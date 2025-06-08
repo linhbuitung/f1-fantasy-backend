@@ -3,6 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace F1Fantasy.Core.Common
 {
+    public enum Role
+    {
+        Player = 0,
+        Admin = 1,
+        SuperAdmin = 2
+    }
+
     [Table("user")]
     public class User
     {
@@ -34,6 +41,10 @@ namespace F1Fantasy.Core.Common
         [Column("last_login", TypeName = "timestamp")]
         public DateTime LastLogin { get; set; }
 
+        public string Salt { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime? RefreshTokenExp { get; set; }
+
         [Required]
         public bool AcceptNotification { get; set; }
 
@@ -52,8 +63,8 @@ namespace F1Fantasy.Core.Common
         [ForeignKey("DriverId")]
         public Driver Driver { get; set; }
 
-        [Required, MaxLength(100)]
-        public required string Role { get; set; }
+        [Required]
+        public required Role Role { get; set; }
 
         // Navigation properties
         public ICollection<FantasyLineup> FantasyLineups { get; set; }

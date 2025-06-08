@@ -1,11 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using F1Fantasy.Infrastructure.Contexts;
-using F1Fantasy.Background;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
-using F1Fantasy.Infrastructure.ExternalServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +29,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplicationScoped(); // Custom extension method to register application services
-builder.Services.AddApplicationBackground(); // Custom extension method to register background services
 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -61,15 +58,6 @@ public static class ServiceExtensions
         services.AddScoped<IConstructorService, ConstructorService>();
         services.AddScoped<ICircuitService, CircuitService>();
         services.AddScoped<IStaticDataRepository, StaticDataRepository>();
-
-        services.AddScoped<F1DataSyncService>();
-        return services;
-    }
-
-    public static IServiceCollection AddApplicationBackground(this IServiceCollection services)
-    {
-        // Register the background service
-        services.AddHostedService<UpdateDbService>();
 
         return services;
     }

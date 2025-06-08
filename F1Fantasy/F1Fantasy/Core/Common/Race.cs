@@ -19,6 +19,9 @@ namespace F1Fantasy.Core.Common
         public DateTime DeadlineDate { get; set; }
 
         [Required]
+        public bool Calculated { get; set; }
+
+        [Required]
         public int CircuitId { get; set; }
 
         [ForeignKey("CircuitId")]

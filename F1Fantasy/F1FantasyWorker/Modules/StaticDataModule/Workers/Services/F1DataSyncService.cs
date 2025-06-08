@@ -1,11 +1,11 @@
-﻿using F1Fantasy.Infrastructure.ExternalServices.TempModels;
+﻿using F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-namespace F1Fantasy.Infrastructure.ExternalServices
+namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
 {
-    public class F1DataSyncService
+    public class F1DataSyncService : IF1DataSyncService
     {
         private readonly HttpClient _httpClient;
 
@@ -168,7 +168,6 @@ namespace F1Fantasy.Infrastructure.ExternalServices
                     condition = false;
                 }
                 tempCircuits.AddRange(apiResponse.MRData.CircuitTable.Circuits);
-            
 
                 offset += limit;
                 await Task.Delay(500);

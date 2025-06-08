@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F1Fantasy", "F1Fantasy\F1Fantasy.csproj", "{759F17E3-7658-4BD8-AD6E-E78A39B6E770}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F1FantasyWorker", "F1FantasyWorker\F1FantasyWorker.csproj", "{2E478C23-B54C-45B0-A318-A06AB6DA7F6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{759F17E3-7658-4BD8-AD6E-E78A39B6E770}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{759F17E3-7658-4BD8-AD6E-E78A39B6E770}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{759F17E3-7658-4BD8-AD6E-E78A39B6E770}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E478C23-B54C-45B0-A318-A06AB6DA7F6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E478C23-B54C-45B0-A318-A06AB6DA7F6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E478C23-B54C-45B0-A318-A06AB6DA7F6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E478C23-B54C-45B0-A318-A06AB6DA7F6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
