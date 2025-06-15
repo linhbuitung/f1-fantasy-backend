@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Infrastructure.Contexts
 {
-    public class WooF1Context : IdentityDbContext<IdentityUser>
+    public class WooF1Context : DbContext
     {
         public WooF1Context(DbContextOptions<WooF1Context> options) : base(options)
         {
