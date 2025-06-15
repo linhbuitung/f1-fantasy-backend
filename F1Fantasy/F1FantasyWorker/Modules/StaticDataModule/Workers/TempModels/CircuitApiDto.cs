@@ -1,10 +1,10 @@
-﻿using F1Fantasy.Core.Common;
+﻿using F1FantasyWorker.Core.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System;
 using Newtonsoft.Json;
 
-namespace F1Fantasy.Infrastructure.ExternalServices.TempModels
+namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
 {
     public class CircuitApiDto
     {

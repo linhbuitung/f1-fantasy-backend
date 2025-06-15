@@ -11,11 +11,11 @@ namespace F1Fantasy.Core.Common
         public int Id { get; set; }
 
         [Required]
-        [Column("date", TypeName = "date")]
+        [Column(TypeName = "date")]
         public DateTime RaceDate { get; set; }
 
         [Required]
-        [Column("deadline_date", TypeName = "date")]
+        [Column(TypeName = "date")]
         public DateTime DeadlineDate { get; set; }
 
         [Required]

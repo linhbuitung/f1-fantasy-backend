@@ -1,7 +1,7 @@
-﻿using F1Fantasy.Core.Common;
+﻿using F1FantasyWorker.Core.Common;
 using Newtonsoft.Json.Linq;
 
-namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
+namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 {
     public class StaticDataDtoMapper
     {
@@ -12,7 +12,16 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
         {
-            return new Driver(driverDto.GivenName, driverDto.FamilyName, driverDto.DateOfBirth, driverDto.Nationality, driverDto.Code, driverDto.ImgUrl);
+            //return new Driver(driverDto.GivenName, driverDto.FamilyName, driverDto.DateOfBirth, driverDto.Nationality, driverDto.Code, driverDto.ImgUrl);
+            return new Driver
+            {
+                GivenName = driverDto.GivenName,
+                FamilyName = driverDto.FamilyName,
+                DateOfBirth = driverDto.DateOfBirth,
+                Nationality = driverDto.Nationality,
+                Code = driverDto.Code,
+                ImgUrl = driverDto.ImgUrl
+            };
         }
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
@@ -22,7 +31,14 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)
         {
-            return new Constructor(constructorDto.Name, constructorDto.Nationality, constructorDto.Code, constructorDto.ImgUrl);
+            // return new Constructor(constructorDto.Name, constructorDto.Nationality, constructorDto.Code, constructorDto.ImgUrl);
+            return new Constructor
+            {
+                Name = constructorDto.Name,
+                Nationality = constructorDto.Nationality,
+                Code = constructorDto.Code,
+                ImgUrl = constructorDto.ImgUrl
+            };
         }
 
         public static CircuitDto MapCircuitToDto(Circuit circuit)
@@ -32,7 +48,16 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Circuit MapDtoToCircuit(CircuitDto circuitDto)
         {
-            return new Circuit(circuitDto.CircuitName, circuitDto.Code, circuitDto.Latitude, circuitDto.Longtitude, circuitDto.Locality, circuitDto.Country, circuitDto.ImgUrl);
+            return new Circuit
+            {
+                CircuitName = circuitDto.CircuitName,
+                Code = circuitDto.Code,
+                Latitude = circuitDto.Latitude,
+                Longtitude = circuitDto.Longtitude,
+                Locality = circuitDto.Locality,
+                Country = circuitDto.Country,
+                ImgUrl = circuitDto.ImgUrl
+            };
         }
     }
 }

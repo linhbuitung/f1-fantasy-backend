@@ -4,14 +4,23 @@ using F1Fantasy.Modules.StaticDataModule.Repositories.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
+using Microsoft.AspNetCore.Builder;
+using F1Fantasy.Core.Common;
+using Microsoft.AspNetCore.Identity;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+//Auth
+builder.Services.AddAuthorization();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContextPool<WooF1Context>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -39,7 +48,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+    });
 }
+
+//auth
+//app.MapIdentityApi<ApplicationUser>();
 
 app.UseHttpsRedirection();
 

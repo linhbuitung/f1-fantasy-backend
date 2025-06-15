@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace F1Fantasy.Modules.StaticDataModule.Controller
+namespace F1FantasyWorker.Modules.StaticDataModule.Controller
 {
     public class DataSyncController
     {

@@ -17,13 +17,12 @@ namespace F1Fantasy.Core.Common
         public string Content { get; set; }
 
         [Required]
-        [Column("created_at")]
         public int CreatedAt { get; set; }
 
         [Required]
         public int UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public UserProfile User { get; set; }
     }
 }

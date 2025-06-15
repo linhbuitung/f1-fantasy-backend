@@ -46,6 +46,6 @@ namespace F1Fantasy.Core.Common
         public ICollection<DriverPrediction> DriverPredictions { get; set; }
         public ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
         public ICollection<RaceEntry> RaceEntries { get; set; }
-        public ICollection<User> Users { get; set; }
+        public ICollection<ApplicationUser> Users { get; set; }
     }
 }

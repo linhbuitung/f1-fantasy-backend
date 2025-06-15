@@ -33,6 +33,6 @@ namespace F1Fantasy.Core.Common
         // Navigation properties
 
         public ICollection<DriverPrediction> DriverPredictions { get; set; }
-        public ICollection<User> Users { get; set; }
+        public ICollection<ApplicationUser> Users { get; set; }
     }
 }

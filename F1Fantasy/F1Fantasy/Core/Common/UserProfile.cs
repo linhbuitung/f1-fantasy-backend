@@ -1,49 +1,44 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace F1Fantasy.Core.Common
 {
-    public enum Role
-    {
-        Player = 0,
-        Admin = 1,
-        SuperAdmin = 2
-    }
+    //public enum Role
+    //{
+    //    Player = 0,
+    //    Admin = 1,
+    //    SuperAdmin = 2
+    //}
 
-    [Table("user")]
-    public class User
+    public class UserProfile
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [MaxLength(100)]
         public string DisplayName { get; set; }
 
-        [Required, MaxLength(200)]
-        public string Email { get; set; }
+        //[Required, MaxLength(200)]
+        //public string Email { get; set; }
 
-        [Required]
-        [Column("date_of_birth", TypeName = "date")]
+        //[Required]
+
+        [Column(TypeName = "date")]
         public DateTime DateOfBirth { get; set; }
 
-        [Required, MaxLength(200)]
+        //[MaxLength(200)]
         public string Nationality { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Password { get; set; }
-
+        //[Required, MaxLength(100)]
+        //public string Password { get; set; }
         [Required]
-        [Column("created_at", TypeName = "date")]
+        [Column(TypeName = "date")]
         public DateTime CreatedAt { get; set; }
 
-        [Required]
-        [Column("last_login", TypeName = "timestamp")]
+        [Column(TypeName = "timestamp")]
         public DateTime LastLogin { get; set; }
-
-        public string Salt { get; set; }
-        public string RefreshToken { get; set; }
-        public DateTime? RefreshTokenExp { get; set; }
 
         [Required]
         public bool AcceptNotification { get; set; }
@@ -62,9 +57,6 @@ namespace F1Fantasy.Core.Common
 
         [ForeignKey("DriverId")]
         public Driver Driver { get; set; }
-
-        [Required]
-        public required Role Role { get; set; }
 
         // Navigation properties
         public ICollection<FantasyLineup> FantasyLineups { get; set; }

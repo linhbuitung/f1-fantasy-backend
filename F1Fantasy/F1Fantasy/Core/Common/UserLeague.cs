@@ -16,6 +16,6 @@ namespace F1Fantasy.Core.Common
         public League League { get; set; }
 
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

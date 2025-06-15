@@ -1,4 +1,4 @@
-﻿namespace F1Fantasy.Infrastructure.ExternalServices.TempModels
+﻿namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
 {
     public class ConstructorApiDto
     {

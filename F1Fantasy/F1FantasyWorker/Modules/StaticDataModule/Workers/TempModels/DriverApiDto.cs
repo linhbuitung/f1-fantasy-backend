@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace F1Fantasy.Infrastructure.ExternalServices.TempModels
+namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
 {
     public class DriverApiDto
     {
@@ -13,7 +13,7 @@ namespace F1Fantasy.Infrastructure.ExternalServices.TempModels
 
         public string FamilyName { get; set; } // "familyName"
 
-        public DateTime DateOfBirth { get; set; } // "dateOfBirth"
+        public DateOnly DateOfBirth { get; set; } // "dateOfBirth"
 
         public string Nationality { get; set; } // "nationality"
 

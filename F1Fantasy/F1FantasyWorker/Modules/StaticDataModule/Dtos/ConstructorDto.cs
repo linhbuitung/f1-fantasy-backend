@@ -1,8 +1,8 @@
-﻿using F1Fantasy.Core.Common;
+﻿using F1FantasyWorker.Core.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace F1Fantasy.Modules.StaticDataModule.Dtos
+namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 {
     public class ConstructorDto
     {
