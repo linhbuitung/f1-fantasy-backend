@@ -4,6 +4,7 @@ using F1Fantasy.Modules.StaticDataModule.Repositories.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
+using F1Fantasy.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Builder;
 using F1Fantasy.Core.Common;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +16,32 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Auth
 builder.Services.AddAuthorization();
-builder.Services.AddIdentity<UserProfile, IdentityRole<int>>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication().AddBearerToken();
+builder.Services.AddAuthentication().AddCookie();
+
+builder.Services.AddIdentityCore<ApplicationUser>().AddEntityFrameworkStores<WooF1Context>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Password settings.
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+
+    // Lockout settings.
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 8;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // User settings.
+    options.User.AllowedUserNameCharacters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.User.RequireUniqueEmail = true;
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -23,7 +49,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContextPool<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSnakeCaseNamingConvention());
 
 builder.Services.AddHttpClient();
 
@@ -53,6 +79,8 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/openapi/v1.json", "v1");
     });
+    //not working
+    // MigrationExtension.ApplyMigration(app);
 }
 
 //auth

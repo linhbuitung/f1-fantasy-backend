@@ -7,15 +7,15 @@ namespace F1Fantasy.Core.Common
     public class FantasyLineupDriver
     {
         [Key, Column(Order = 1)]
-        public int FantasyLineupId { get; set; }
+        public Guid FantasyLineupId { get; set; }
 
         [Key, Column(Order = 2)]
-        public int DriverId { get; set; }
+        public Guid DriverId { get; set; }
 
-        [ForeignKey("FantasyLineupId")]
+        [ForeignKey(nameof(FantasyLineupId))]
         public FantasyLineup FantasyLineup { get; set; }
 
-        [ForeignKey("DriverId")]
+        [ForeignKey(nameof(DriverId))]
         public Driver Driver { get; set; }
     }
 }

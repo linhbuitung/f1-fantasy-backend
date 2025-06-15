@@ -23,7 +23,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return driver;
         }
 
-        public async Task<Driver> GetDriverByIdAsync(int id)
+        public async Task<Driver> GetDriverByIdAsync(Guid id)
         {
             return await _context.Drivers.FirstOrDefaultAsync(d => d.Id == id);
         }
@@ -40,7 +40,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return constructor;
         }
 
-        public async Task<Constructor> GetConstructorByIdAsync(int id)
+        public async Task<Constructor> GetConstructorByIdAsync(Guid id)
         {
             return await _context.Constructors.FirstOrDefaultAsync(c => c.Id == id);
         }
@@ -58,7 +58,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return circuit;
         }
 
-        public async Task<Circuit> GetCircuitByIdAsync(int id)
+        public async Task<Circuit> GetCircuitByIdAsync(Guid id)
         {
             return await _context.Circuits.FirstOrDefaultAsync(c => c.Id == id);
         }

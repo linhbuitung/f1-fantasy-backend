@@ -7,15 +7,15 @@ namespace F1Fantasy.Core.Common
     public class PowerupFantasyLineup
     {
         [Key, Column(Order = 1)]
-        public int FantasyLineupId { get; set; }
+        public Guid FantasyLineupId { get; set; }
 
         [Key, Column(Order = 2)]
-        public int PowerupId { get; set; }
+        public Guid PowerupId { get; set; }
 
-        [ForeignKey("FantasyLineupId")]
+        [ForeignKey(nameof(FantasyLineupId))]
         public FantasyLineup FantasyLineup { get; set; }
 
-        [ForeignKey("PowerupId")]
+        [ForeignKey(nameof(PowerupId))]
         public Powerup Powerup { get; set; }
     }
 }

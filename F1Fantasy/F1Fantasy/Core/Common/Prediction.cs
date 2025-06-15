@@ -10,7 +10,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [Column("datePredicted", TypeName = "date")]
@@ -26,15 +26,15 @@ namespace F1Fantasy.Core.Common
         //public string PredictionType { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
-        [ForeignKey("UserId")]
-        public UserProfile User { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser User { get; set; }
 
         [Required]
-        public int CircuitId { get; set; }
+        public Guid CircuitId { get; set; }
 
-        [ForeignKey("CircuitId")]
+        [ForeignKey(nameof(CircuitId))]
         public Circuit Circuit { get; set; }
 
         // Navigation property
