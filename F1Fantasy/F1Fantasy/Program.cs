@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Auth
 builder.Services.AddAuthorization();
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<UserProfile, IdentityRole<int>>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

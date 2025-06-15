@@ -21,15 +21,13 @@ namespace F1Fantasy.Core.Common
         public int Id { get; set; }
 
         [Required, MaxLength(300)]
-        [Column("given_name")]
         public string GivenName { get; set; }
 
         [Required, MaxLength(300)]
-        [Column("family_name")]
         public string FamilyName { get; set; }
 
         [Required]
-        [Column("date_of_birth", TypeName = "date")]
+        [Column(TypeName = "date")]
         public DateTime DateOfBirth { get; set; }
 
         [Required, MaxLength(200)]
@@ -46,6 +44,6 @@ namespace F1Fantasy.Core.Common
         public ICollection<DriverPrediction> DriverPredictions { get; set; }
         public ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
         public ICollection<RaceEntry> RaceEntries { get; set; }
-        public ICollection<ApplicationUser> Users { get; set; }
+        public ICollection<UserProfile> Users { get; set; }
     }
 }
