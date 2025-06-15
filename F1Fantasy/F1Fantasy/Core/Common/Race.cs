@@ -8,7 +8,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [Column(TypeName = "date")]
@@ -22,9 +22,9 @@ namespace F1Fantasy.Core.Common
         public bool Calculated { get; set; }
 
         [Required]
-        public int CircuitId { get; set; }
+        public Guid CircuitId { get; set; }
 
-        [ForeignKey("CircuitId")]
+        [ForeignKey(nameof(CircuitId))]
         public Circuit Circuit { get; set; }
 
         // Navigation properties

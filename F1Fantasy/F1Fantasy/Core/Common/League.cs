@@ -8,7 +8,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         public int MaxPlayersNum { get; set; }
@@ -23,10 +23,10 @@ namespace F1Fantasy.Core.Common
         public string Description { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
-        [ForeignKey("UserId")]
-        public UserProfile User { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser User { get; set; }
 
         // Navigation properties
         public ICollection<UserLeague> UserLeagues { get; set; }

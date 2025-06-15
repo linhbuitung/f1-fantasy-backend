@@ -9,7 +9,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         public int TotalAmount { get; set; }
@@ -21,15 +21,15 @@ namespace F1Fantasy.Core.Common
         public int PointsGained { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
-        [ForeignKey("UserId")]
-        public UserProfile User { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser User { get; set; }
 
         [Required]
-        public int RaceId { get; set; }
+        public Guid RaceId { get; set; }
 
-        [ForeignKey("RaceId")]
+        [ForeignKey(nameof(RaceId))]
         public Race Race { get; set; }
 
         // Navigation properties

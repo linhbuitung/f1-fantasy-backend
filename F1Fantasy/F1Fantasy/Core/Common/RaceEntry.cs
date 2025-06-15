@@ -8,7 +8,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public int? Position { get; set; }
         public int? Grid { get; set; }
@@ -18,15 +18,15 @@ namespace F1Fantasy.Core.Common
         public int PointsGained { get; set; }
 
         [Required]
-        public int DriverId { get; set; }
+        public Guid DriverId { get; set; }
 
-        [ForeignKey("DriverId")]
+        [ForeignKey(nameof(DriverId))]
         public Driver Driver { get; set; }
 
         [Required]
-        public int RaceId { get; set; }
+        public Guid RaceId { get; set; }
 
-        [ForeignKey("RaceId")]
+        [ForeignKey(nameof(RaceId))]
         public Race Race { get; set; }
     }
 }
