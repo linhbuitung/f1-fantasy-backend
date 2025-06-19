@@ -26,9 +26,6 @@ namespace F1Fantasy.Core.Common
         [Column(TypeName = "date")]
         public DateOnly DateOfBirth { get; set; }
 
-        //[MaxLength(200)]
-        public string Nationality { get; set; }
-
         //[Required, MaxLength(100)]
         //public string Password { get; set; }
         [Column(TypeName = "timestamp with time zone")]
@@ -37,6 +34,9 @@ namespace F1Fantasy.Core.Common
         public bool AcceptNotification { get; set; }
 
         public int LoginStreak { get; set; }
+
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
 
         public DateTime? LastLogin { get; set; }
 
@@ -51,6 +51,13 @@ namespace F1Fantasy.Core.Common
         public Driver Driver { get; set; }
 
         // Navigation properties
+
+        [Required]
+        public string NationalityId { get; set; }
+
+        [ForeignKey(nameof(NationalityId))]
+        public Nationality Nationality { get; set; }
+
         public ICollection<FantasyLineup> FantasyLineups { get; set; }
 
         public ICollection<League> Leagues { get; set; }

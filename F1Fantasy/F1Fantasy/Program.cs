@@ -9,18 +9,17 @@ using Microsoft.AspNetCore.Builder;
 using F1Fantasy.Core.Common;
 using Microsoft.AspNetCore.Identity;
 using System;
+using F1Fantasy.Core.Configurations;
+using F1Fantasy.Modules.AuthModule.Extensions;
+using F1Fantasy.Core.Auth;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using F1Fantasy.Infrastructure.ExternalServices.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.Configure<AuthConfiguration>(
+    builder.Configuration.GetSection("AuthConfiguration"));
 // Add services to the container.
-
-//Auth
-builder.Services.AddAuthorization();
-
-builder.Services.AddAuthentication().AddBearerToken();
-builder.Services.AddAuthentication().AddCookie();
-
-builder.Services.AddIdentityCore<ApplicationUser>().AddEntityFrameworkStores<WooF1Context>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -48,8 +47,17 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContextPool<WooF1Context>(options =>
+builder.Services.AddDbContext<WooF1Context>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSnakeCaseNamingConvention());
+
+#region Auth
+
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
+builder.Services.AddAuthorization();
+
+builder.Services.AddAuthentication().AddBearerToken();
+
+#endregion Auth
 
 builder.Services.AddHttpClient();
 
@@ -59,7 +67,6 @@ builder.Services.Configure<HostOptions>(options =>
     options.ServicesStopConcurrently = false; // Stop services sequentially
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -68,8 +75,20 @@ builder.Services.AddApplicationScoped(); // Custom extension method to register 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-var app = builder.Build();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSwaggerUI",
+        policy => policy
+            .WithOrigins("https://localhost:8080")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
+var app = builder.Build();
+app.MapIdentityApi<ApplicationUser>();
+//seed roles
+
+await ServiceExtensions.SeedRoles(app.Services);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -77,14 +96,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "v1");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     });
     //not working
     // MigrationExtension.ApplyMigration(app);
 }
-
-//auth
-//app.MapIdentityApi<ApplicationUser>();
 
 app.UseHttpsRedirection();
 
@@ -103,7 +119,30 @@ public static class ServiceExtensions
         services.AddScoped<IConstructorService, ConstructorService>();
         services.AddScoped<ICircuitService, CircuitService>();
         services.AddScoped<IStaticDataRepository, StaticDataRepository>();
+        services.AddScoped<INationalityService, NationalityService>();
+
+        services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
 
         return services;
+    }
+
+    public static async Task SeedRoles(IServiceProvider services)
+    {
+        using var scope = services.CreateScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var roles = new[]
+        {
+        new ApplicationRole { Id = Guid.NewGuid(), Name = AppRoles.Player, NormalizedName = AppRoles.NormalizedPlayer },
+        new ApplicationRole { Id = Guid.NewGuid(), Name = AppRoles.Admin, NormalizedName = AppRoles.NormalizedAdmin },
+        new ApplicationRole { Id = Guid.NewGuid(), Name = AppRoles.SuperAdmin, NormalizedName = AppRoles.NormalizedSuperAdmin },
+        };
+
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role.Name))
+            {
+                await roleManager.CreateAsync(role);
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class Powerup
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     public string Type { get; set; } = null!;
 

@@ -25,12 +25,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Driver> GetDriverByIdAsync(Guid id)
         {
-            return await _context.Drivers.FirstOrDefaultAsync(d => d.Id == id);
+            return await _context.Drivers.Include(d => d.Nationality).FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<Driver> GetDriverByCodeAsync(string code)
         {
-            return await _context.Drivers.FirstOrDefaultAsync(d => d.Code.Equals(code));
+            return await _context.Drivers.Include(d => d.Nationality).FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
@@ -42,12 +42,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Constructor> GetConstructorByIdAsync(Guid id)
         {
-            return await _context.Constructors.FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Constructors.Include(d => d.Nationality).FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Constructor> GetConstructorByCodeAsync(string code)
         {
-            return await _context.Constructors.FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await _context.Constructors.Include(d => d.Nationality).FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
@@ -66,6 +66,23 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         public async Task<Circuit> GetCircuitByCodeAsync(string code)
         {
             return await _context.Circuits.FirstOrDefaultAsync(c => c.Code.Equals(code));
+        }
+
+        public async Task<Nationality> AddNationalityAsync(Nationality nationality)
+        {
+            _context.Nationalities.Add(nationality);
+            await _context.SaveChangesAsync();
+            return nationality;
+        }
+
+        public async Task<Nationality> GetNationalityByIdAsync(string NationalityId)
+        {
+            return await _context.Nationalities.FirstOrDefaultAsync(n => n.NationalityId.Equals(NationalityId));
+        }
+
+        public async Task<IEnumerable<Nationality>> GetAllNationalitiesAsync()
+        {
+            return await _context.Nationalities.ToListAsync();
         }
     }
 }

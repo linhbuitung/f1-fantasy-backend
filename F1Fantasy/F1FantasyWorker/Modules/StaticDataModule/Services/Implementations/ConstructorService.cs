@@ -59,7 +59,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         }
 
         //get
-        public async Task<ConstructorDto> GetConstructorByIdAsync(int id)
+        public async Task<ConstructorDto> GetConstructorByIdAsync(Guid id)
         {
             Constructor constructor = await _staticDataRepository.GetConstructorByIdAsync(id);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);

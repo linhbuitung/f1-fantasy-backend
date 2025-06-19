@@ -59,7 +59,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         }
 
         //get
-        public async Task<CircuitDto> GetCircuitByIdAsync(int id)
+        public async Task<CircuitDto> GetCircuitByIdAsync(Guid id)
         {
             Circuit circuit = await _staticDataRepository.GetCircuitByIdAsync(id);
             if (circuit == null)

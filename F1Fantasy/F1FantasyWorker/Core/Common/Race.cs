@@ -5,15 +5,15 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class Race
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public DateOnly Date { get; set; }
+    public DateOnly RaceDate { get; set; }
 
     public DateOnly DeadlineDate { get; set; }
 
-    public int CircuitId { get; set; }
-
     public bool Calculated { get; set; }
+
+    public Guid CircuitId { get; set; }
 
     public virtual Circuit Circuit { get; set; } = null!;
 

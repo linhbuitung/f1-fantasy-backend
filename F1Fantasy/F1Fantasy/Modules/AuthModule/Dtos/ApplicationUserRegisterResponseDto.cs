@@ -2,9 +2,11 @@
 
 namespace F1Fantasy.Modules.AuthModule.Dtos
 {
-    public class ApplicationUserResponseDto
+    public class ApplicationUserRegisterResponseDto
     {
-        public string Id { get; set; }
+        public Guid Id { get; set; }
         public string Email { get; set; }
+
+        public string Role { get; set; }
     }
 }

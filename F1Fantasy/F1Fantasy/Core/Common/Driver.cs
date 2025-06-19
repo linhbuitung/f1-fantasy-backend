@@ -11,7 +11,7 @@ namespace F1Fantasy.Core.Common
             GivenName = givenName;
             FamilyName = familyName;
             DateOfBirth = dateOfBirth;
-            Nationality = nationality;
+
             Code = code;
             ImgUrl = imgUrl;
         }
@@ -30,16 +30,30 @@ namespace F1Fantasy.Core.Common
         [Column(TypeName = "date")]
         public DateTime DateOfBirth { get; set; }
 
-        [Required, MaxLength(200)]
-        public string Nationality { get; set; }
-
         [Required, MaxLength(50)]
         public string Code { get; set; }
 
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
 
+        //constructor
+        public Driver() { }
+
+        public Driver(string givenName, string familyName, DateTime dateOfBirth, string code, string? imgUrl)
+        {
+            GivenName = givenName;
+            FamilyName = familyName;
+            DateOfBirth = dateOfBirth;
+            Code = code;
+            ImgUrl = imgUrl;
+        }
+
         // Navigation properties
+        [Required]
+        public string NationalityId { get; set; }
+
+        [ForeignKey(nameof(NationalityId))]
+        public Nationality Nationality { get; set; }
 
         public ICollection<DriverPrediction> DriverPredictions { get; set; }
         public ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }

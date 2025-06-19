@@ -55,6 +55,8 @@ namespace F1Fantasy.Infrastructure.Contexts
 
         public virtual DbSet<UserLeague> UserLeagues { get; set; }
 
+        public virtual DbSet<Nationality> Nationalities { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -74,6 +76,7 @@ namespace F1Fantasy.Infrastructure.Contexts
             modelBuilder.ApplyConfiguration(new ApplicationAuthConfiguration());
             modelBuilder.ApplyConfiguration(new ApplicationUserRoleConfiguration());
             modelBuilder.ApplyConfiguration(new ApplicationUserTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new NationalityConfiguration());
         }
     }
 }

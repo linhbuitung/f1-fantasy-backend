@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class RaceEntry
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     public int? Position { get; set; }
 
@@ -15,9 +15,9 @@ public partial class RaceEntry
 
     public int PointsGained { get; set; }
 
-    public int DriverId { get; set; }
+    public Guid DriverId { get; set; }
 
-    public int RaceId { get; set; }
+    public Guid RaceId { get; set; }
 
     public virtual Driver Driver { get; set; } = null!;
 

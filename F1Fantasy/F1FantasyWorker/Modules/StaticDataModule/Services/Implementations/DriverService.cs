@@ -62,7 +62,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         }
 
         //get
-        public async Task<DriverDto> GetDriverByIdAsync(int id)
+        public async Task<DriverDto> GetDriverByIdAsync(Guid id)
         {
             Driver driver = await _staticDataRepository.GetDriverByIdAsync(id);
             if (driver == null)

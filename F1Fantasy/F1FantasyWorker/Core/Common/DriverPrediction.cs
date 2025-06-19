@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class DriverPrediction
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     public int? GridPosition { get; set; }
 
@@ -13,11 +13,11 @@ public partial class DriverPrediction
 
     public bool Crashed { get; set; }
 
-    public int PredictionId { get; set; }
+    public Guid PredictionId { get; set; }
 
-    public int DriverId { get; set; }
+    public Guid DriverId { get; set; }
 
-    public int ConstructorId { get; set; }
+    public Guid ConstructorId { get; set; }
 
     public virtual Constructor Constructor { get; set; } = null!;
 

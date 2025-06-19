@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class Prediction
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     public DateOnly DatePredicted { get; set; }
 
@@ -13,13 +13,13 @@ public partial class Prediction
 
     public bool Rain { get; set; }
 
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
-    public int CircuitId { get; set; }
+    public Guid CircuitId { get; set; }
 
     public virtual Circuit Circuit { get; set; } = null!;
 
     public virtual ICollection<DriverPrediction> DriverPredictions { get; set; } = new List<DriverPrediction>();
 
-    public virtual User User { get; set; } = null!;
+    public virtual AspNetUser User { get; set; } = null!;
 }
