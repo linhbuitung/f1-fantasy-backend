@@ -8,19 +8,19 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
         //DriverDto GetDriverById(int id);
         Task<Driver> AddDriverAsync(Driver driver);
 
-        Task<Driver> GetDriverByIdAsync(int id);
+        Task<Driver> GetDriverByIdAsync(Guid id);
 
         Task<Driver> GetDriverByCodeAsync(string code);
 
         Task<Constructor> AddConstructorAsync(Constructor constructor);
 
-        Task<Constructor> GetConstructorByIdAsync(int id);
+        Task<Constructor> GetConstructorByIdAsync(Guid id);
 
         Task<Constructor> GetConstructorByCodeAsync(string code);
 
         Task<Circuit> AddCircuitAsync(Circuit circuit);
 
-        Task<Circuit> GetCircuitByIdAsync(int id);
+        Task<Circuit> GetCircuitByIdAsync(Guid id);
 
         Task<Circuit> GetCircuitByCodeAsync(string code);
 

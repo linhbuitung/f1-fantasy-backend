@@ -13,11 +13,15 @@ namespace F1Fantasy.Modules.AuthModule.Dtos
         [MinLength(6)]
         public string Password { get; set; }
 
+        [Required]
         [MaxLength(100)]
         public string DisplayName { get; set; }
 
+        [Required]
         public DateOnly DateOfBirth { get; set; }
 
-        public string Nationality { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string NationalityId { get; set; }
     }
 }

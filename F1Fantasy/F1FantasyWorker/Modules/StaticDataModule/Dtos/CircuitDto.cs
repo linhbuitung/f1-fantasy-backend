@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 {
     public class CircuitDto
     {
-        public int? Id { get; set; }
+        public Guid? Id { get; set; }
 
         public string CircuitName { get; set; }
 
@@ -33,7 +33,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
             ImgUrl = imgUrl;
         }
 
-        public CircuitDto(int id, string circuitName, string code, decimal latitude, decimal longtitude, string locality, string country, string? imgUrl)
+        public CircuitDto(Guid id, string circuitName, string code, decimal latitude, decimal longtitude, string locality, string country, string? imgUrl)
         {
             Id = id;
             CircuitName = circuitName;

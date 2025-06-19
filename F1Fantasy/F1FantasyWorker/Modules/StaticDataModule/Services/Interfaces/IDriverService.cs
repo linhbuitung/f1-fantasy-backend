@@ -10,11 +10,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
 
         void AddListDriversAsync(List<DriverDto> driverDtos);
 
-        Task<DriverDto> GetDriverByIdAsync(int id);
+        Task<DriverDto> GetDriverByIdAsync(Guid id);
 
         Task<DriverDto> GetDriverByCodeAsync(string code);
 
         //void UpdateDriver(DriverDto driver);
+
         // void DeleteDriver(int id);
     }
 }

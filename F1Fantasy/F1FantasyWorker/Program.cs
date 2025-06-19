@@ -1,5 +1,6 @@
 using F1FantasyWorker;
-using F1FantasyWorker.Infrastructure.Contexts;
+
+//using F1FantasyWorker.Infrastructure.Contexts;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
 using F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
@@ -13,8 +14,8 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddApplicationBackground();
 builder.Services.AddApplicationScoped();
 
-builder.Services.AddDbContextPool<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+//builder.Services.AddDbContextPool<WooF1Context>(options =>
+//      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var host = builder.Build();
 host.Run();

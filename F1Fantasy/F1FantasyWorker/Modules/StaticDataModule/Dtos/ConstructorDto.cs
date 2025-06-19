@@ -1,4 +1,4 @@
-﻿using F1FantasyWorker.Core.Common;
+﻿//using F1FantasyWorker.Core.Common;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,7 +6,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 {
     public class ConstructorDto
     {
-        public int? Id { get; set; }
+        public Guid? Id { get; set; }
 
         public string Name { get; set; }
 
@@ -16,7 +16,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 
         public string? ImgUrl { get; set; }
 
-        public ConstructorDto(int id, string name, string nationality, string code, string? imgUrl)
+        public ConstructorDto(Guid id, string name, string nationality, string code, string? imgUrl)
         {
             Id = id;
             Name = name;

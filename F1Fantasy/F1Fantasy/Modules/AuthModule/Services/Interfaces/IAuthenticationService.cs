@@ -4,6 +4,8 @@ namespace F1Fantasy.Modules.AuthModule.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task<ApplicationUserResponseDto> RegisterAsync(ApplicationUserRegisterDto registerDto);
+        Task<ApplicationUserRegisterResponseDto> RegisterAsync(ApplicationUserRegisterDto registerDto);
+
+        Task<ApplicationUserTokenResponseDto> LoginAsync(ApplicationUserLoginDto loginDto);
     }
 }

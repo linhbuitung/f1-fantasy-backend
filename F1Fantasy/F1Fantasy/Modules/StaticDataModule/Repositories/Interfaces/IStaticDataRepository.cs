@@ -24,6 +24,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
 
         Task<Circuit> GetCircuitByCodeAsync(string code);
 
+        Task<Nationality> AddNationalityAsync(Nationality nationality);
+
+        Task<Nationality> GetNationalityByIdAsync(string NationalityId);
+
+        Task<IEnumerable<Nationality>> GetAllNationalitiesAsync();
+
         //void UpdateDriver(DriverDto driver);
         // void DeleteDriver(int id);
     }
