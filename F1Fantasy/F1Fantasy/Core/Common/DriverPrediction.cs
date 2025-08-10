@@ -8,7 +8,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         public int? GridPosition { get; set; }
 
@@ -19,19 +19,19 @@ namespace F1Fantasy.Core.Common
 
         // Foreign keys and navigation properties
         [Required]
-        public Guid PredictionId { get; set; }
+        public int PredictionId { get; set; }
 
         [ForeignKey(nameof(PredictionId))]
         public Prediction Prediction { get; set; }
 
         [Required]
-        public Guid DriverId { get; set; }
+        public int DriverId { get; set; }
 
         [ForeignKey(nameof(DriverId))]
         public Driver Driver { get; set; }
 
         [Required]
-        public Guid ConstructorId { get; set; }
+        public int ConstructorId { get; set; }
 
         [ForeignKey(nameof(ConstructorId))]
         public Constructor Constructor { get; set; }

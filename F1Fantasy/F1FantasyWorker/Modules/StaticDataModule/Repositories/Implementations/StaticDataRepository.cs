@@ -23,14 +23,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return driver;
         }
 
-        public async Task<Driver> GetDriverByIdAsync(Guid id)
+        public async Task<Driver> GetDriverByIdAsync(int id)
         {
-            return await _context.Drivers.FirstOrDefaultAsync(d => d.Id == id);
+            return await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<Driver> GetDriverByCodeAsync(string code)
         {
-            return await _context.Drivers.FirstOrDefaultAsync(d => d.Code.Equals(code));
+            return await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
@@ -40,14 +40,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return constructor;
         }
 
-        public async Task<Constructor> GetConstructorByIdAsync(Guid id)
+        public async Task<Constructor> GetConstructorByIdAsync(int id)
         {
-            return await _context.Constructors.FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Constructor> GetConstructorByCodeAsync(string code)
         {
-            return await _context.Constructors.FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await _context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
@@ -58,14 +58,37 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return circuit;
         }
 
-        public async Task<Circuit> GetCircuitByIdAsync(Guid id)
+        public async Task<Circuit> GetCircuitByIdAsync(int id)
         {
-            return await _context.Circuits.FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Circuit> GetCircuitByCodeAsync(string code)
         {
-            return await _context.Circuits.FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await _context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
+        }
+
+        public async Task<Country> AddCountryAsync(Country country)
+        {
+            _context.Countries.Add(country);
+
+            await _context.SaveChangesAsync();
+            return country;
+        }
+
+        public async Task<Country> GetCountryByIdAsync(string id)
+        {
+            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
+        }
+
+        public async Task<Country> GetCountryByNationalitityAsync(string nationality)
+        {
+            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Nationalities.Contains(nationality));
+        }
+
+        public async Task<Country> GetCountryByShortNameAsync(string shortName)
+        {
+            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.ShortName.Equals(shortName));
         }
     }
 }

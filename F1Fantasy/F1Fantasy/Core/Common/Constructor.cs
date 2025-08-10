@@ -8,7 +8,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required, MaxLength(300)]
         public string Name { get; set; }
@@ -29,10 +29,10 @@ namespace F1Fantasy.Core.Common
 
         // Navigation properties
         [Required]
-        public string NationalityId { get; set; }
+        public string CountryId { get; set; }
 
-        [ForeignKey(nameof(NationalityId))]
-        public Nationality Nationality { get; set; }
+        [ForeignKey(nameof(CountryId))]
+        public Country Country { get; set; }
 
         public ICollection<DriverPrediction> DriverPredictions { get; set; }
         public ICollection<ApplicationUser> Users { get; set; }

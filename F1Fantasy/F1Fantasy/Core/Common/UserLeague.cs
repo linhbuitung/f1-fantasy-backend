@@ -7,10 +7,10 @@ namespace F1Fantasy.Core.Common
     public class UserLeague
     {
         [Key, Column(Order = 1)]
-        public Guid LeagueId { get; set; }
+        public int LeagueId { get; set; }
 
         [Key, Column(Order = 2)]
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
 
         [ForeignKey(nameof(LeagueId))]
         public League League { get; set; }

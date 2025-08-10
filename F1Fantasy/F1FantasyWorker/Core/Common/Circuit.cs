@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class Circuit
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string CircuitName { get; set; } = null!;
 
@@ -17,9 +17,11 @@ public partial class Circuit
 
     public string Locality { get; set; } = null!;
 
-    public string Country { get; set; } = null!;
+    public string CountryId { get; set; } = null!;
 
     public string? ImgUrl { get; set; }
+
+    public virtual Country Country { get; set; } = null!;
 
     public virtual ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
 

@@ -5,7 +5,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
 {
     public class CircuitDto
     {
-        public Guid? Id { get; set; }
+        public int? Id { get; set; }
 
         public string CircuitName { get; set; }
 
@@ -17,11 +17,11 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
 
         public string Locality { get; set; }
 
-        public string Country { get; set; }
+        public string CountryId { get; set; }
 
         public string? ImgUrl { get; set; }
 
-        public CircuitDto(string circuitName, string code, decimal latitude, decimal longtitude, string locality, string country, string? imgUrl)
+        public CircuitDto(string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
         {
             Id = null;
             CircuitName = circuitName;
@@ -29,11 +29,11 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
             Latitude = latitude;
             Longtitude = longtitude;
             Locality = locality;
-            Country = country;
+            CountryId = countryId;
             ImgUrl = imgUrl;
         }
 
-        public CircuitDto(Guid id, string circuitName, string code, decimal latitude, decimal longtitude, string locality, string country, string? imgUrl)
+        public CircuitDto(int id, string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
         {
             Id = id;
             CircuitName = circuitName;
@@ -41,7 +41,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
             Latitude = latitude;
             Longtitude = longtitude;
             Locality = locality;
-            Country = country;
+            CountryId = countryId;
             ImgUrl = imgUrl;
         }
     }

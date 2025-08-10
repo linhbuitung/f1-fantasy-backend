@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class League
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public int MaxPlayersNum { get; set; }
 
@@ -15,7 +15,7 @@ public partial class League
 
     public string Description { get; set; } = null!;
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public virtual AspNetUser User { get; set; } = null!;
 

@@ -8,8 +8,8 @@ namespace F1Fantasy.Core.Common
     public class FantasyLineup
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public Guid Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         [Required]
         public int TotalAmount { get; set; }
@@ -21,13 +21,13 @@ namespace F1Fantasy.Core.Common
         public int PointsGained { get; set; }
 
         [Required]
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; }
 
         [Required]
-        public Guid RaceId { get; set; }
+        public int RaceId { get; set; }
 
         [ForeignKey(nameof(RaceId))]
         public Race Race { get; set; }

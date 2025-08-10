@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace F1Fantasy.Core.Auth
 {
     [Table("application_role_claim")]
-    public class ApplicationRoleClaim : IdentityRoleClaim<Guid>
+    public class ApplicationRoleClaim : IdentityRoleClaim<int>
     {
         public virtual ApplicationRole Role { get; set; }
     }

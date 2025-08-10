@@ -8,21 +8,29 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
         //DriverDto GetDriverById(int id);
         Task<Driver> AddDriverAsync(Driver driver);
 
-        Task<Driver> GetDriverByIdAsync(Guid id);
+        Task<Driver> GetDriverByIdAsync(int id);
 
         Task<Driver> GetDriverByCodeAsync(string code);
 
         Task<Constructor> AddConstructorAsync(Constructor constructor);
 
-        Task<Constructor> GetConstructorByIdAsync(Guid id);
+        Task<Constructor> GetConstructorByIdAsync(int id);
 
         Task<Constructor> GetConstructorByCodeAsync(string code);
 
         Task<Circuit> AddCircuitAsync(Circuit circuit);
 
-        Task<Circuit> GetCircuitByIdAsync(Guid id);
+        Task<Circuit> GetCircuitByIdAsync(int id);
 
         Task<Circuit> GetCircuitByCodeAsync(string code);
+
+        Task<Country> AddCountryAsync(Country country);
+
+        Task<Country> GetCountryByIdAsync(string id);
+
+        Task<Country> GetCountryByNationalitityAsync(string nationality);
+
+        Task<Country> GetCountryByShortNameAsync(string shortName);
 
         //void UpdateDriver(DriverDto driver);
         // void DeleteDriver(int id);

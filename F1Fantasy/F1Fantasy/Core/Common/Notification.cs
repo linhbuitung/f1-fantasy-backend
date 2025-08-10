@@ -8,7 +8,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required, MaxLength(200)]
         public string Header { get; set; }
@@ -20,7 +20,7 @@ namespace F1Fantasy.Core.Common
         public int CreatedAt { get; set; }
 
         [Required]
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; }

@@ -7,7 +7,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
     {
         public static DriverDto MapDriverToDto(Driver driver)
         {
-            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.Nationality.Names[0], driver.Code, driver.ImgUrl);
+            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.ImgUrl);
         }
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
@@ -17,7 +17,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
         {
-            return new ConstructorDto(constructor.Id, constructor.Name, constructor.Nationality.Names[0], constructor.Code, constructor.ImgUrl);
+            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.ImgUrl);
         }
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)
@@ -27,29 +27,29 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static CircuitDto MapCircuitToDto(Circuit circuit)
         {
-            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longtitude, circuit.Locality, circuit.Country, circuit.ImgUrl);
+            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longtitude, circuit.Locality, circuit.CountryId, circuit.ImgUrl);
         }
 
         public static Circuit MapDtoToCircuit(CircuitDto circuitDto)
         {
-            return new Circuit(circuitDto.CircuitName, circuitDto.Code, circuitDto.Latitude, circuitDto.Longtitude, circuitDto.Locality, circuitDto.Country, circuitDto.ImgUrl);
+            return new Circuit(circuitDto.CircuitName, circuitDto.Code, circuitDto.Latitude, circuitDto.Longtitude, circuitDto.Locality, circuitDto.CountryId, circuitDto.ImgUrl);
         }
 
-        public static Nationality MapDtoToNationality(NationalityDto nationalityDto)
+        public static Country MapDtoToNationality(NationalityDto nationalityDto)
         {
-            return new Nationality
+            return new Country
             {
-                NationalityId = nationalityDto.NationalityId,
-                Names = nationalityDto.Names
+                Id = nationalityDto.NationalityId,
+                Nationalities = nationalityDto.Names
             };
         }
 
-        public static NationalityDto MapNationalityToDto(Nationality nationality)
+        public static NationalityDto MapNationalityToDto(Country nationality)
         {
             return new NationalityDto
             {
-                NationalityId = nationality.NationalityId,
-                Names = nationality.Names
+                NationalityId = nationality.Id,
+                Names = nationality.Nationalities
             };
         }
     }

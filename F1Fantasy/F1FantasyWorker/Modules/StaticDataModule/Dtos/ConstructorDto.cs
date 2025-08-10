@@ -6,30 +6,30 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 {
     public class ConstructorDto
     {
-        public Guid? Id { get; set; }
+        public int? Id { get; set; }
 
         public string Name { get; set; }
 
-        public string Nationality { get; set; }
+        public string CountryId { get; set; }
 
         public string Code { get; set; }
 
         public string? ImgUrl { get; set; }
 
-        public ConstructorDto(Guid id, string name, string nationality, string code, string? imgUrl)
+        public ConstructorDto(int id, string name, string countryId, string code, string? imgUrl)
         {
             Id = id;
             Name = name;
-            Nationality = nationality;
+            CountryId = countryId;
             Code = code;
             ImgUrl = imgUrl;
         }
 
-        public ConstructorDto(string name, string nationality, string code, string? imgUrl)
+        public ConstructorDto(string name, string countryId, string code, string? imgUrl)
         {
             Id = null;
             Name = name;
-            Nationality = nationality;
+            CountryId = countryId;
             Code = code;
             ImgUrl = imgUrl;
         }

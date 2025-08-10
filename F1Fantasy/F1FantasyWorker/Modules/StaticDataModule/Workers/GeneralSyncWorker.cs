@@ -12,28 +12,26 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 {
     internal class GeneralSyncWorker : BackgroundService
     {
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<GeneralSyncWorker> _logger;
-        private readonly IF1DataSyncService _f1DataSyncService;
-        private readonly IDriverService _driverService;
-        private readonly IConstructorService _constructorService;
-        private readonly ICircuitService _circuitService;
 
         public GeneralSyncWorker(
-            ILogger<GeneralSyncWorker> logger,
-            IF1DataSyncService f1DataSyncService,
-            IDriverService driverService,
-            IConstructorService constructorService,
-            ICircuitService circuitService)
+            IServiceScopeFactory scopeFactory,
+            ILogger<GeneralSyncWorker> logger)
         {
+            _scopeFactory = scopeFactory;
             _logger = logger;
-            _f1DataSyncService = f1DataSyncService;
-            _driverService = driverService;
-            _constructorService = constructorService;
-            _circuitService = circuitService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            using var scope = _scopeFactory.CreateScope();
+            var _f1DataSyncService = scope.ServiceProvider.GetRequiredService<IF1DataSyncService>();
+            var _driverService = scope.ServiceProvider.GetRequiredService<IDriverService>();
+            var _constructorService = scope.ServiceProvider.GetRequiredService<IConstructorService>();
+            var _circuitService = scope.ServiceProvider.GetRequiredService<ICircuitService>();
+            var _nationalityService = scope.ServiceProvider.GetRequiredService<ICountryService>();
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
@@ -41,22 +39,31 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     _logger.LogInformation("GeneralSyncWorker running at: {time}", DateTimeOffset.Now);
 
                     _logger.LogInformation("Starting F1 data synchronization...");
-                    //sync drivers
-                    List<DriverApiDto> newTempDrivers = await _f1DataSyncService.GetDriversAsync();
-                    List<DriverDto> newDriverDtos = new List<DriverDto>();
-                    foreach (var tempDriver in newTempDrivers)
-                    {
-                        newDriverDtos.Add(new DriverDto(tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, null));
-                    }
+                }
+                // Sync countries
+                List<CountryDto> newNationalityDtos = await _f1DataSyncService.GetNationalitiesAsync();
+                foreach (var countryDto in newNationalityDtos)
+                {
+                    await _nationalityService.AddCountryAsync(countryDto);
+                }
+                Console.WriteLine("Database synced with new countries.");
 
-                    foreach (var driverDto in newDriverDtos)
-                    {
-                        await _driverService.AddDriverAsync(driverDto);
-                    }
+                // Sync drivers
+                List<DriverApiDto> newTempDrivers = await _f1DataSyncService.GetDriversAsync();
+                List<DriverDto> newDriverDtos = new List<DriverDto>();
+                foreach (var tempDriver in newTempDrivers)
+                {
+                    newDriverDtos.Add(new DriverDto(tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, null));
+                }
+
+                foreach (var driverDto in newDriverDtos)
+                {
+                    await _driverService.AddDriverAsync(driverDto);
                 }
 
                 Console.WriteLine("Database synced with new drivers.");
 
+                // Sync constructor
                 List<ConstructorApiDto> newTempConstructors = await _f1DataSyncService.GetConstructorsAsync();
 
                 List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
@@ -89,6 +96,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 //wait 2 days
                 await Task.Delay(TimeSpan.FromDays(2), stoppingToken);
             }
+        }
+
+        public override async Task StopAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation(
+                "Sync Service is stopping.");
+
+            await base.StopAsync(stoppingToken);
         }
     }
 }

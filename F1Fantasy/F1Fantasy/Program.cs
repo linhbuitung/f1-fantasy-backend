@@ -15,6 +15,7 @@ using F1Fantasy.Core.Auth;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using F1Fantasy.Infrastructure.ExternalServices.Implementations;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AuthConfiguration>(
@@ -43,9 +44,6 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
       options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSnakeCaseNamingConvention());
@@ -67,6 +65,7 @@ builder.Services.Configure<HostOptions>(options =>
     options.ServicesStopConcurrently = false; // Stop services sequentially
 });
 
+builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -74,15 +73,6 @@ builder.Services.AddApplicationScoped(); // Custom extension method to register 
 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowSwaggerUI",
-        policy => policy
-            .WithOrigins("https://localhost:8080")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
 
 var app = builder.Build();
 app.MapIdentityApi<ApplicationUser>();
@@ -93,13 +83,14 @@ await ServiceExtensions.SeedRoles(app.Services);
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwagger();
+    app.UseDeveloperExceptionPage();
+    app.UseCors("AllowSwaggerUI");
+    app.UseSwagger(); // Generates /swagger/v1/swagger.json
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
     });
-    //not working
-    // MigrationExtension.ApplyMigration(app);
 }
 
 app.UseHttpsRedirection();
@@ -132,9 +123,9 @@ public static class ServiceExtensions
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var roles = new[]
         {
-        new ApplicationRole { Id = Guid.NewGuid(), Name = AppRoles.Player, NormalizedName = AppRoles.NormalizedPlayer },
-        new ApplicationRole { Id = Guid.NewGuid(), Name = AppRoles.Admin, NormalizedName = AppRoles.NormalizedAdmin },
-        new ApplicationRole { Id = Guid.NewGuid(), Name = AppRoles.SuperAdmin, NormalizedName = AppRoles.NormalizedSuperAdmin },
+        new ApplicationRole { Name = AppRoles.Player, NormalizedName = AppRoles.NormalizedPlayer },
+        new ApplicationRole { Name = AppRoles.Admin, NormalizedName = AppRoles.NormalizedAdmin },
+        new ApplicationRole { Name = AppRoles.SuperAdmin, NormalizedName = AppRoles.NormalizedSuperAdmin },
         };
 
         foreach (var role in roles)

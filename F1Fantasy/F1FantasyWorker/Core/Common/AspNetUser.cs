@@ -5,25 +5,27 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class AspNetUser
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public string DisplayName { get; set; } = null!;
+    public string? DisplayName { get; set; }
 
-    public DateOnly DateOfBirth { get; set; }
-
-    public string Nationality { get; set; } = null!;
-
-    public DateTime CreatedAt { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
     public bool AcceptNotification { get; set; }
 
-    public int LoginStreak { get; set; }
+    public int? LoginStreak { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime RefreshTokenExpiryTime { get; set; }
 
     public DateTime? LastLogin { get; set; }
 
-    public Guid? ConstructorId { get; set; }
+    public int? ConstructorId { get; set; }
 
-    public Guid? DriverId { get; set; }
+    public int? DriverId { get; set; }
+
+    public string? CountryId { get; set; }
 
     public string? UserName { get; set; }
 
@@ -60,6 +62,8 @@ public partial class AspNetUser
     public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; } = new List<AspNetUserToken>();
 
     public virtual Constructor? Constructor { get; set; }
+
+    public virtual Country? Country { get; set; }
 
     public virtual Driver? Driver { get; set; }
 

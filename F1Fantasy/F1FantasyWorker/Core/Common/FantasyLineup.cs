@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class FantasyLineup
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public int TotalAmount { get; set; }
 
@@ -13,9 +13,9 @@ public partial class FantasyLineup
 
     public int PointsGained { get; set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
-    public Guid RaceId { get; set; }
+    public int RaceId { get; set; }
 
     public virtual Race Race { get; set; } = null!;
 

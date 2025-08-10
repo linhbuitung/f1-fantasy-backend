@@ -7,7 +7,7 @@ public partial class AspNetUserClaim
 {
     public int Id { get; set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public string? ClaimType { get; set; }
 
