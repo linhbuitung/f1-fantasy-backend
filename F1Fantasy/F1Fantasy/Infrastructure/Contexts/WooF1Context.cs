@@ -8,7 +8,7 @@ namespace F1Fantasy.Infrastructure.Contexts
 {
     public class WooF1Context : IdentityDbContext<ApplicationUser,
         ApplicationRole,
-        /*key type*/Guid,
+        /*key type*/int,
         ApplicationUserClaim,
         ApplicationUserRole,
         ApplicationUserLogin,
@@ -55,7 +55,7 @@ namespace F1Fantasy.Infrastructure.Contexts
 
         public virtual DbSet<UserLeague> UserLeagues { get; set; }
 
-        public virtual DbSet<Nationality> Nationalities { get; set; }
+        public virtual DbSet<Country> Nationalities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -76,7 +76,7 @@ namespace F1Fantasy.Infrastructure.Contexts
             modelBuilder.ApplyConfiguration(new ApplicationAuthConfiguration());
             modelBuilder.ApplyConfiguration(new ApplicationUserRoleConfiguration());
             modelBuilder.ApplyConfiguration(new ApplicationUserTokenConfiguration());
-            modelBuilder.ApplyConfiguration(new NationalityConfiguration());
+            modelBuilder.ApplyConfiguration(new CountryConfiguration());
         }
     }
 }

@@ -10,7 +10,7 @@ namespace F1Fantasy.Core.Common
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required, MaxLength(300)]
         public string CircuitName { get; set; }
@@ -29,20 +29,23 @@ namespace F1Fantasy.Core.Common
         [Required, MaxLength(200)]
         public string Locality { get; set; }
 
-        [Required, MaxLength(200)]
-        public string Country { get; set; }
+        [Required]
+        public string CountryId { get; set; }
+
+        [ForeignKey(nameof(CountryId))]
+        public Country Country { get; set; }
 
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
 
-        public Circuit(string circuitName, string code, decimal latitude, decimal longtitude, string locality, string country, string? imgUrl)
+        public Circuit(string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
         {
             CircuitName = circuitName;
             Code = code;
             Latitude = latitude;
             Longtitude = longtitude;
             Locality = locality;
-            Country = country;
+            CountryId = countryId;
             ImgUrl = imgUrl;
         }
 

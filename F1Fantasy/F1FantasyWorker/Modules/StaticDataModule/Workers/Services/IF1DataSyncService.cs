@@ -1,4 +1,5 @@
-﻿using F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels;
+﻿using F1FantasyWorker.Modules.StaticDataModule.Dtos;
+using F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
         Task<List<ConstructorApiDto>> GetConstructorsAsync();
 
         Task<List<CircuitApiDto>> GetCircuitsAsync();
+
+        Task<List<CountryDto>> GetNationalitiesAsync();
     }
 }

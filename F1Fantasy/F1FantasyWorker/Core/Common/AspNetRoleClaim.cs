@@ -7,7 +7,7 @@ public partial class AspNetRoleClaim
 {
     public int Id { get; set; }
 
-    public Guid RoleId { get; set; }
+    public int RoleId { get; set; }
 
     public string? ClaimType { get; set; }
 

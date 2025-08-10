@@ -29,7 +29,16 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 {
                     return null;
                 }
-
+                constructorDto = FixSpecialCountryCase(constructorDto);
+                
+                // Constructor API returns nationality, so we need check for nationality.
+                Country country = await _staticDataRepository.GetCountryByNationalitityAsync(constructorDto.CountryId);
+                if (country == null)
+                {
+                    throw new Exception($"Country with nationality {constructorDto.CountryId} not found");
+                }
+                constructorDto.CountryId = country.Id;
+                
                 Constructor constructor = StaticDataDtoMapper.MapDtoToConstructor(constructorDto);
 
                 Constructor newConstructor = await _staticDataRepository.AddConstructorAsync(constructor);
@@ -39,7 +48,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
                 await transaction.CommitAsync();
 
-                return StaticDataDtoMapper.MapConstructorToDto(constructor);
+                return StaticDataDtoMapper.MapConstructorToDto(newConstructor);
             }
             catch (Exception ex)
             {
@@ -59,7 +68,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         }
 
         //get
-        public async Task<ConstructorDto> GetConstructorByIdAsync(Guid id)
+        public async Task<ConstructorDto> GetConstructorByIdAsync(int id)
         {
             Constructor constructor = await _staticDataRepository.GetConstructorByIdAsync(id);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
@@ -69,6 +78,20 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         {
             Constructor constructor = await _staticDataRepository.GetConstructorByCodeAsync(code);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
+        }
+        
+        private ConstructorDto FixSpecialCountryCase(ConstructorDto constructorDto)
+        {
+            if (constructorDto.CountryId.Equals("East German"))
+            {
+                constructorDto.CountryId = "German";
+            }
+            else if (constructorDto.CountryId.Equals("Rhodesian"))
+            {
+                constructorDto.CountryId = "Zimbabwean";
+            }
+            
+            return constructorDto;
         }
     }
 }

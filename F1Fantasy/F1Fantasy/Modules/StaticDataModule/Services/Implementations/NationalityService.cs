@@ -21,14 +21,18 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 
         public async Task<IEnumerable<NationalityDto>> GetAllNationalitiesAsync()
         {
-            IEnumerable<Nationality> nationalities = await _staticDataRepository.GetAllNationalitiesAsync();
+            IEnumerable<Country> nationalities = await _staticDataRepository.GetAllNationalitiesAsync();
             return nationalities.Select(StaticDataDtoMapper.MapNationalityToDto).ToList();
         }
 
         public async Task<NationalityDto> GetNationalityByIdAsync(string id)
         {
-            return StaticDataDtoMapper.MapNationalityToDto(
-                await _staticDataRepository.GetNationalityByIdAsync(id));
+            Country nationality = await _staticDataRepository.GetNationalityByIdAsync(id);
+            if (nationality == null)
+            {
+                return null;
+            }
+            return StaticDataDtoMapper.MapNationalityToDto(nationality);
         }
 
         public async Task<NationalityDto> AddNationalityAsync(NationalityDto nationalityDto)
@@ -42,8 +46,8 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
                     return null;
                 }
 
-                Nationality nationality = StaticDataDtoMapper.MapDtoToNationality(nationalityDto);
-                Nationality newNationality = await _staticDataRepository.AddNationalityAsync(nationality);
+                Country nationality = StaticDataDtoMapper.MapDtoToNationality(nationalityDto);
+                Country newNationality = await _staticDataRepository.AddNationalityAsync(nationality);
 
                 await _context.SaveChangesAsync();
 

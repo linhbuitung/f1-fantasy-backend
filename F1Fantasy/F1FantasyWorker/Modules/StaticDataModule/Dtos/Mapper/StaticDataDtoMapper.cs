@@ -7,7 +7,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
     {
         public static DriverDto MapDriverToDto(Driver driver)
         {
-            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.Nationality, driver.Code, driver.ImgUrl);
+            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.ImgUrl);
         }
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
@@ -18,7 +18,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 GivenName = driverDto.GivenName,
                 FamilyName = driverDto.FamilyName,
                 DateOfBirth = driverDto.DateOfBirth,
-                Nationality = driverDto.Nationality,
+                CountryId = driverDto.CountryId,
                 Code = driverDto.Code,
                 ImgUrl = driverDto.ImgUrl
             };
@@ -26,7 +26,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
         {
-            return new ConstructorDto(constructor.Id, constructor.Name, constructor.Nationality, constructor.Code, constructor.ImgUrl);
+            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.ImgUrl);
         }
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)
@@ -35,7 +35,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
             return new Constructor
             {
                 Name = constructorDto.Name,
-                Nationality = constructorDto.Nationality,
+                CountryId = constructorDto.CountryId,
                 Code = constructorDto.Code,
                 ImgUrl = constructorDto.ImgUrl
             };
@@ -43,7 +43,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 
         public static CircuitDto MapCircuitToDto(Circuit circuit)
         {
-            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longtitude, circuit.Locality, circuit.Country, circuit.ImgUrl);
+            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longtitude, circuit.Locality, circuit.CountryId, circuit.ImgUrl);
         }
 
         public static Circuit MapDtoToCircuit(CircuitDto circuitDto)
@@ -55,8 +55,23 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 Latitude = circuitDto.Latitude,
                 Longtitude = circuitDto.Longtitude,
                 Locality = circuitDto.Locality,
-                Country = circuitDto.Country,
+                CountryId = circuitDto.CountryId,
                 ImgUrl = circuitDto.ImgUrl
+            };
+        }
+
+        public static CountryDto MapCountryToDto(Country country)
+        {
+            return new CountryDto(country.Id, country.Nationalities, country.ShortName);
+        }
+
+        public static Country MapDtoToCountry(CountryDto countryDto)
+        {
+            return new Country
+            {
+                Id = countryDto.CountryId,
+                Nationalities = countryDto.Nationalities,
+                ShortName = countryDto.ShortName
             };
         }
     }

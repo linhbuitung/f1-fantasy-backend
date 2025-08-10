@@ -23,14 +23,14 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return driver;
         }
 
-        public async Task<Driver> GetDriverByIdAsync(Guid id)
+        public async Task<Driver> GetDriverByIdAsync(int id)
         {
-            return await _context.Drivers.Include(d => d.Nationality).FirstOrDefaultAsync(d => d.Id == id);
+            return await _context.Drivers.Include(d => d.Country).FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<Driver> GetDriverByCodeAsync(string code)
         {
-            return await _context.Drivers.Include(d => d.Nationality).FirstOrDefaultAsync(d => d.Code.Equals(code));
+            return await _context.Drivers.Include(d => d.Country).FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
@@ -40,14 +40,14 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return constructor;
         }
 
-        public async Task<Constructor> GetConstructorByIdAsync(Guid id)
+        public async Task<Constructor> GetConstructorByIdAsync(int id)
         {
-            return await _context.Constructors.Include(d => d.Nationality).FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Constructors.Include(d => d.Country).FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Constructor> GetConstructorByCodeAsync(string code)
         {
-            return await _context.Constructors.Include(d => d.Nationality).FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await _context.Constructors.Include(d => d.Country).FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
@@ -58,7 +58,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return circuit;
         }
 
-        public async Task<Circuit> GetCircuitByIdAsync(Guid id)
+        public async Task<Circuit> GetCircuitByIdAsync(int id)
         {
             return await _context.Circuits.FirstOrDefaultAsync(c => c.Id == id);
         }
@@ -68,19 +68,19 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await _context.Circuits.FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
-        public async Task<Nationality> AddNationalityAsync(Nationality nationality)
+        public async Task<Country> AddNationalityAsync(Country nationality)
         {
             _context.Nationalities.Add(nationality);
             await _context.SaveChangesAsync();
             return nationality;
         }
 
-        public async Task<Nationality> GetNationalityByIdAsync(string NationalityId)
+        public async Task<Country> GetNationalityByIdAsync(string NationalityId)
         {
-            return await _context.Nationalities.FirstOrDefaultAsync(n => n.NationalityId.Equals(NationalityId));
+            return await _context.Nationalities.FirstOrDefaultAsync(n => n.Id.Equals(NationalityId));
         }
 
-        public async Task<IEnumerable<Nationality>> GetAllNationalitiesAsync()
+        public async Task<IEnumerable<Country>> GetAllNationalitiesAsync()
         {
             return await _context.Nationalities.ToListAsync();
         }

@@ -28,6 +28,8 @@ public partial class WooF1Context : DbContext
 
     public virtual DbSet<Constructor> Constructors { get; set; }
 
+    public virtual DbSet<Country> Countries { get; set; }
+
     public virtual DbSet<Driver> Drivers { get; set; }
 
     public virtual DbSet<DriverPrediction> DriverPredictions { get; set; }
@@ -45,7 +47,7 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Race> Races { get; set; }
 
     public virtual DbSet<RaceEntry> RaceEntries { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>
@@ -54,9 +56,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.NormalizedName, "RoleNameIndex").IsUnique();
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ConcurrencyStamp).HasColumnName("concurrency_stamp");
             entity.Property(e => e.Name)
                 .HasMaxLength(256)
@@ -92,16 +92,18 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.ConstructorId, "ix_asp_net_users_constructor_id");
 
+            entity.HasIndex(e => e.CountryId, "ix_asp_net_users_country_id");
+
             entity.HasIndex(e => e.DriverId, "ix_asp_net_users_driver_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AcceptNotification).HasColumnName("accept_notification");
             entity.Property(e => e.AccessFailedCount).HasColumnName("access_failed_count");
             entity.Property(e => e.ConcurrencyStamp).HasColumnName("concurrency_stamp");
             entity.Property(e => e.ConstructorId).HasColumnName("constructor_id");
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CountryId)
+                .HasMaxLength(100)
+                .HasColumnName("country_id");
             entity.Property(e => e.DateOfBirth).HasColumnName("date_of_birth");
             entity.Property(e => e.DisplayName)
                 .HasMaxLength(100)
@@ -115,7 +117,6 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.LockoutEnabled).HasColumnName("lockout_enabled");
             entity.Property(e => e.LockoutEnd).HasColumnName("lockout_end");
             entity.Property(e => e.LoginStreak).HasColumnName("login_streak");
-            entity.Property(e => e.Nationality).HasColumnName("nationality");
             entity.Property(e => e.NormalizedEmail)
                 .HasMaxLength(128)
                 .HasColumnName("normalized_email");
@@ -125,6 +126,8 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
             entity.Property(e => e.PhoneNumber).HasColumnName("phone_number");
             entity.Property(e => e.PhoneNumberConfirmed).HasColumnName("phone_number_confirmed");
+            entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
+            entity.Property(e => e.RefreshTokenExpiryTime).HasColumnName("refresh_token_expiry_time");
             entity.Property(e => e.SecurityStamp).HasColumnName("security_stamp");
             entity.Property(e => e.TwoFactorEnabled).HasColumnName("two_factor_enabled");
             entity.Property(e => e.UserName)
@@ -135,6 +138,10 @@ public partial class WooF1Context : DbContext
                 .HasForeignKey(d => d.ConstructorId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_asp_net_users_constructor_constructor_id");
+
+            entity.HasOne(d => d.Country).WithMany(p => p.AspNetUsers)
+                .HasForeignKey(d => d.CountryId)
+                .HasConstraintName("fk_asp_net_users_country_country_id");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.AspNetUsers)
                 .HasForeignKey(d => d.DriverId)
@@ -155,8 +162,8 @@ public partial class WooF1Context : DbContext
                         j.HasKey("UserId", "RoleId").HasName("pk_asp_net_user_roles");
                         j.ToTable("AspNetUserRoles");
                         j.HasIndex(new[] { "RoleId" }, "ix_asp_net_user_roles_role_id");
-                        j.IndexerProperty<Guid>("UserId").HasColumnName("user_id");
-                        j.IndexerProperty<Guid>("RoleId").HasColumnName("role_id");
+                        j.IndexerProperty<int>("UserId").HasColumnName("user_id");
+                        j.IndexerProperty<int>("RoleId").HasColumnName("role_id");
                     });
         });
 
@@ -218,18 +225,18 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.Code, "ak_circuit_code").IsUnique();
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.HasIndex(e => e.CountryId, "ix_circuit_country_id");
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CircuitName)
                 .HasMaxLength(300)
                 .HasColumnName("circuit_name");
             entity.Property(e => e.Code)
                 .HasMaxLength(50)
                 .HasColumnName("code");
-            entity.Property(e => e.Country)
-                .HasMaxLength(200)
-                .HasColumnName("country");
+            entity.Property(e => e.CountryId)
+                .HasMaxLength(100)
+                .HasColumnName("country_id");
             entity.Property(e => e.ImgUrl)
                 .HasMaxLength(300)
                 .HasColumnName("img_url");
@@ -242,6 +249,10 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Longtitude)
                 .HasPrecision(10, 7)
                 .HasColumnName("longtitude");
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Circuits)
+                .HasForeignKey(d => d.CountryId)
+                .HasConstraintName("fk_circuit_country_country_id");
         });
 
         modelBuilder.Entity<Constructor>(entity =>
@@ -252,21 +263,40 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.Code, "ak_constructor_code").IsUnique();
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.HasIndex(e => e.CountryId, "ix_constructor_country_id");
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
                 .HasMaxLength(50)
                 .HasColumnName("code");
+            entity.Property(e => e.CountryId)
+                .HasMaxLength(100)
+                .HasColumnName("country_id");
             entity.Property(e => e.ImgUrl)
                 .HasMaxLength(300)
                 .HasColumnName("img_url");
             entity.Property(e => e.Name)
                 .HasMaxLength(300)
                 .HasColumnName("name");
-            entity.Property(e => e.Nationality)
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Constructors)
+                .HasForeignKey(d => d.CountryId)
+                .HasConstraintName("fk_constructor_country_country_id");
+        });
+
+        modelBuilder.Entity<Country>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_country");
+
+            entity.ToTable("country");
+
+            entity.Property(e => e.Id)
+                .HasMaxLength(100)
+                .HasColumnName("id");
+            entity.Property(e => e.Nationalities).HasColumnName("nationalities");
+            entity.Property(e => e.ShortName)
                 .HasMaxLength(200)
-                .HasColumnName("nationality");
+                .HasColumnName("short_name");
         });
 
         modelBuilder.Entity<Driver>(entity =>
@@ -277,12 +307,15 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.Code, "ak_driver_code").IsUnique();
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.HasIndex(e => e.CountryId, "ix_driver_country_id");
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
                 .HasMaxLength(50)
                 .HasColumnName("code");
+            entity.Property(e => e.CountryId)
+                .HasMaxLength(100)
+                .HasColumnName("country_id");
             entity.Property(e => e.DateOfBirth).HasColumnName("date_of_birth");
             entity.Property(e => e.FamilyName)
                 .HasMaxLength(300)
@@ -293,9 +326,10 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.ImgUrl)
                 .HasMaxLength(300)
                 .HasColumnName("img_url");
-            entity.Property(e => e.Nationality)
-                .HasMaxLength(200)
-                .HasColumnName("nationality");
+
+            entity.HasOne(d => d.Country).WithMany(p => p.Drivers)
+                .HasForeignKey(d => d.CountryId)
+                .HasConstraintName("fk_driver_country_country_id");
         });
 
         modelBuilder.Entity<DriverPrediction>(entity =>
@@ -310,9 +344,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.PredictionId, "ix_driver_prediction_prediction_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ConstructorId).HasColumnName("constructor_id");
             entity.Property(e => e.Crashed).HasColumnName("crashed");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
@@ -346,9 +378,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.UserId, "ix_fantasy_lineup_user_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.PointsGained).HasColumnName("points_gained");
             entity.Property(e => e.RaceId).HasColumnName("race_id");
             entity.Property(e => e.TotalAmount).HasColumnName("total_amount");
@@ -380,8 +410,8 @@ public partial class WooF1Context : DbContext
                         j.HasKey("FantasyLineupId", "DriverId").HasName("pk_fantasy_lineup_driver");
                         j.ToTable("fantasy_lineup_driver");
                         j.HasIndex(new[] { "DriverId" }, "ix_fantasy_lineup_driver_driver_id");
-                        j.IndexerProperty<Guid>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
-                        j.IndexerProperty<Guid>("DriverId").HasColumnName("driver_id");
+                        j.IndexerProperty<int>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
+                        j.IndexerProperty<int>("DriverId").HasColumnName("driver_id");
                     });
 
             entity.HasMany(d => d.Powerups).WithMany(p => p.FantasyLineups)
@@ -398,8 +428,8 @@ public partial class WooF1Context : DbContext
                         j.HasKey("FantasyLineupId", "PowerupId").HasName("pk_powerup_fantasy_lineup");
                         j.ToTable("powerup_fantasy_lineup");
                         j.HasIndex(new[] { "PowerupId" }, "ix_powerup_fantasy_lineup_powerup_id");
-                        j.IndexerProperty<Guid>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
-                        j.IndexerProperty<Guid>("PowerupId").HasColumnName("powerup_id");
+                        j.IndexerProperty<int>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
+                        j.IndexerProperty<int>("PowerupId").HasColumnName("powerup_id");
                     });
         });
 
@@ -411,9 +441,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.UserId, "ix_league_user_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description)
                 .HasMaxLength(500)
                 .HasColumnName("description");
@@ -447,8 +475,8 @@ public partial class WooF1Context : DbContext
                         j.HasKey("LeagueId", "UserId").HasName("pk_user_league");
                         j.ToTable("user_league");
                         j.HasIndex(new[] { "UserId" }, "ix_user_league_user_id");
-                        j.IndexerProperty<Guid>("LeagueId").HasColumnName("league_id");
-                        j.IndexerProperty<Guid>("UserId").HasColumnName("user_id");
+                        j.IndexerProperty<int>("LeagueId").HasColumnName("league_id");
+                        j.IndexerProperty<int>("UserId").HasColumnName("user_id");
                     });
         });
 
@@ -460,9 +488,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.UserId, "ix_notification_user_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content)
                 .HasMaxLength(1000)
                 .HasColumnName("content");
@@ -484,9 +510,7 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("powerup");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description)
                 .HasMaxLength(500)
                 .HasColumnName("description");
@@ -508,9 +532,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.UserId, "ix_prediction_user_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DatePredicted).HasColumnName("datePredicted");
             entity.Property(e => e.PredictYear).HasColumnName("predict_year");
@@ -536,9 +558,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.CircuitId, "ix_race_circuit_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Calculated).HasColumnName("calculated");
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DeadlineDate).HasColumnName("deadline_date");
@@ -560,9 +580,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.RaceId, "ix_race_entry_race_id");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.FastestLap).HasColumnName("fastest_lap");
             entity.Property(e => e.Grid).HasColumnName("grid");

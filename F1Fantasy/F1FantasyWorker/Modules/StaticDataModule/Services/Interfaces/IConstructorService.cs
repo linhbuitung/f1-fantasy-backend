@@ -8,7 +8,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
 
         void AddListConstructorsAsync(List<ConstructorDto> constructorDtos);
 
-        Task<ConstructorDto> GetConstructorByIdAsync(Guid id);
+        Task<ConstructorDto> GetConstructorByIdAsync(int id);
 
         Task<ConstructorDto> GetConstructorByCodeAsync(string code);
     }

@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class AspNetRole
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string? Name { get; set; }
 

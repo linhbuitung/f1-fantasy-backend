@@ -1,4 +1,5 @@
 using F1FantasyWorker;
+using F1FantasyWorker.Infrastructure.Contexts;
 
 //using F1FantasyWorker.Infrastructure.Contexts;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations;
@@ -11,11 +12,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services.AddHttpClient();
+builder.Services.AddDbContext<WooF1Context>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddApplicationBackground();
 builder.Services.AddApplicationScoped();
-
-//builder.Services.AddDbContextPool<WooF1Context>(options =>
-//      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var host = builder.Build();
 host.Run();
@@ -28,6 +30,7 @@ public static class ServiceExtensions
         services.AddScoped<IDriverService, DriverService>();
         services.AddScoped<IConstructorService, ConstructorService>();
         services.AddScoped<ICircuitService, CircuitService>();
+        services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IStaticDataRepository, StaticDataRepository>();
 
         services.AddScoped<IF1DataSyncService, F1DataSyncService>();

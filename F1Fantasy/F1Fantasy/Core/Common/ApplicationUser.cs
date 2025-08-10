@@ -13,10 +13,10 @@ namespace F1Fantasy.Core.Common
     //    SuperAdmin = 2
     //}
     [Table("application_user")]
-    public class ApplicationUser : IdentityUser<Guid>
+    public class ApplicationUser : IdentityUser<int>
     {
         [MaxLength(100)]
-        public string DisplayName { get; set; }
+        public string? DisplayName { get; set; }
 
         //[Required, MaxLength(200)]
         //public string Email { get; set; }
@@ -24,39 +24,37 @@ namespace F1Fantasy.Core.Common
         //[Required]
 
         [Column(TypeName = "date")]
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
         //[Required, MaxLength(100)]
         //public string Password { get; set; }
-        [Column(TypeName = "timestamp with time zone")]
-        public DateTime CreatedAt { get; set; }
+        //[Column(TypeName = "timestamp with time zone")]
+        //public DateTime CreatedAt { get; set; }
 
         public bool AcceptNotification { get; set; }
 
-        public int LoginStreak { get; set; }
+        public int? LoginStreak { get; set; }
 
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
 
         public DateTime? LastLogin { get; set; }
 
-        public Guid? ConstructorId { get; set; }
+        public int? ConstructorId { get; set; }
 
         [ForeignKey(nameof(ConstructorId))]
-        public Constructor Constructor { get; set; }
+        public Constructor? Constructor { get; set; }
 
-        public Guid? DriverId { get; set; }
+        public int? DriverId { get; set; }
 
         [ForeignKey(nameof(DriverId))]
-        public Driver Driver { get; set; }
+        public Driver? Driver { get; set; }
 
         // Navigation properties
+        public string? CountryId { get; set; }
 
-        [Required]
-        public string NationalityId { get; set; }
-
-        [ForeignKey(nameof(NationalityId))]
-        public Nationality Nationality { get; set; }
+        [ForeignKey(nameof(CountryId))]
+        public Country? Country { get; set; }
 
         public ICollection<FantasyLineup> FantasyLineups { get; set; }
 

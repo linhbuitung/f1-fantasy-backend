@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class AspNetUserToken
 {
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public string LoginProvider { get; set; } = null!;
 

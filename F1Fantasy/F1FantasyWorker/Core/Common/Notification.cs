@@ -5,7 +5,7 @@ namespace F1FantasyWorker.Core.Common;
 
 public partial class Notification
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Header { get; set; } = null!;
 
@@ -13,7 +13,7 @@ public partial class Notification
 
     public int CreatedAt { get; set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public virtual AspNetUser User { get; set; } = null!;
 }
