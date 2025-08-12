@@ -15,6 +15,7 @@ using F1Fantasy.Core.Auth;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using F1Fantasy.Infrastructure.ExternalServices.Implementations;
+using F1Fantasy.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,10 +51,11 @@ builder.Services.AddDbContext<WooF1Context>(options =>
 
 #region Auth
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddRoles<ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
 builder.Services.AddAuthorization();
 
-builder.Services.AddAuthentication().AddBearerToken();
+builder.Services.AddAuthentication()
+    .AddBearerToken(IdentityConstants.BearerScheme);
 
 #endregion Auth
 
@@ -71,11 +73,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplicationScoped(); // Custom extension method to register application services
 
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 var app = builder.Build();
-app.MapIdentityApi<ApplicationUser>();
+//app.MapIdentityApi<ApplicationUser>();
 //seed roles
 
 await ServiceExtensions.SeedRoles(app.Services);
@@ -93,6 +97,20 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+//block access to /register endpoint
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.Equals("/register", StringComparison.OrdinalIgnoreCase) &&
+        context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.StatusCode = 404;
+        await context.Response.WriteAsync("Not Found");
+        return;
+    }
+    await next();
+});
+
+app.MapIdentityApi<ApplicationUser>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -113,6 +131,7 @@ public static class ServiceExtensions
         services.AddScoped<INationalityService, NationalityService>();
 
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
+
 
         return services;
     }

@@ -31,6 +31,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             var _constructorService = scope.ServiceProvider.GetRequiredService<IConstructorService>();
             var _circuitService = scope.ServiceProvider.GetRequiredService<ICircuitService>();
             var _nationalityService = scope.ServiceProvider.GetRequiredService<ICountryService>();
+            var _raceService = scope.ServiceProvider.GetRequiredService<IRaceService>();
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -93,6 +94,21 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 }
 
                 Console.WriteLine("Database synced with new circuits.");
+                
+                // Sync races
+                List<RaceApiDto> newTempRaces = await _f1DataSyncService.GetRacesAsync();
+                List<RaceDto> newRaceDtos = new List<RaceDto>();
+                foreach (var tempRace in newTempRaces)
+                {
+                    newRaceDtos.Add(new RaceDto(tempRace.Date, tempRace.Date.AddDays(-2), false, circuitId: null, tempRace.Circuit.CircuitId));
+                }
+
+                foreach (var raceDto in newRaceDtos)
+                {
+                    await _raceService.AddRaceAsync(raceDto);
+                }
+
+                Console.WriteLine("Database synced with new races.");
                 //wait 2 days
                 await Task.Delay(TimeSpan.FromDays(2), stoppingToken);
             }

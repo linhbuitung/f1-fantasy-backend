@@ -13,8 +13,8 @@ namespace F1Fantasy.Core.Common
         public int Id { get; set; }
 
         [Required]
-        [Column("datePredicted", TypeName = "date")]
-        public DateTime DatePredicted { get; set; }
+        [Column( TypeName = "date")]
+        public DateOnly DatePredicted { get; set; }
 
         [Required]
         public int PredictYear { get; set; }

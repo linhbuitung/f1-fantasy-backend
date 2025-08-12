@@ -259,5 +259,59 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
         }
 
         #endregion nationality
+
+        #region race
+
+        private class RaceTableDto
+        {
+            public List<RaceApiDto> Races { get; set; }
+        }
+        
+        private class MRRaceDataDto
+        {
+            public RaceTableDto RaceTable { get; set; }
+        }
+        private class RaceApiResponseDto
+        {
+            public MRRaceDataDto MRData { get; set; }
+        }
+        
+        public async Task<List<RaceApiDto>> GetRacesAsync()
+        {
+            int limit = 100;
+            int offset = 0;
+            string queryParams;
+            string apiUrl;
+
+            List<RaceApiDto> tempConstructors = new List<RaceApiDto>();
+
+            bool condition = true;
+            while (condition)
+            {
+                queryParams = $"limit={limit}&offset={offset}";
+                apiUrl = $"https://api.jolpi.ca/ergast/f1/races/?{queryParams}";
+
+                var response = await _httpClient.GetStringAsync(apiUrl);
+                if (string.IsNullOrEmpty(response))
+                {
+                    break;
+                }
+
+                RaceApiResponseDto apiResponse = JsonConvert.DeserializeObject<RaceApiResponseDto>(response);
+                if (apiResponse == null || apiResponse.MRData.RaceTable.Races.Count < 100)
+                {
+                    condition = false;
+                }
+                Console.WriteLine($"offset: {offset} - Races count: {apiResponse.MRData.RaceTable.Races.Count}");
+                tempConstructors.AddRange(apiResponse.MRData.RaceTable.Races);
+
+                offset += limit;
+                await Task.Delay(500);
+            }
+
+            return tempConstructors;
+        }
+
+        #endregion
     }
 }

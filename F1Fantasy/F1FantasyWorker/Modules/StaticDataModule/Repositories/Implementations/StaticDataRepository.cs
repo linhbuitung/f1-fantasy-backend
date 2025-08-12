@@ -90,5 +90,23 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
         {
             return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.ShortName.Equals(shortName));
         }
+
+        public async Task<Race> AddRaceAsync(Race race)
+        {
+            _context.Races.Add(race);
+
+            await _context.SaveChangesAsync();
+            return race;
+        }
+
+        public async Task<Race> GetRaceByIdAsync(int id)
+        {
+            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
+        }
+
+        public async Task<Race> GetRaceByRaceDateAsync(DateOnly date)
+        {
+            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
+        }
     }
 }

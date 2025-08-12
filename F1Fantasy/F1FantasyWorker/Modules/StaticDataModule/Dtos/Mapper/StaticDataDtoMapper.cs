@@ -74,5 +74,22 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 ShortName = countryDto.ShortName
             };
         }
+
+
+        public static RaceDto MapRaceToDto(Race race)
+        {
+            return new RaceDto(race.RaceDate, race.DeadlineDate, race.Calculated, race.CircuitId, null);
+        }
+
+        public static Race MapDtoToRace(RaceDto raceDto)
+        {
+            return new Race()
+            {
+                RaceDate = raceDto.RaceDate,
+                Calculated = raceDto.Calculated,
+                CircuitId = raceDto.CircuitId ?? 0, // Default to 0 if CircuitId is null
+                DeadlineDate = raceDto.DeadlineDate
+            };
+        }
     }
 }

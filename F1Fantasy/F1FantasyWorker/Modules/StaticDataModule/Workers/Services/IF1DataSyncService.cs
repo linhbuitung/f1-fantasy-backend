@@ -17,5 +17,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
         Task<List<CircuitApiDto>> GetCircuitsAsync();
 
         Task<List<CountryDto>> GetNationalitiesAsync();
+
+        Task<List<RaceApiDto>> GetRacesAsync();
     }
 }
