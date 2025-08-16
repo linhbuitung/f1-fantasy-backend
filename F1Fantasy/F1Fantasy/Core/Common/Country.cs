@@ -17,11 +17,11 @@ namespace F1Fantasy.Core.Common
         [Required]
         public List<string> Nationalities { get; set; }
 
-        public ICollection<ApplicationUser> Users { get; set; }
+        public virtual ICollection<ApplicationUser> Users { get; set; }
 
-        public ICollection<Constructor> Constructors { get; set; }
+        public virtual ICollection<Constructor> Constructors { get; set; }
 
-        public ICollection<Driver> Drivers { get; set; }
+        public virtual ICollection<Driver> Drivers { get; set; }
 
         public ICollection<Circuit> Circuits { get; set; }
     }

@@ -26,9 +26,9 @@ namespace F1Fantasy.Core.Common
         public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         // Navigation properties
-        public ICollection<UserLeague> UserLeagues { get; set; }
+        public virtual ICollection<UserLeague> UserLeagues { get; set; }
     }
 }

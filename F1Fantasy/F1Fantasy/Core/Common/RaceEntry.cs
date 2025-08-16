@@ -21,12 +21,12 @@ namespace F1Fantasy.Core.Common
         public int DriverId { get; set; }
 
         [ForeignKey(nameof(DriverId))]
-        public Driver Driver { get; set; }
+        public virtual Driver Driver { get; set; }
 
         [Required]
         public int RaceId { get; set; }
 
         [ForeignKey(nameof(RaceId))]
-        public Race Race { get; set; }
+        public virtual Race Race { get; set; }
     }
 }

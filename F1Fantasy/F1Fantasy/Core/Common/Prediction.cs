@@ -29,15 +29,15 @@ namespace F1Fantasy.Core.Common
         public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         [Required]
         public int CircuitId { get; set; }
 
         [ForeignKey(nameof(CircuitId))]
-        public Circuit Circuit { get; set; }
+        public virtual Circuit Circuit { get; set; }
 
         // Navigation property
-        public ICollection<DriverPrediction> DriverPredictions { get; set; }
+        public virtual ICollection<DriverPrediction> DriverPredictions { get; set; }
     }
 }

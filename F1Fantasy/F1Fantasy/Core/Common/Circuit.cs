@@ -39,8 +39,8 @@ namespace F1Fantasy.Core.Common
         public string? ImgUrl { get; set; }
 
         // Navigation properties
-        public ICollection<Prediction> Predictions { get; set; }
+        public virtual ICollection<Prediction> Predictions { get; set; }
 
-        public ICollection<Race> Races { get; set; }
+        public virtual ICollection<Race> Races { get; set; }
     }
 }

@@ -31,7 +31,7 @@ public class UserService : IUserService
                 throw new ApplicationException($"User with id {userUpdateDto.Id} not found");
             }
                 
-            ApplicationUser user = ApplicationUserDtoMapper.MapUpdateDtoToUser(userUpdateDto);
+            ApplicationUser user = ApplicationUserDtoMapper.MapUpdateDtoToUser(userUpdateDto, existingUser);
 
             ApplicationUser newUser = await _userRepository.UpdateUserAsync(user);
 

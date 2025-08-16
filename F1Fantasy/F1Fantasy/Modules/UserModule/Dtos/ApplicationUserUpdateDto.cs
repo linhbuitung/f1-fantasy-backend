@@ -13,7 +13,7 @@ public class ApplicationUserUpdateDto
     [Column(TypeName = "date")]
     public DateOnly? DateOfBirth { get; set; }
 
-    public bool AcceptNotification { get; set; }
+    public bool? AcceptNotification { get; set; }
     
     public int? ConstructorId { get; set; }
     

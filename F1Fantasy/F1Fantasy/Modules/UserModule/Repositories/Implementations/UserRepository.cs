@@ -28,7 +28,13 @@ public class UserRepository : IUserRepository
             existingUser.CountryId = user.CountryId;
 
             await _context.SaveChangesAsync();
-            return existingUser;
+            
+            return await _context.Users
+                .Include(u => u.Constructor)
+                .Include(u => u.Driver)
+                .Include(u => u.Country)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
         }
 
         throw new InvalidOperationException();

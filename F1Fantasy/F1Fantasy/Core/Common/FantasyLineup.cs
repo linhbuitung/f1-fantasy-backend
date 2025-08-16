@@ -24,17 +24,21 @@ namespace F1Fantasy.Core.Common
         public int UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; }
+        public virtual ApplicationUser User { get; set; }
 
         [Required]
         public int RaceId { get; set; }
 
         [ForeignKey(nameof(RaceId))]
-        public Race Race { get; set; }
+        public virtual Race Race { get; set; }
 
         // Navigation properties
-        public ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
+        public virtual ICollection<Driver> Drivers { get; set; }
+        
+        public virtual ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
+        
+        public virtual ICollection<Powerup> Powerups { get; set; }
 
-        public ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
+        public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
     }
 }

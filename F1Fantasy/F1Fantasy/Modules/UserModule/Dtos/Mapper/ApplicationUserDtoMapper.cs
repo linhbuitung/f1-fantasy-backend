@@ -23,17 +23,17 @@ public class ApplicationUserDtoMapper
         };
     }
 
-    public static ApplicationUser MapUpdateDtoToUser(ApplicationUserUpdateDto dto)
+    public static ApplicationUser MapUpdateDtoToUser(ApplicationUserUpdateDto dto, ApplicationUser existingUser)
     {
         return new ApplicationUser
         {
             Id = dto.Id,
-            DisplayName = dto.DisplayName,
-            DateOfBirth = dto.DateOfBirth,
-            AcceptNotification = dto.AcceptNotification,
-            ConstructorId = dto.ConstructorId,
-            DriverId = dto.DriverId,
-            CountryId = dto.CountryId
+            DisplayName = dto.DisplayName ?? existingUser.DisplayName,
+            DateOfBirth = dto.DateOfBirth ?? existingUser.DateOfBirth,
+            AcceptNotification = dto.AcceptNotification ?? existingUser.AcceptNotification,
+            ConstructorId = dto.ConstructorId ?? existingUser.ConstructorId,
+            DriverId = dto.DriverId ?? existingUser.DriverId,
+            CountryId = dto.CountryId ?? existingUser.CountryId
         };
     }
 

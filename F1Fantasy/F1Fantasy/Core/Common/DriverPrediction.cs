@@ -22,18 +22,18 @@ namespace F1Fantasy.Core.Common
         public int PredictionId { get; set; }
 
         [ForeignKey(nameof(PredictionId))]
-        public Prediction Prediction { get; set; }
+        public virtual Prediction Prediction { get; set; }
 
         [Required]
         public int DriverId { get; set; }
 
         [ForeignKey(nameof(DriverId))]
-        public Driver Driver { get; set; }
+        public virtual Driver Driver { get; set; }
 
         [Required]
         public int ConstructorId { get; set; }
 
         [ForeignKey(nameof(ConstructorId))]
-        public Constructor Constructor { get; set; }
+        public virtual Constructor Constructor { get; set; }
     }
 }

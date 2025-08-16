@@ -26,10 +26,16 @@ namespace F1Fantasy.Core.Common
 
         [ForeignKey(nameof(CircuitId))]
         public Circuit Circuit { get; set; }
+        
+        [Required]
+        public int SeasonId { get; set; }
+
+        [ForeignKey(nameof(SeasonId))]
+        public virtual Season Season { get; set; }
 
         // Navigation properties
-        public ICollection<RaceEntry> RaceEntries { get; set; }
+        public virtual ICollection<RaceEntry> RaceEntries { get; set; }
 
-        public ICollection<FantasyLineup> FantasyLineups { get; set; }
+        public virtual ICollection<FantasyLineup> FantasyLineups { get; set; }
     }
 }
