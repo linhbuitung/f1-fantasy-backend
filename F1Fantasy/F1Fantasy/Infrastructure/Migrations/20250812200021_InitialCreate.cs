@@ -134,7 +134,7 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     given_name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     family_name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
-                    date_of_birth = table.Column<DateTime>(type: "date", nullable: false),
+                    date_of_birth = table.Column<DateOnly>(type: "date", nullable: false),
                     code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     img_url = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
                     country_id = table.Column<string>(type: "character varying(100)", nullable: false)
@@ -157,8 +157,8 @@ namespace F1Fantasy.Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    race_date = table.Column<DateTime>(type: "date", nullable: false),
-                    deadline_date = table.Column<DateTime>(type: "date", nullable: false),
+                    race_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    deadline_date = table.Column<DateOnly>(type: "date", nullable: false),
                     calculated = table.Column<bool>(type: "boolean", nullable: false),
                     circuit_id = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -401,7 +401,7 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     header = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     content = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    created_at = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateOnly>(type: "date", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -421,7 +421,7 @@ namespace F1Fantasy.Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    datePredicted = table.Column<DateTime>(type: "date", nullable: false),
+                    date_predicted = table.Column<DateOnly>(type: "date", nullable: false),
                     predict_year = table.Column<int>(type: "integer", nullable: false),
                     rain = table.Column<bool>(type: "boolean", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false),

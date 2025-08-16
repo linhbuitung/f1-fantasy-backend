@@ -181,7 +181,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
 
         #region nationality
 
-        public async Task<List<CountryDto>> GetNationalitiesAsync()
+        public async Task<List<CountryDto>> GetCountriesAsync()
         {
             var result = new List<CountryDto>();
             var filePath = Path.Combine(AppContext.BaseDirectory, "Static", "countries.csv");
@@ -228,7 +228,107 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
 
             return result;
         }
+        
+        #endregion nationality
 
+        #region race
+
+        private class RaceTableDto
+        {
+            public List<RaceApiDto> Races { get; set; }
+        }
+        
+        private class MRRaceDataDto
+        {
+            public RaceTableDto RaceTable { get; set; }
+        }
+        private class RaceApiResponseDto
+        {
+            public MRRaceDataDto MRData { get; set; }
+        }
+        
+        public async Task<List<RaceApiDto>> GetRacesAsync()
+        {
+            int limit = 100;
+            int offset = 0;
+            string queryParams;
+            string apiUrl;
+
+            List<RaceApiDto> tempConstructors = new List<RaceApiDto>();
+
+            bool condition = true;
+            while (condition)
+            {
+                queryParams = $"limit={limit}&offset={offset}";
+                apiUrl = $"https://api.jolpi.ca/ergast/f1/races/?{queryParams}";
+
+                var response = await _httpClient.GetStringAsync(apiUrl);
+                if (string.IsNullOrEmpty(response))
+                {
+                    break;
+                }
+
+                RaceApiResponseDto apiResponse = JsonConvert.DeserializeObject<RaceApiResponseDto>(response);
+                if (apiResponse == null || apiResponse.MRData.RaceTable.Races.Count < 100)
+                {
+                    condition = false;
+                }
+                Console.WriteLine($"offset: {offset} - Races count: {apiResponse.MRData.RaceTable.Races.Count}");
+                tempConstructors.AddRange(apiResponse.MRData.RaceTable.Races);
+
+                offset += limit;
+                await Task.Delay(500);
+            }
+
+            return tempConstructors;
+        }
+
+        #endregion
+
+        #region powerup
+
+        public async Task<List<PowerupDto>> GetPowerupsAsync()
+        {
+            var result = new List<PowerupDto>();
+            var filePath = Path.Combine(AppContext.BaseDirectory, "Static", "powerups.csv");
+
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"powerups.csv not found at {filePath}");
+
+            using var reader = new StreamReader(filePath);
+            string? line;
+            bool isFirstLine = true;
+
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                if (isFirstLine)
+                {
+                    isFirstLine = false; // skip header
+                    continue;
+                }
+
+                // Use a simple CSV parser to handle quoted fields with commas
+                var fields = ParseCsvLine(line);
+                if (fields.Count < 4)
+                    continue;
+
+                var id = Int32.Parse(fields[0].Trim());
+                var type = fields[1].Trim();
+                var description = fields[2].Trim();
+                var imgUrl = fields[3].Trim();
+                
+
+                if (!string.IsNullOrEmpty(type) &&
+                    !string.IsNullOrEmpty(description) &&
+                    !string.IsNullOrEmpty(imgUrl))
+                    result.Add(new PowerupDto(id, type, description, imgUrl));
+            }
+
+            return result;
+        }
+
+        #endregion
+        
         // Simple CSV parser for quoted fields
         private static List<string> ParseCsvLine(string line)
         {
@@ -257,7 +357,5 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
             fields.Add(field.ToString());
             return fields;
         }
-
-        #endregion nationality
     }
 }

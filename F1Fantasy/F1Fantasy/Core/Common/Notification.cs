@@ -17,7 +17,7 @@ namespace F1Fantasy.Core.Common
         public string Content { get; set; }
 
         [Required]
-        public int CreatedAt { get; set; }
+        public DateOnly CreatedAt { get; set; }
 
         [Required]
         public int UserId { get; set; }

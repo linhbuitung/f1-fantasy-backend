@@ -25,9 +25,9 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
             ImgUrl = imgUrl;
         }
 
-        public ConstructorDto(string name, string countryId, string code, string? imgUrl)
+        public ConstructorDto(int? id, string name, string countryId, string code, string? imgUrl)
         {
-            Id = null;
+            Id = id ?? null;
             Name = name;
             CountryId = countryId;
             Code = code;

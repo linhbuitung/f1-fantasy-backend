@@ -34,9 +34,9 @@
     <Folder Include="Downloads\Csv\" />
     <Folder Include="Infrastructure\ExternalServices\Interfaces\" />
     <Folder Include="Infrastructure\Migrations\" />
-    <Folder Include="Modules\AuthModule\Controllers\" />
     <Folder Include="Modules\AuthModule\Services\Implementation\" />
     <Folder Include="Modules\AuthModule\Services\Interfaces\" />
+    <Folder Include="Modules\CoreGameplayModule\" />
   </ItemGroup>
 
 </Project>

@@ -7,6 +7,10 @@ namespace F1FantasyWorker.Infrastructure.Contexts;
 
 public partial class WooF1Context : DbContext
 {
+    public WooF1Context()
+    {
+    }
+
     public WooF1Context(DbContextOptions<WooF1Context> options)
         : base(options)
     {
@@ -47,7 +51,11 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Race> Races { get; set; }
 
     public virtual DbSet<RaceEntry> RaceEntries { get; set; }
-    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=localhost;Database=woof1;Username=postgres;Password=Tunglinh2003.");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>
@@ -534,7 +542,7 @@ public partial class WooF1Context : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
-            entity.Property(e => e.DatePredicted).HasColumnName("datePredicted");
+            entity.Property(e => e.DatePredicted).HasColumnName("date_predicted");
             entity.Property(e => e.PredictYear).HasColumnName("predict_year");
             entity.Property(e => e.Rain).HasColumnName("rain");
             entity.Property(e => e.UserId).HasColumnName("user_id");

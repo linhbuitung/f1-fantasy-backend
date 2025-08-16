@@ -38,17 +38,6 @@ namespace F1Fantasy.Core.Common
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
 
-        public Circuit(string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
-        {
-            CircuitName = circuitName;
-            Code = code;
-            Latitude = latitude;
-            Longtitude = longtitude;
-            Locality = locality;
-            CountryId = countryId;
-            ImgUrl = imgUrl;
-        }
-
         // Navigation properties
         public ICollection<Prediction> Predictions { get; set; }
 

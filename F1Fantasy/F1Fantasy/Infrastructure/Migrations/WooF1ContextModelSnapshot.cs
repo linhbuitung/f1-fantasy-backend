@@ -466,7 +466,7 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("country_id");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date")
                         .HasColumnName("date_of_birth");
 
@@ -668,8 +668,8 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("content");
 
-                    b.Property<int>("CreatedAt")
-                        .HasColumnType("integer")
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Header")
@@ -758,9 +758,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("circuit_id");
 
-                    b.Property<DateTime>("DatePredicted")
+                    b.Property<DateOnly>("DatePredicted")
                         .HasColumnType("date")
-                        .HasColumnName("datePredicted");
+                        .HasColumnName("date_predicted");
 
                     b.Property<int>("PredictYear")
                         .HasColumnType("integer")
@@ -803,11 +803,11 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("circuit_id");
 
-                    b.Property<DateTime>("DeadlineDate")
+                    b.Property<DateOnly>("DeadlineDate")
                         .HasColumnType("date")
                         .HasColumnName("deadline_date");
 
-                    b.Property<DateTime>("RaceDate")
+                    b.Property<DateOnly>("RaceDate")
                         .HasColumnType("date")
                         .HasColumnName("race_date");
 

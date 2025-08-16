@@ -6,7 +6,7 @@ namespace F1Fantasy.Core.Common
     [Table("driver")]
     public class Driver
     {
-        public Driver(string givenName, string familyName, DateTime dateOfBirth, string nationality, string code, string? imgUrl)
+        public Driver(string givenName, string familyName, DateOnly dateOfBirth, string nationality, string code, string? imgUrl)
         {
             GivenName = givenName;
             FamilyName = familyName;
@@ -28,7 +28,7 @@ namespace F1Fantasy.Core.Common
 
         [Required]
         [Column(TypeName = "date")]
-        public DateTime DateOfBirth { get; set; }
+        public DateOnly DateOfBirth { get; set; }
 
         [Required, MaxLength(50)]
         public string Code { get; set; }
@@ -39,7 +39,7 @@ namespace F1Fantasy.Core.Common
         //constructor
         public Driver() { }
 
-        public Driver(string givenName, string familyName, DateTime dateOfBirth, string code, string? imgUrl)
+        public Driver(string givenName, string familyName, DateOnly dateOfBirth, string code, string? imgUrl)
         {
             GivenName = givenName;
             FamilyName = familyName;

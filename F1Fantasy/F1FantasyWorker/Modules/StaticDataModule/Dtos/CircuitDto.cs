@@ -20,22 +20,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
         public string CountryId { get; set; }
 
         public string? ImgUrl { get; set; }
-
-        public CircuitDto(string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
+        
+        public CircuitDto(int? id, string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
         {
-            Id = null;
-            CircuitName = circuitName;
-            Code = code;
-            Latitude = latitude;
-            Longtitude = longtitude;
-            Locality = locality;
-            CountryId = countryId;
-            ImgUrl = imgUrl;
-        }
-
-        public CircuitDto(int id, string circuitName, string code, decimal latitude, decimal longtitude, string locality, string countryId, string? imgUrl)
-        {
-            Id = id;
+            Id = id ?? null;
             CircuitName = circuitName;
             Code = code;
             Latitude = latitude;

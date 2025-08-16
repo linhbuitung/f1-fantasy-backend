@@ -11,7 +11,7 @@ public partial class Notification
 
     public string Content { get; set; } = null!;
 
-    public int CreatedAt { get; set; }
+    public DateOnly CreatedAt { get; set; }
 
     public int UserId { get; set; }
 

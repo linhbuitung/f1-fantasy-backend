@@ -12,7 +12,16 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
         {
-            return new Driver(driverDto.GivenName, driverDto.FamilyName, driverDto.DateOfBirth, driverDto.Code, driverDto.ImgUrl);
+            //return new Driver(driverDto.GivenName, driverDto.FamilyName, driverDto.DateOfBirth, driverDto.Nationality, driverDto.Code, driverDto.ImgUrl);
+            return new Driver
+            {
+                GivenName = driverDto.GivenName,
+                FamilyName = driverDto.FamilyName,
+                DateOfBirth = driverDto.DateOfBirth,
+                CountryId = driverDto.CountryId,
+                Code = driverDto.Code,
+                ImgUrl = driverDto.ImgUrl
+            };
         }
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
@@ -22,7 +31,14 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)
         {
-            return new Constructor(constructorDto.Name, constructorDto.Code, constructorDto.ImgUrl);
+            // return new Constructor(constructorDto.Name, constructorDto.Nationality, constructorDto.Code, constructorDto.ImgUrl);
+            return new Constructor
+            {
+                Name = constructorDto.Name,
+                CountryId = constructorDto.CountryId,
+                Code = constructorDto.Code,
+                ImgUrl = constructorDto.ImgUrl
+            };
         }
 
         public static CircuitDto MapCircuitToDto(Circuit circuit)
@@ -32,24 +48,63 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Circuit MapDtoToCircuit(CircuitDto circuitDto)
         {
-            return new Circuit(circuitDto.CircuitName, circuitDto.Code, circuitDto.Latitude, circuitDto.Longtitude, circuitDto.Locality, circuitDto.CountryId, circuitDto.ImgUrl);
-        }
-
-        public static Country MapDtoToNationality(NationalityDto nationalityDto)
-        {
-            return new Country
+            return new Circuit
             {
-                Id = nationalityDto.NationalityId,
-                Nationalities = nationalityDto.Names
+                CircuitName = circuitDto.CircuitName,
+                Code = circuitDto.Code,
+                Latitude = circuitDto.Latitude,
+                Longtitude = circuitDto.Longtitude,
+                Locality = circuitDto.Locality,
+                CountryId = circuitDto.CountryId,
+                ImgUrl = circuitDto.ImgUrl
             };
         }
 
-        public static NationalityDto MapNationalityToDto(Country nationality)
+        public static CountryDto MapCountryToDto(Country country)
         {
-            return new NationalityDto
+            return new CountryDto(country.Id, country.Nationalities, country.ShortName);
+        }
+
+        public static Country MapDtoToCountry(CountryDto countryDto)
+        {
+            return new Country
             {
-                NationalityId = nationality.Id,
-                Names = nationality.Nationalities
+                Id = countryDto.CountryId,
+                Nationalities = countryDto.Nationalities,
+                ShortName = countryDto.ShortName
+            };
+        }
+
+
+        public static RaceDto MapRaceToDto(Race race)
+        {
+            return new RaceDto(race.Id, race.RaceDate, race.DeadlineDate, race.Calculated, race.CircuitId, null);
+        }
+
+        public static Race MapDtoToRace(RaceDto raceDto)
+        {
+            return new Race()
+            {
+                RaceDate = raceDto.RaceDate,
+                Calculated = raceDto.Calculated,
+                CircuitId = raceDto.CircuitId ?? 0, // Default to 0 if CircuitId is null
+                DeadlineDate = raceDto.DeadlineDate
+            };
+        }
+
+        public static PowerupDto MapPowerupToDto(Powerup powerup)
+        {
+            return new PowerupDto(powerup.Id, powerup.Type, powerup.Description, powerup.ImgUrl);
+        }
+        
+        public static Powerup MapDtoToPowerup(PowerupDto powerupDto)
+        {
+            return new Powerup
+            {
+                Id = powerupDto.Id ?? 0, // Default to 0 if Id is null
+                Type = powerupDto.Type,
+                Description = powerupDto.Description,
+                ImgUrl = powerupDto.ImgUrl
             };
         }
     }

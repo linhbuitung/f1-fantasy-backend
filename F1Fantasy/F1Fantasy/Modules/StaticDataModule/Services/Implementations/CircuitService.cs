@@ -29,7 +29,15 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
                 {
                     return null;
                 }
-
+                
+                // Circuit API returns country name, so we need check for short name.
+                Country country = await _staticDataRepository.GetCountryByShortNameAsync(circuitDto.CountryId);
+                if (country == null)
+                {
+                    throw new Exception($"Country with name {circuitDto.CountryId} not found");
+                }
+                circuitDto.CountryId = country.Id;
+                
                 Circuit circuit = StaticDataDtoMapper.MapDtoToCircuit(circuitDto);
 
                 Circuit newDircuit = await _staticDataRepository.AddCircuitAsync(circuit);
@@ -39,7 +47,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 
                 await transaction.CommitAsync();
 
-                return StaticDataDtoMapper.MapCircuitToDto(circuit);
+                return StaticDataDtoMapper.MapCircuitToDto(newDircuit);
             }
             catch (Exception ex)
             {
@@ -56,6 +64,27 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             {
                 await AddCircuitAsync(circuit);
             }
+        }
+
+        //get
+        public async Task<CircuitDto> GetCircuitByIdAsync(int id)
+        {
+            Circuit circuit = await _staticDataRepository.GetCircuitByIdAsync(id);
+            if (circuit == null)
+            {
+                return null;
+            }
+            return StaticDataDtoMapper.MapCircuitToDto(circuit);
+        }
+
+        public async Task<CircuitDto> GetCircuitByCodeAsync(string code)
+        {
+            Circuit circuit = await _staticDataRepository.GetCircuitByCodeAsync(code);
+            if (circuit == null)
+            {
+                return null;
+            }
+            return StaticDataDtoMapper.MapCircuitToDto(circuit);
         }
     }
 }

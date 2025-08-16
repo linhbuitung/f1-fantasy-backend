@@ -36,9 +36,9 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
             ImgUrl = imgUrl;
         }
 
-        public DriverDto(string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, string? imgUrl)
+        public DriverDto(int? id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, string? imgUrl)
         {
-            Id = null;
+            Id = id ?? null;
             GivenName = givenName;
             FamilyName = familyName;
             DateOfBirth = dateOfBirth;
