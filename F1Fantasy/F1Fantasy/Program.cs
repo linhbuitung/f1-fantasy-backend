@@ -4,19 +4,19 @@ using F1Fantasy.Modules.StaticDataModule.Repositories.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
-using F1Fantasy.Infrastructure.Extensions;
-using Microsoft.AspNetCore.Builder;
 using F1Fantasy.Core.Common;
 using Microsoft.AspNetCore.Identity;
-using System;
 using F1Fantasy.Core.Configurations;
 using F1Fantasy.Modules.AuthModule.Extensions;
 using F1Fantasy.Core.Auth;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using F1Fantasy.Core.Policies;
 using F1Fantasy.Infrastructure.ExternalServices.Implementations;
 using F1Fantasy.Infrastructure.Settings;
-using Microsoft.AspNetCore.Authorization;
+using F1Fantasy.Modules.AuthModule.ApiMapper;
+using F1Fantasy.Modules.UserModule.Repositories.Implementations;
+using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
+using F1Fantasy.Modules.UserModule.Services.Implementations;
+using F1Fantasy.Modules.UserModule.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AuthConfiguration>(
@@ -44,6 +44,12 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = ".F1Fantasy.Identity";
+
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
@@ -52,7 +58,7 @@ builder.Services.AddDbContext<WooF1Context>(options =>
 #region Auth
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddRoles<ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(Policies.AddCustomPolicies);
 
 builder.Services.AddAuthentication()
     .AddBearerToken(IdentityConstants.BearerScheme);
@@ -97,20 +103,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-//block access to /register endpoint
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path.Equals("/register", StringComparison.OrdinalIgnoreCase) &&
-        context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
-    {
-        context.Response.StatusCode = 404;
-        await context.Response.WriteAsync("Not Found");
-        return;
-    }
-    await next();
-});
+app.MapIdentityApi();
 
-app.MapIdentityApi<ApplicationUser>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -127,8 +121,15 @@ public static class ServiceExtensions
         services.AddScoped<IDriverService, DriverService>();
         services.AddScoped<IConstructorService, ConstructorService>();
         services.AddScoped<ICircuitService, CircuitService>();
+        services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<IRaceService, RaceService>();
+        services.AddScoped<IPowerupService, PowerupService> ();
+
         services.AddScoped<IStaticDataRepository, StaticDataRepository>();
-        services.AddScoped<INationalityService, NationalityService>();
+        
+        services.AddScoped<IUserService, UserService> ();
+        
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
 

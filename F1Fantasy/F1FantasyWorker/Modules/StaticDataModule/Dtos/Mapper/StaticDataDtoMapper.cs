@@ -78,7 +78,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 
         public static RaceDto MapRaceToDto(Race race)
         {
-            return new RaceDto(race.RaceDate, race.DeadlineDate, race.Calculated, race.CircuitId, null);
+            return new RaceDto(race.Id, race.RaceDate, race.DeadlineDate, race.Calculated, race.CircuitId, null);
         }
 
         public static Race MapDtoToRace(RaceDto raceDto)
@@ -89,6 +89,22 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 Calculated = raceDto.Calculated,
                 CircuitId = raceDto.CircuitId ?? 0, // Default to 0 if CircuitId is null
                 DeadlineDate = raceDto.DeadlineDate
+            };
+        }
+
+        public static PowerupDto MapPowerupToDto(Powerup powerup)
+        {
+            return new PowerupDto(powerup.Id, powerup.Type, powerup.Description, powerup.ImgUrl);
+        }
+        
+        public static Powerup MapDtoToPowerup(PowerupDto powerupDto)
+        {
+            return new Powerup
+            {
+                Id = powerupDto.Id ?? 0, // Default to 0 if Id is null
+                Type = powerupDto.Type,
+                Description = powerupDto.Description,
+                ImgUrl = powerupDto.ImgUrl
             };
         }
     }

@@ -18,15 +18,7 @@ namespace F1Fantasy.Core.Common
 
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
-
-        // constructor
-        public Constructor(string name, string code, string? imgUrl)
-        {
-            Name = name;
-            Code = code;
-            ImgUrl = imgUrl;
-        }
-
+        
         // Navigation properties
         [Required]
         public string CountryId { get; set; }

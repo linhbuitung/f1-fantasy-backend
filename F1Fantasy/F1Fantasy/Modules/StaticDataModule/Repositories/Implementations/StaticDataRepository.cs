@@ -25,12 +25,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Driver> GetDriverByIdAsync(int id)
         {
-            return await _context.Drivers.Include(d => d.Country).FirstOrDefaultAsync(d => d.Id == id);
+            return await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<Driver> GetDriverByCodeAsync(string code)
         {
-            return await _context.Drivers.Include(d => d.Country).FirstOrDefaultAsync(d => d.Code.Equals(code));
+            return await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
@@ -42,12 +42,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Constructor> GetConstructorByIdAsync(int id)
         {
-            return await _context.Constructors.Include(d => d.Country).FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Constructor> GetConstructorByCodeAsync(string code)
         {
-            return await _context.Constructors.Include(d => d.Country).FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await _context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
@@ -60,29 +60,72 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Circuit> GetCircuitByIdAsync(int id)
         {
-            return await _context.Circuits.FirstOrDefaultAsync(c => c.Id == id);
+            return await _context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Circuit> GetCircuitByCodeAsync(string code)
         {
-            return await _context.Circuits.FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await _context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
-        public async Task<Country> AddNationalityAsync(Country nationality)
+        public async Task<Country> AddCountryAsync(Country country)
         {
-            _context.Nationalities.Add(nationality);
+            _context.Countries.Add(country);
+
             await _context.SaveChangesAsync();
-            return nationality;
+            return country;
         }
 
-        public async Task<Country> GetNationalityByIdAsync(string NationalityId)
+        // Country has string Id, so we use Equal method
+        public async Task<Country> GetCountryByIdAsync(string id)
         {
-            return await _context.Nationalities.FirstOrDefaultAsync(n => n.Id.Equals(NationalityId));
+            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Country>> GetAllNationalitiesAsync()
+        public async Task<Country> GetCountryByNationalitityAsync(string nationality)
         {
-            return await _context.Nationalities.ToListAsync();
+            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Nationalities.Contains(nationality));
+        }
+
+        public async Task<Country> GetCountryByShortNameAsync(string shortName)
+        {
+            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.ShortName.Equals(shortName));
+        }
+
+        public async Task<Race> AddRaceAsync(Race race)
+        {
+            _context.Races.Add(race);
+
+            await _context.SaveChangesAsync();
+            return race;
+        }
+
+        public async Task<Race> GetRaceByIdAsync(int id)
+        {
+            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
+        }
+
+        public async Task<Race> GetRaceByRaceDateAsync(DateOnly date)
+        {
+            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
+        }
+
+        public async Task<Powerup> AddPowerupAsync(Powerup powerup)
+        {
+            _context.Powerups.Add(powerup);
+            
+            await _context.SaveChangesAsync();
+            return powerup;
+        }
+        
+        public async Task<Powerup> GetPowerupByIdAsync(int id)
+        {
+            return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+        }
+        
+        public async Task<Powerup> GetPowerupByTypeAsync(string type)
+        {
+            return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Type.Equals(type));
         }
     }
 }

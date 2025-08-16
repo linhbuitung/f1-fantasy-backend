@@ -31,6 +31,16 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
                 {
                     return null;
                 }
+                
+                driverDto = FixSpecialCountryCase(driverDto);
+                
+                // Driver API returns nationality, so we need check for nationality.
+                Country country = await _staticDataRepository.GetCountryByNationalitityAsync(driverDto.CountryId);
+                if (country == null)
+                {
+                    throw new Exception($"Country with nationality {driverDto.CountryId} not found");
+                }
+                driverDto.CountryId = country.Id;
 
                 Driver driver = StaticDataDtoMapper.MapDtoToDriver(driverDto);
 
@@ -59,6 +69,41 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
                 Console.WriteLine($"Adding driver: {driver.FamilyName} with code: {driver.Code}");
                 await AddDriverAsync(driver);
             }
+        }
+
+        public async Task<DriverDto> GetDriverByIdAsync(int id)
+        {
+            Driver driver = await _staticDataRepository.GetDriverByIdAsync(id);
+            if (driver == null)
+            {
+                return null;
+            }
+            return StaticDataDtoMapper.MapDriverToDto(driver);
+        }
+
+        public async Task<DriverDto> GetDriverByCodeAsync(string code)
+        {
+            Driver driver = await _staticDataRepository.GetDriverByCodeAsync(code);
+            if (driver == null)
+            {
+                return null;
+            }
+            return StaticDataDtoMapper.MapDriverToDto(driver);
+        }
+
+        private DriverDto FixSpecialCountryCase(DriverDto driverDto)
+        {
+            if (driverDto.CountryId.Equals("East German"))
+            {
+                driverDto.CountryId = "German";
+            }
+            else if (driverDto.CountryId.Equals("Rhodesian"))
+            {
+                driverDto.CountryId = "Zimbabwean";
+            }
+            
+
+            return driverDto;
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using F1Fantasy.Core.Common;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace F1Fantasy.Modules.StaticDataModule.Dtos
+﻿namespace F1Fantasy.Modules.StaticDataModule.Dtos
 {
     public class ConstructorDto
     {
@@ -25,9 +21,9 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
             ImgUrl = imgUrl;
         }
 
-        public ConstructorDto(string name, string countryId, string code, string? imgUrl)
+        public ConstructorDto(int? id, string name, string countryId, string code, string? imgUrl)
         {
-            Id = null;
+            Id = id ?? null;
             Name = name;
             CountryId = countryId;
             Code = code;

@@ -4,6 +4,7 @@ using F1FantasyWorker.Infrastructure.Contexts;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
+using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
 {
@@ -76,6 +77,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return country;
         }
 
+        // Country has string Id, so we use Equal method
         public async Task<Country> GetCountryByIdAsync(string id)
         {
             return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
@@ -101,12 +103,30 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Race> GetRaceByIdAsync(int id)
         {
-            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
+            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
         }
 
         public async Task<Race> GetRaceByRaceDateAsync(DateOnly date)
         {
             return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
+        }
+
+        public async Task<Powerup> AddPowerupAsync(Powerup powerup)
+        {
+            _context.Powerups.Add(powerup);
+            
+            await _context.SaveChangesAsync();
+            return powerup;
+        }
+        
+        public async Task<Powerup> GetPowerupByIdAsync(int id)
+        {
+            return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+        }
+        
+        public async Task<Powerup> GetPowerupByTypeAsync(string type)
+        {
+            return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Type.Equals(type));
         }
     }
 }

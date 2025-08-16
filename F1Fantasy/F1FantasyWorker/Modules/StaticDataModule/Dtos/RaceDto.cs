@@ -23,9 +23,9 @@ public class RaceDto
     
     public string? CircuitCode { get; set; }
 
-    public RaceDto(DateOnly raceDate, DateOnly deadlineDate, bool calculated, int? circuitId, string? circuitCode)
+    public RaceDto(int? id, DateOnly raceDate, DateOnly deadlineDate, bool calculated, int? circuitId, string? circuitCode)
     {
-        Id = null;
+        Id = id ?? null;
         RaceDate = raceDate;
         DeadlineDate = deadlineDate;
         Calculated = calculated;

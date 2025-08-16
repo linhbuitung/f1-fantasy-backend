@@ -32,6 +32,8 @@ namespace F1Fantasy.Infrastructure.Contexts
 
         public virtual DbSet<Circuit> Circuits { get; set; }
         public virtual DbSet<Constructor> Constructors { get; set; }
+        
+        public virtual DbSet<Country> Countries { get; set; }
         public virtual DbSet<Driver> Drivers { get; set; }
 
         public virtual DbSet<DriverPrediction> DriverPredictions { get; set; }
@@ -44,9 +46,10 @@ namespace F1Fantasy.Infrastructure.Contexts
 
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Powerup> Powerups { get; set; }
+        
         public virtual DbSet<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
+        
         public virtual DbSet<Prediction> Predictions { get; set; }
-
         public virtual DbSet<Race> Races { get; set; }
 
         public virtual DbSet<RaceEntry> RaceEntries { get; set; }
@@ -54,9 +57,7 @@ namespace F1Fantasy.Infrastructure.Contexts
         public virtual DbSet<ApplicationUser> UserProfiles { get; set; }
 
         public virtual DbSet<UserLeague> UserLeagues { get; set; }
-
-        public virtual DbSet<Country> Nationalities { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -32,6 +32,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             var _circuitService = scope.ServiceProvider.GetRequiredService<ICircuitService>();
             var _nationalityService = scope.ServiceProvider.GetRequiredService<ICountryService>();
             var _raceService = scope.ServiceProvider.GetRequiredService<IRaceService>();
+            var _powerupService = scope.ServiceProvider.GetRequiredService<IPowerupService>();
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -41,9 +42,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
                     _logger.LogInformation("Starting F1 data synchronization...");
                 }
+                
+                // Sync powerups
+                List<PowerupDto> newPowerups = await _f1DataSyncService.GetPowerupsAsync();
+                foreach (var powerupDto in newPowerups)
+                {
+                    await _powerupService.AddPowerupAsync(powerupDto);
+                }
+                Console.WriteLine("Database synced with new powerups.");
+                
                 // Sync countries
-                List<CountryDto> newNationalityDtos = await _f1DataSyncService.GetNationalitiesAsync();
-                foreach (var countryDto in newNationalityDtos)
+                List<CountryDto> newCountryDtos = await _f1DataSyncService.GetCountriesAsync();
+                foreach (var countryDto in newCountryDtos)
                 {
                     await _nationalityService.AddCountryAsync(countryDto);
                 }
@@ -54,7 +64,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<DriverDto> newDriverDtos = new List<DriverDto>();
                 foreach (var tempDriver in newTempDrivers)
                 {
-                    newDriverDtos.Add(new DriverDto(tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, null));
+                    newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, null));
                 }
 
                 foreach (var driverDto in newDriverDtos)
@@ -70,7 +80,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
                 foreach (var tempConstructor in newTempConstructors)
                 {
-                    newConstructorDtos.Add(new ConstructorDto(tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, null));
+                    newConstructorDtos.Add(new ConstructorDto(id: null,tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, null));
                 }
 
                 foreach (var constructorDto in newConstructorDtos)
@@ -85,7 +95,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<CircuitDto> newCircuitDtos = new List<CircuitDto>();
                 foreach (var tempCircuit in newTempCircuits)
                 {
-                    newCircuitDtos.Add(new CircuitDto(tempCircuit.CircuitName, tempCircuit.CircuitId, tempCircuit.Location.Lat, tempCircuit.Location.Long, tempCircuit.Location.Locality, tempCircuit.Location.Country, null));
+                    newCircuitDtos.Add(new CircuitDto(id: null, tempCircuit.CircuitName, tempCircuit.CircuitId, tempCircuit.Location.Lat, tempCircuit.Location.Long, tempCircuit.Location.Locality, tempCircuit.Location.Country, null));
                 }//(int circuitName, string code, decimal lattitude, decimal longttitude, string locality, string nationality, string? imgUrl)
 
                 foreach (var circuitDto in newCircuitDtos)
@@ -100,7 +110,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<RaceDto> newRaceDtos = new List<RaceDto>();
                 foreach (var tempRace in newTempRaces)
                 {
-                    newRaceDtos.Add(new RaceDto(tempRace.Date, tempRace.Date.AddDays(-2), false, circuitId: null, tempRace.Circuit.CircuitId));
+                    newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Date.AddDays(-2), false, circuitId: null, tempRace.Circuit.CircuitId));
                 }
 
                 foreach (var raceDto in newRaceDtos)
@@ -109,6 +119,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 }
 
                 Console.WriteLine("Database synced with new races.");
+                
                 //wait 2 days
                 await Task.Delay(TimeSpan.FromDays(2), stoppingToken);
             }

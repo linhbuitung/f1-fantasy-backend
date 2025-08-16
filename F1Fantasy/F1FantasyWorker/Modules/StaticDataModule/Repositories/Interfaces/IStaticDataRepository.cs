@@ -37,7 +37,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
 
         Task<Race> GetRaceByRaceDateAsync(DateOnly date);
 
-        
+        Task<Powerup> AddPowerupAsync(Powerup powerup);
+
+        Task<Powerup> GetPowerupByIdAsync(int id);
+
+        Task<Powerup> GetPowerupByTypeAsync(string type);
+
 
         //void UpdateDriver(DriverDto driver);
         // void DeleteDriver(int id);
