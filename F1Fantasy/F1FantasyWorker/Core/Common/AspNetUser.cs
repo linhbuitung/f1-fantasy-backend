@@ -15,10 +15,6 @@ public partial class AspNetUser
 
     public int? LoginStreak { get; set; }
 
-    public string? RefreshToken { get; set; }
-
-    public DateTime RefreshTokenExpiryTime { get; set; }
-
     public DateTime? LastLogin { get; set; }
 
     public int? ConstructorId { get; set; }

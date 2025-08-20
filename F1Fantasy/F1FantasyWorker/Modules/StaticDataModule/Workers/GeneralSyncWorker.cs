@@ -27,6 +27,8 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
         {
             using var scope = _scopeFactory.CreateScope();
             var _f1DataSyncService = scope.ServiceProvider.GetRequiredService<IF1DataSyncService>();
+            
+            var _seasonService = scope.ServiceProvider.GetRequiredService<ISeasonService>();
             var _driverService = scope.ServiceProvider.GetRequiredService<IDriverService>();
             var _constructorService = scope.ServiceProvider.GetRequiredService<IConstructorService>();
             var _circuitService = scope.ServiceProvider.GetRequiredService<ICircuitService>();
@@ -90,6 +92,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
                 Console.WriteLine("Database synced with new constructors.");
 
+                // Sync circuits
                 List<CircuitApiDto> newTempCircuits = await _f1DataSyncService.GetCircuitsAsync();
 
                 List<CircuitDto> newCircuitDtos = new List<CircuitDto>();
@@ -105,12 +108,28 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
                 Console.WriteLine("Database synced with new circuits.");
                 
+                // Sync seasons
+                List<SeasonApiDto> newTempSeasons = await _f1DataSyncService.GetSeasonsAsync();
+                
+                List<SeasonDto> newSeasonDtos = new List<SeasonDto>();
+                foreach (var tempSeason in newTempSeasons)
+                {
+                    newSeasonDtos.Add(new SeasonDto(id: null, tempSeason.Season, isActive:false));
+                }
+                
+                foreach (var seasonDto in newSeasonDtos)
+                {
+                    await _seasonService.AddSeasonAsync(seasonDto);
+                }
+                
+                Console.WriteLine("Database synced with new seasons.");
+                
                 // Sync races
                 List<RaceApiDto> newTempRaces = await _f1DataSyncService.GetRacesAsync();
                 List<RaceDto> newRaceDtos = new List<RaceDto>();
                 foreach (var tempRace in newTempRaces)
                 {
-                    newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Date.AddDays(-2), false, circuitId: null, tempRace.Circuit.CircuitId));
+                    newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
                 }
 
                 foreach (var raceDto in newRaceDtos)
@@ -121,6 +140,8 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 Console.WriteLine("Database synced with new races.");
                 
                 //wait 2 days
+                _logger.LogInformation("GeneralSyncWorker completed at: {time}", DateTimeOffset.Now);
+                _logger.LogInformation("Next synchronization will occur at: {time}", DateTimeOffset.Now.AddDays(2));
                 await Task.Delay(TimeSpan.FromDays(2), stoppingToken);
             }
         }

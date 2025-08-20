@@ -33,6 +33,7 @@ public static class ServiceExtensions
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IRaceService, RaceService>();
         services.AddScoped<IPowerupService, PowerupService> ();
+        services.AddScoped<ISeasonService, SeasonService>();
         
         services.AddScoped<IStaticDataRepository, StaticDataRepository>();
 

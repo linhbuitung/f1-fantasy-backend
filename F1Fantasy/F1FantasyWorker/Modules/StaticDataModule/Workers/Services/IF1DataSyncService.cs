@@ -10,6 +10,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services
 {
     public interface IF1DataSyncService
     {
+        Task<List<SeasonApiDto>> GetSeasonsAsync();
         Task<List<DriverApiDto>> GetDriversAsync();
 
         Task<List<ConstructorApiDto>> GetConstructorsAsync();

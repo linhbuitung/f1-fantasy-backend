@@ -37,6 +37,14 @@ public class RaceService : IRaceService
                 throw new Exception($"Circuit with code {raceDto.CircuitCode} not found");
             }
             raceDto.CircuitId = circuit.Id;
+            
+            // Race API returns season, so we need check for season.
+            Season season = await _staticDataRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
+            if (season == null)
+            {
+                throw new Exception($"Season with year {raceDto.RaceDate.Year} not found");
+            }
+            raceDto.SeasonId = season.Id;
 
             Race race = StaticDataDtoMapper.MapDtoToRace(raceDto);
 

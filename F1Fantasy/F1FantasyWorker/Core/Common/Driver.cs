@@ -25,7 +25,9 @@ public partial class Driver
 
     public virtual ICollection<DriverPrediction> DriverPredictions { get; set; } = new List<DriverPrediction>();
 
-    public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
+    public virtual ICollection<FantasyLineupDriver> FantasyLineupDriverDriverId1Navigations { get; set; } = new List<FantasyLineupDriver>();
 
-    public virtual ICollection<FantasyLineup> FantasyLineups { get; set; } = new List<FantasyLineup>();
+    public virtual ICollection<FantasyLineupDriver> FantasyLineupDriverDrivers { get; set; } = new List<FantasyLineupDriver>();
+
+    public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
 }

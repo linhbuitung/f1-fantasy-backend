@@ -1,3 +1,4 @@
+using F1Fantasy.Core;
 using Microsoft.EntityFrameworkCore;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Implementations;
@@ -9,9 +10,14 @@ using Microsoft.AspNetCore.Identity;
 using F1Fantasy.Core.Configurations;
 using F1Fantasy.Modules.AuthModule.Extensions;
 using F1Fantasy.Core.Auth;
+using F1Fantasy.Core.Middlewares;
 using F1Fantasy.Core.Policies;
 using F1Fantasy.Infrastructure.ExternalServices.Implementations;
 using F1Fantasy.Infrastructure.Settings;
+using F1Fantasy.Modules.AdminModule.Repositories.Implementations;
+using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
+using F1Fantasy.Modules.AdminModule.Services.Implementations;
+using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.AuthModule.ApiMapper;
 using F1Fantasy.Modules.UserModule.Repositories.Implementations;
 using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
@@ -103,6 +109,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 app.MapIdentityApi();
 
 app.UseHttpsRedirection();
@@ -124,12 +132,14 @@ public static class ServiceExtensions
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IRaceService, RaceService>();
         services.AddScoped<IPowerupService, PowerupService> ();
-
+        services.AddScoped<ISeasonService, SeasonService>();
         services.AddScoped<IStaticDataRepository, StaticDataRepository>();
         
         services.AddScoped<IUserService, UserService> ();
-        
         services.AddScoped<IUserRepository, UserRepository>();
+        
+        services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IAdminRepository, AdminRepository>();
 
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
 

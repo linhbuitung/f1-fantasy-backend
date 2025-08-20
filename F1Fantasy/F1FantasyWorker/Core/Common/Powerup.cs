@@ -13,5 +13,7 @@ public partial class Powerup
 
     public string ImgUrl { get; set; } = null!;
 
-    public virtual ICollection<FantasyLineup> FantasyLineups { get; set; } = new List<FantasyLineup>();
+    public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineupPowerupId1Navigations { get; set; } = new List<PowerupFantasyLineup>();
+
+    public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineupPowerups { get; set; } = new List<PowerupFantasyLineup>();
 }

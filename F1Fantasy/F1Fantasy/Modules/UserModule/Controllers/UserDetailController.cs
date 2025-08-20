@@ -31,6 +31,7 @@ public class UserDetailController : ControllerBase
     }
 
     [HttpPut("{userId}/update")]
+    [Authorize]
     public async Task<IActionResult> UpdateUser(int userId, [FromBody] ApplicationUserUpdateDto userUpdateDto)
     {
         var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanAccessOwnResource);

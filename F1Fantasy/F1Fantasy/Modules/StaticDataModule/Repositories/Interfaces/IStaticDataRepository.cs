@@ -43,7 +43,11 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
 
         Task<Powerup> GetPowerupByTypeAsync(string type);
 
+        Task<Season> AddSeasonAsync(Season season);
 
+        Task<Season> GetSeasonByIdAsync(int id);
+
+        Task<Season> GetSeasonByYearAsync(int year);
         //void UpdateDriver(DriverDto driver);
         // void DeleteDriver(int id);
     }
