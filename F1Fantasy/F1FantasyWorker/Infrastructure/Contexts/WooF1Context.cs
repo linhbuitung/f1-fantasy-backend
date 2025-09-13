@@ -60,7 +60,7 @@ public partial class WooF1Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=woof1;Username=postgres;Password=Tunglinh2003.");
+        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -545,6 +545,8 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("powerup_fantasy_lineup");
 
+            entity.HasIndex(e => e.DriverId, "ix_powerup_fantasy_lineup_driver_id");
+
             entity.HasIndex(e => e.FantasyLineupId1, "ix_powerup_fantasy_lineup_fantasy_lineup_id1");
 
             entity.HasIndex(e => e.PowerupId, "ix_powerup_fantasy_lineup_powerup_id");
@@ -553,12 +555,18 @@ public partial class WooF1Context : DbContext
 
             entity.Property(e => e.FantasyLineupId).HasColumnName("fantasy_lineup_id");
             entity.Property(e => e.PowerupId).HasColumnName("powerup_id");
+            entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.FantasyLineupId1)
                 .HasDefaultValue(0)
                 .HasColumnName("fantasy_lineup_id1");
             entity.Property(e => e.PowerupId1)
                 .HasDefaultValue(0)
                 .HasColumnName("powerup_id1");
+
+            entity.HasOne(d => d.Driver).WithMany(p => p.PowerupFantasyLineups)
+                .HasForeignKey(d => d.DriverId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_powerup_fantasy_lineup_driver_driver_id");
 
             entity.HasOne(d => d.FantasyLineup).WithMany(p => p.PowerupFantasyLineupFantasyLineups)
                 .HasForeignKey(d => d.FantasyLineupId)
@@ -620,6 +628,9 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DeadlineDate).HasColumnName("deadline_date");
             entity.Property(e => e.RaceDate).HasColumnName("race_date");
+            entity.Property(e => e.Round)
+                .HasDefaultValue(0)
+                .HasColumnName("round");
             entity.Property(e => e.SeasonId)
                 .HasDefaultValue(0)
                 .HasColumnName("season_id");
@@ -641,17 +652,30 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("race_entry");
 
+            entity.HasIndex(e => e.ConstructorId, "ix_race_entry_constructor_id");
+
             entity.HasIndex(e => e.DriverId, "ix_race_entry_driver_id");
 
             entity.HasIndex(e => e.RaceId, "ix_race_entry_race_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ConstructorId)
+                .HasDefaultValue(0)
+                .HasColumnName("constructor_id");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.FastestLap).HasColumnName("fastest_lap");
+            entity.Property(e => e.Finished)
+                .HasDefaultValue(false)
+                .HasColumnName("finished");
             entity.Property(e => e.Grid).HasColumnName("grid");
             entity.Property(e => e.PointsGained).HasColumnName("points_gained");
             entity.Property(e => e.Position).HasColumnName("position");
             entity.Property(e => e.RaceId).HasColumnName("race_id");
+
+            entity.HasOne(d => d.Constructor).WithMany(p => p.RaceEntries)
+                .HasForeignKey(d => d.ConstructorId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_race_entry_constructor_constructor_id");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.RaceEntries)
                 .HasForeignKey(d => d.DriverId)

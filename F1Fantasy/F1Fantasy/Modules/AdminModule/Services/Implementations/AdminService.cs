@@ -36,12 +36,12 @@ public class AdminService : IAdminService
         return returnDto;
     }
 
-    public async Task<SeasonDto> GetActiveSeasonAsync()
+    public async Task<SeasonDto?> GetActiveSeasonAsync()
     {
-        Season currentlyActiveSeason = await _adminRepository.GetActiveSeasonAsync();
+        Season? currentlyActiveSeason = await _adminRepository.GetActiveSeasonAsync();
         if (currentlyActiveSeason == null)
         {
-            throw new InvalidOperationException("There is no active season.");
+            return null;
         }
         SeasonDto returnDto = AdminDtoMapper.MapSeasonToDto(currentlyActiveSeason);
         return returnDto;

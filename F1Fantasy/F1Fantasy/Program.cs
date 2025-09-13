@@ -53,7 +53,6 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = ".F1Fantasy.Identity";
-
 });
 
 builder.Services.AddControllers();

@@ -66,7 +66,7 @@ public class AdminController : ControllerBase
     [HttpGet("season/active")]
     public async Task<IActionResult> GetActiveSeasonAsync()
     {
-        SeasonDto seasonDto = await _adminService.GetActiveSeasonAsync();
+        SeasonDto? seasonDto = await _adminService.GetActiveSeasonAsync();
         if (seasonDto == null)
         {
             return NotFound($"There is no active season currently");

@@ -1,5 +1,6 @@
 ﻿using F1FantasyWorker.Core.Common;
 using F1FantasyWorker.Infrastructure.Contexts;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
@@ -85,6 +86,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 return null;
             }
             return StaticDataDtoMapper.MapCircuitToDto(circuit);
+        }
+
+        public async Task<int> GetCircuitsCountAsync()
+        {
+            return await _staticDataRepository.GetCircuitsCountAsync();
         }
     }
 }

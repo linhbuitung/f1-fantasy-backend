@@ -1,4 +1,6 @@
-﻿namespace F1Fantasy.Core.Middlewares;
+﻿using F1Fantasy.Exceptions;
+
+namespace F1Fantasy.Core.Middlewares;
 
 public class ErrorHandlingMiddleware
 {
@@ -16,6 +18,18 @@ public class ErrorHandlingMiddleware
         try
         {
             await _next(context);
+        }
+        catch (NotFoundException ex)
+        {
+            _logger.LogError(ex, "Not found exception");
+            context.Response.StatusCode = 400;
+            context.Response.ContentType = "application/json";
+            var errorResponse = new
+            {
+                error = "An not found error occurred.",
+                message = ex.Message,
+            };
+            await context.Response.WriteAsJsonAsync(errorResponse);
         }
         catch (Exception ex)
         {

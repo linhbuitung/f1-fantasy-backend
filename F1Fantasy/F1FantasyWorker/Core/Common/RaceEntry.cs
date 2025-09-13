@@ -19,6 +19,12 @@ public partial class RaceEntry
 
     public int RaceId { get; set; }
 
+    public int ConstructorId { get; set; }
+
+    public bool Finished { get; set; }
+
+    public virtual Constructor Constructor { get; set; } = null!;
+
     public virtual Driver Driver { get; set; } = null!;
 
     public virtual Race Race { get; set; } = null!;

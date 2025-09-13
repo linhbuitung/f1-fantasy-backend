@@ -30,7 +30,7 @@ public class AdminRepository : IAdminRepository
         return season;
     }
     
-    public async Task<Season> GetActiveSeasonAsync()
+    public async Task<Season?> GetActiveSeasonAsync()
     {
         return await _context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.IsActive);
     }

@@ -1,5 +1,6 @@
 ﻿using F1FantasyWorker.Core.Common;
 using F1FantasyWorker.Infrastructure.Contexts;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
@@ -92,6 +93,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             }
             
             return constructorDto;
+        }
+
+        public async Task<int> GetConstructorsCountAsync()
+        {
+            return await _staticDataRepository.GetConstructorsCountAsync();
         }
     }
 }

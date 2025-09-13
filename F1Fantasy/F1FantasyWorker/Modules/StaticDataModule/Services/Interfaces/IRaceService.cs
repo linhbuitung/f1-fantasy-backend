@@ -11,4 +11,6 @@ public interface IRaceService
     Task<RaceDto> GetRaceByIdAsync(int id);
 
     Task<RaceDto> GetRaceByRaceDateAsync(DateOnly date);
+
+    Task<int> GetRacesCountAsync();
 }

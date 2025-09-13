@@ -12,10 +12,14 @@ namespace F1Fantasy.Core.Common
         [Key, Column(Order = 2)]
         public int PowerupId { get; set; }
 
-        [ForeignKey(nameof(FantasyLineupId))]
+        public int? DriverId { get; set; }
+
         public virtual FantasyLineup FantasyLineup { get; set; }
 
-        [ForeignKey(nameof(PowerupId))]
         public virtual Powerup Powerup { get; set; }
+        
+        [ForeignKey(nameof(DriverId))]
+
+        public virtual Driver? Driver { get; set; }
     }
 }

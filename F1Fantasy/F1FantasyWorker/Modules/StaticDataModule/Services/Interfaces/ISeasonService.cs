@@ -11,4 +11,6 @@ public interface ISeasonService
     Task<SeasonDto> GetSeasonByIdAsync(int id);
 
     Task<SeasonDto> GetSeasonByYearAsync(int year);
+
+    Task<int> GetSeasonsCountAsync();
 }

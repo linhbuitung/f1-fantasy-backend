@@ -1,5 +1,6 @@
 ﻿using F1FantasyWorker.Core.Common;
 using F1FantasyWorker.Infrastructure.Contexts;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
@@ -94,4 +95,10 @@ public class RaceService : IRaceService
         }
         return StaticDataDtoMapper.MapRaceToDto(race);
     }
+
+    public async Task<int> GetRacesCountAsync()
+    {
+        return await _staticDataRepository.GetRacesCountAsync();
+    }
+
 }

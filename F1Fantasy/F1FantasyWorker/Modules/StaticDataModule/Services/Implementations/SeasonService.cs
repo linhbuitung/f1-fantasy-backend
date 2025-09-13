@@ -1,5 +1,6 @@
 ﻿using F1FantasyWorker.Core.Common;
 using F1FantasyWorker.Infrastructure.Contexts;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
@@ -77,5 +78,10 @@ public class SeasonService : ISeasonService
             return null;
         }
         return StaticDataDtoMapper.MapSeasonToDto(season);
+    }
+    
+    public async Task<int> GetSeasonsCountAsync()
+    {
+        return await _staticDataRepository.GetSeasonsCountAsync();
     }
 }

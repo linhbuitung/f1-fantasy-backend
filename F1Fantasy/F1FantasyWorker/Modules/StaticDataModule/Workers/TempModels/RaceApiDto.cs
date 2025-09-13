@@ -14,6 +14,7 @@ public class RaceApiDto
     
     public DateOnly Date  { get; set; }
 
+    public List<RaceEntryApiDto>? Results { get; set; } 
     public RaceApiDto(int season, int round, string url, string raceName, CircuitApiDto circuit, DateOnly date)
     {
         Season = season;

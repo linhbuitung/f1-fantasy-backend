@@ -9,7 +9,7 @@ namespace F1Fantasy.Core.Common
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
+        
         [Required]
         [Column(TypeName = "date")]
         public DateOnly RaceDate { get; set; }
@@ -18,6 +18,9 @@ namespace F1Fantasy.Core.Common
         [Column(TypeName = "date")]
         public DateOnly DeadlineDate { get; set; }
 
+        [Required]
+        public int Round { get; set; }
+        
         [Required]
         public bool Calculated { get; set; }
 

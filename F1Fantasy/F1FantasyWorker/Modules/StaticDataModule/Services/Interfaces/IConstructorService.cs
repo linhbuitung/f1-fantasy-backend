@@ -11,5 +11,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
         Task<ConstructorDto> GetConstructorByIdAsync(int id);
 
         Task<ConstructorDto> GetConstructorByCodeAsync(string code);
+
+        Task<int> GetConstructorsCountAsync();
     }
 }

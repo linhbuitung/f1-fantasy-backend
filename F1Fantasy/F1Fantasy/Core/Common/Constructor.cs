@@ -28,5 +28,7 @@ namespace F1Fantasy.Core.Common
 
         public virtual ICollection<DriverPrediction> DriverPredictions { get; set; }
         public virtual ICollection<ApplicationUser> Users { get; set; }
+        
+        public virtual ICollection<RaceEntry> RaceEntries { get; set; }
     }
 }

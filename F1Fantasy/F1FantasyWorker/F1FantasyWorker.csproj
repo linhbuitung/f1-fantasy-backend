@@ -32,13 +32,8 @@
     <Content Include="Static\powerups.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Modules\CoreGameplatModule\Controllers\" />
-    <Folder Include="Modules\CoreGameplatModule\Dtos\" />
-    <Folder Include="Modules\CoreGameplatModule\Repositories\" />
-    <Folder Include="Modules\CoreGameplatModule\Services\" />
-    <Folder Include="Modules\CoreGameplatModule\Workers\" />
+      <Content Include="Static\initial.csv">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
   </ItemGroup>
 </Project>

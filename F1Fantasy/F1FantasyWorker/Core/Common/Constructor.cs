@@ -20,4 +20,6 @@ public partial class Constructor
     public virtual Country Country { get; set; } = null!;
 
     public virtual ICollection<DriverPrediction> DriverPredictions { get; set; } = new List<DriverPrediction>();
+
+    public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
 }

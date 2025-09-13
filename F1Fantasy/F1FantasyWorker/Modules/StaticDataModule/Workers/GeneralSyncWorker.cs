@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using F1FantasyWorker.Modules.CoreGameplayModule.Services.Interfaces;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 using F1FantasyWorker.Modules.StaticDataModule.Workers.Services;
+using F1FantasyWorker.Modules.StaticDataModule.Workers.Services.Interfaces;
 using F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Workers
@@ -25,16 +27,31 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            #region AddScopedServices
+
             using var scope = _scopeFactory.CreateScope();
-            var _f1DataSyncService = scope.ServiceProvider.GetRequiredService<IF1DataSyncService>();
             
-            var _seasonService = scope.ServiceProvider.GetRequiredService<ISeasonService>();
-            var _driverService = scope.ServiceProvider.GetRequiredService<IDriverService>();
-            var _constructorService = scope.ServiceProvider.GetRequiredService<IConstructorService>();
-            var _circuitService = scope.ServiceProvider.GetRequiredService<ICircuitService>();
-            var _nationalityService = scope.ServiceProvider.GetRequiredService<ICountryService>();
-            var _raceService = scope.ServiceProvider.GetRequiredService<IRaceService>();
-            var _powerupService = scope.ServiceProvider.GetRequiredService<IPowerupService>();
+            var seasonService = scope.ServiceProvider.GetRequiredService<ISeasonService>();
+            var driverService = scope.ServiceProvider.GetRequiredService<IDriverService>();
+            var constructorService = scope.ServiceProvider.GetRequiredService<IConstructorService>();
+            var circuitService = scope.ServiceProvider.GetRequiredService<ICircuitService>();
+            var countryService = scope.ServiceProvider.GetRequiredService<ICountryService>();
+            var raceService = scope.ServiceProvider.GetRequiredService<IRaceService>();
+            var powerupService = scope.ServiceProvider.GetRequiredService<IPowerupService>();
+            var raceEntryService = scope.ServiceProvider.GetRequiredService<IRaceEntryService>();
+            
+            var seasonSyncService = scope.ServiceProvider.GetRequiredService<ISeasonSyncService>();
+            var driveSyncService = scope.ServiceProvider.GetRequiredService<IDriverSyncService>();
+            var constructorSyncService = scope.ServiceProvider.GetRequiredService<IConstructorSyncService>();
+            var circuitSyncService = scope.ServiceProvider.GetRequiredService<ICircuitSyncService>();
+            var countrySyncService = scope.ServiceProvider.GetRequiredService<ICountrySyncService>();
+            var raceSyncService = scope.ServiceProvider.GetRequiredService<IRaceSyncService>();
+            var powerupSyncService = scope.ServiceProvider.GetRequiredService<IPowerupSyncService>();
+            var raceEntrySyncService = scope.ServiceProvider.GetRequiredService<IRaceEntrySyncService>();
+            
+            var coreGameplayService = scope.ServiceProvider.GetRequiredService<ICoreGameplayService>();
+            #endregion
+            
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -46,23 +63,29 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 }
                 
                 // Sync powerups
-                List<PowerupDto> newPowerups = await _f1DataSyncService.GetPowerupsAsync();
+                Console.WriteLine("Start syncing powerups");
+                
+                List<PowerupDto> newPowerups = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
                 foreach (var powerupDto in newPowerups)
                 {
-                    await _powerupService.AddPowerupAsync(powerupDto);
+                    await powerupService.AddPowerupAsync(powerupDto);
                 }
                 Console.WriteLine("Database synced with new powerups.");
                 
                 // Sync countries
-                List<CountryDto> newCountryDtos = await _f1DataSyncService.GetCountriesAsync();
+                Console.WriteLine("Start syncing countries");
+                
+                List<CountryDto> newCountryDtos = await countrySyncService.GetCountriesFromStaticResourcesAsync();
                 foreach (var countryDto in newCountryDtos)
                 {
-                    await _nationalityService.AddCountryAsync(countryDto);
+                    await countryService.AddCountryAsync(countryDto);
                 }
                 Console.WriteLine("Database synced with new countries.");
 
                 // Sync drivers
-                List<DriverApiDto> newTempDrivers = await _f1DataSyncService.GetDriversAsync();
+                Console.WriteLine("Start syncing drivers");
+                
+                List<DriverApiDto> newTempDrivers = await driveSyncService.GetDriversFromApiAsync();
                 List<DriverDto> newDriverDtos = new List<DriverDto>();
                 foreach (var tempDriver in newTempDrivers)
                 {
@@ -71,13 +94,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
                 foreach (var driverDto in newDriverDtos)
                 {
-                    await _driverService.AddDriverAsync(driverDto);
+                    await driverService.AddDriverAsync(driverDto);
                 }
 
                 Console.WriteLine("Database synced with new drivers.");
 
                 // Sync constructor
-                List<ConstructorApiDto> newTempConstructors = await _f1DataSyncService.GetConstructorsAsync();
+                Console.WriteLine("Start syncing constructors");
+                
+                List<ConstructorApiDto> newTempConstructors = await constructorSyncService.GetConstructorsFromApiAsync();
 
                 List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
                 foreach (var tempConstructor in newTempConstructors)
@@ -87,29 +112,33 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
                 foreach (var constructorDto in newConstructorDtos)
                 {
-                    await _constructorService.AddConstructorAsync(constructorDto);
+                    await constructorService.AddConstructorAsync(constructorDto);
                 }
 
                 Console.WriteLine("Database synced with new constructors.");
 
                 // Sync circuits
-                List<CircuitApiDto> newTempCircuits = await _f1DataSyncService.GetCircuitsAsync();
+                Console.WriteLine("Start syncing circuits");
+                
+                List<CircuitApiDto> newTempCircuits = await circuitSyncService.GetCircuitsFromApiAsync();
 
                 List<CircuitDto> newCircuitDtos = new List<CircuitDto>();
                 foreach (var tempCircuit in newTempCircuits)
                 {
                     newCircuitDtos.Add(new CircuitDto(id: null, tempCircuit.CircuitName, tempCircuit.CircuitId, tempCircuit.Location.Lat, tempCircuit.Location.Long, tempCircuit.Location.Locality, tempCircuit.Location.Country, null));
-                }//(int circuitName, string code, decimal lattitude, decimal longttitude, string locality, string nationality, string? imgUrl)
-
+                }
+                
                 foreach (var circuitDto in newCircuitDtos)
                 {
-                    await _circuitService.AddCircuitAsync(circuitDto);
+                    await circuitService.AddCircuitAsync(circuitDto);
                 }
 
                 Console.WriteLine("Database synced with new circuits.");
                 
                 // Sync seasons
-                List<SeasonApiDto> newTempSeasons = await _f1DataSyncService.GetSeasonsAsync();
+                Console.WriteLine("Start syncing seasons");
+                
+                List<SeasonApiDto> newTempSeasons = await seasonSyncService.GetSeasonsFromApiAsync();
                 
                 List<SeasonDto> newSeasonDtos = new List<SeasonDto>();
                 foreach (var tempSeason in newTempSeasons)
@@ -119,37 +148,83 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 
                 foreach (var seasonDto in newSeasonDtos)
                 {
-                    await _seasonService.AddSeasonAsync(seasonDto);
+                    await seasonService.AddSeasonAsync(seasonDto);
                 }
                 
                 Console.WriteLine("Database synced with new seasons.");
                 
                 // Sync races
-                List<RaceApiDto> newTempRaces = await _f1DataSyncService.GetRacesAsync();
+                Console.WriteLine("Start syncing races");
+                
+                List<RaceApiDto> newTempRaces = await raceSyncService.GetRacesFromApiAsync();
                 List<RaceDto> newRaceDtos = new List<RaceDto>();
                 foreach (var tempRace in newTempRaces)
                 {
-                    newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
+                    newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
                 }
 
                 foreach (var raceDto in newRaceDtos)
                 {
-                    await _raceService.AddRaceAsync(raceDto);
+                    await raceService.AddRaceAsync(raceDto);
                 }
 
                 Console.WriteLine("Database synced with new races.");
                 
+                // Sync race entries
+                Console.WriteLine("Start syncing race entries for the current year from API");
+                
+                List<RaceEntryApiDto> newTempRaceEntries = await raceEntrySyncService.GetRaceEntriesForCurrentYearFromApiAsync();
+                List<RaceEntryDto> newRaceEntryDtos = new List<RaceEntryDto>();
+                string pattern = @"\+.* Lap.*";
+                foreach (var tempRaceEntry in newTempRaceEntries)
+                {
+                    // match the pattern or is equal to "Finished"
+                    bool finished = tempRaceEntry.Status.Equals("Finished") || tempRaceEntry.Status.Equals("Lapped") ||
+                                    System.Text.RegularExpressions.Regex.IsMatch(tempRaceEntry.Status, pattern);
+                   
+                    newRaceEntryDtos.Add(new RaceEntryDto(id: null, 
+                        tempRaceEntry.Position, 
+                        tempRaceEntry.Grid,
+                        tempRaceEntry.FastestLap?.Rank,
+                        0,
+                        null,
+                        tempRaceEntry.Driver.DriverId,
+                        null,
+                        tempRaceEntry.RaceDate,
+                        null,
+                        tempRaceEntry.Constructor.ConstructorId,
+                        null,
+                        finished
+                        ));
+                }
+                
+                foreach (var raceEntry in newRaceEntryDtos)
+                {
+                    await raceEntryService.AddRaceEntryAsync(raceEntry);
+                }
+
+                /*List<RaceEntryDto> newRaceEntryDtos =  await raceEntrySyncService.GetStaticRaceEntriesAsync();
+                
+                foreach (var raceEntry in newRaceEntryDtos)
+                {
+                    await raceEntryService.AddRaceEntryAsync(raceEntry);
+                }*/
+                Console.WriteLine("Database synced with static race entries.");
+                
+                // Calculate points for all users in latest race
+                Console.WriteLine("Start calculating point gained for all users in latest");
+                coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
+                Console.WriteLine("Database calculated point gained for all users in latest race.");
                 //wait 2 days
                 _logger.LogInformation("GeneralSyncWorker completed at: {time}", DateTimeOffset.Now);
                 _logger.LogInformation("Next synchronization will occur at: {time}", DateTimeOffset.Now.AddDays(2));
-                await Task.Delay(TimeSpan.FromDays(2), stoppingToken);
+                await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation(
-                "Sync Service is stopping.");
+            _logger.LogInformation("Sync Service is stopping.");
 
             await base.StopAsync(stoppingToken);
         }

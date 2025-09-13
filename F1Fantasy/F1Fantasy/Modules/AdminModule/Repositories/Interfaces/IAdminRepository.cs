@@ -7,7 +7,7 @@ public interface IAdminRepository
 {
     Task<Season> UpdateSeasonStatusAsync(int year, bool isActive);
     
-    Task<Season> GetActiveSeasonAsync();
+    Task<Season?> GetActiveSeasonAsync();
     
     Task<List<ApplicationRole>> GetAllRolesAsync();
     

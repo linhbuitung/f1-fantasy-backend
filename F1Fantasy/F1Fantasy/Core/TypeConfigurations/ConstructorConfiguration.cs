@@ -19,6 +19,11 @@ namespace F1Fantasy.Core.TypeConfigurations
                 .WithOne(u => u.Constructor)
                 .HasForeignKey(u => u.ConstructorId)
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            entity.HasMany(c => c.RaceEntries)
+                .WithOne(re => re.Constructor)
+                .HasForeignKey(re => re.ConstructorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

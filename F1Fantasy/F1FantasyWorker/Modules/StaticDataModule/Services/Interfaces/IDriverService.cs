@@ -14,6 +14,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
 
         Task<DriverDto> GetDriverByCodeAsync(string code);
 
+        Task<int> GetDriversCountAsync();
         //void UpdateDriver(DriverDto driver);
 
         // void DeleteDriver(int id);

@@ -6,7 +6,7 @@ public interface IAdminService
 {
     Task<SeasonDto>  StartSeasonAsync(int year);
     
-    Task<SeasonDto> GetActiveSeasonAsync();
+    Task<SeasonDto?> GetActiveSeasonAsync();
 
     Task DeactivateActiveSeasonAsync();
     

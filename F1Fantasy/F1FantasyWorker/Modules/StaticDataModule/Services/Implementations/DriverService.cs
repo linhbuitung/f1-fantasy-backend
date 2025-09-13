@@ -6,6 +6,7 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 {
@@ -104,6 +105,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             
 
             return driverDto;
+        }
+        
+        public async Task<int> GetDriversCountAsync()
+        {
+            return await _staticDataRepository.GetDriversCountAsync();
         }
     }
 }

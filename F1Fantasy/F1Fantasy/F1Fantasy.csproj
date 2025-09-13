@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <Folder Include="API\" />
-    <Folder Include="Downloads\Csv\" />
     <Folder Include="Infrastructure\ExternalServices\Interfaces\" />
     <Folder Include="Infrastructure\Migrations\" />
     <Folder Include="Modules\AuthModule\Services\Implementation\" />
