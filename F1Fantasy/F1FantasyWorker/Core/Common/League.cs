@@ -15,9 +15,9 @@ public partial class League
 
     public string Description { get; set; } = null!;
 
-    public int UserId { get; set; }
+    public int OwnerId { get; set; }
 
-    public virtual AspNetUser User { get; set; } = null!;
+    public virtual AspNetUser Owner { get; set; } = null!;
 
     public virtual ICollection<AspNetUser> Users { get; set; } = new List<AspNetUser>();
 }

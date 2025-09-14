@@ -65,6 +65,9 @@ public class ConstructorSyncService : IConstructorSyncService
                 condition = false;
             }
             
+            Console.WriteLine($"offset: {offset} - Constructors count: {apiResponse.MRData.ConstructorTable.Constructors.Count}");
+            tempConstructors.AddRange(apiResponse.MRData.ConstructorTable.Constructors);
+
             if (offset == 0 && apiResponse != null)
             {
                 using var scope = _scopeFactory.CreateScope();
@@ -74,13 +77,21 @@ public class ConstructorSyncService : IConstructorSyncService
                 {
                     return [];
                 }
-                offset = currentConstructorCount;
-            }
-            
-            Console.WriteLine($"offset: {offset} - Constructors count: {apiResponse.MRData.ConstructorTable.Constructors.Count}");
-            tempConstructors.AddRange(apiResponse.MRData.ConstructorTable.Constructors);
 
-            offset += limit;
+                if (currentConstructorCount == 0)
+                {
+                    offset += limit;
+                }
+                else
+                {
+                    offset = currentConstructorCount;
+
+                }
+            }
+            else
+            {
+                offset += limit;
+            }
         }
 
         return tempConstructors;

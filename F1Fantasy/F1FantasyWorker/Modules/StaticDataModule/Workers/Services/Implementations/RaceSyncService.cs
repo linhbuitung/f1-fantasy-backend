@@ -61,6 +61,9 @@ public class RaceSyncService : IRaceSyncService
             {
                 condition = false;
             }
+            
+            Console.WriteLine($"offset: {offset} - Races count: {apiResponse.MRData.RaceTable.Races.Count}");
+            tempRaces.AddRange(apiResponse.MRData.RaceTable.Races);
 
             if (offset == 0 && apiResponse != null)
             {
@@ -71,14 +74,19 @@ public class RaceSyncService : IRaceSyncService
                 {
                     return [];
                 }
-                offset = currentRacesCount;
+                if (currentRacesCount == 0)
+                {
+                    offset += limit;
+                }
+                else
+                {
+                    offset = currentRacesCount;
+                }
             }
-            
-            
-            Console.WriteLine($"offset: {offset} - Races count: {apiResponse.MRData.RaceTable.Races.Count}");
-            tempRaces.AddRange(apiResponse.MRData.RaceTable.Races);
-
-            offset += limit;
+            else
+            {
+                offset += limit;
+            }
         }
 
         return tempRaces;

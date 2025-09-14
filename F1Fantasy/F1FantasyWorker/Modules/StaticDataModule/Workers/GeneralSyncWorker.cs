@@ -39,6 +39,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             var raceService = scope.ServiceProvider.GetRequiredService<IRaceService>();
             var powerupService = scope.ServiceProvider.GetRequiredService<IPowerupService>();
             var raceEntryService = scope.ServiceProvider.GetRequiredService<IRaceEntryService>();
+            var fantasyLineupService = scope.ServiceProvider.GetRequiredService<IFantasyLineupService>();
             
             var seasonSyncService = scope.ServiceProvider.GetRequiredService<ISeasonSyncService>();
             var driveSyncService = scope.ServiceProvider.GetRequiredService<IDriverSyncService>();
@@ -153,7 +154,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 
                 Console.WriteLine("Database synced with new seasons.");
                 
-                // Sync races
+                // Sync races and add fantasy lineups for all users for new races
                 Console.WriteLine("Start syncing races");
                 
                 List<RaceApiDto> newTempRaces = await raceSyncService.GetRacesFromApiAsync();
@@ -168,7 +169,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await raceService.AddRaceAsync(raceDto);
                 }
 
-                Console.WriteLine("Database synced with new races.");
+                Console.WriteLine("Database synced with new races");
+                
+                // Add fantasy lineups for all users for current season
+                Console.WriteLine("Start adding fantasy lineups for all users in current season");
+                await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.Now.Year);
+                Console.WriteLine("Database synced with new fantasy lineups");
                 
                 // Sync race entries
                 Console.WriteLine("Start syncing race entries for the current year from API");
@@ -213,7 +219,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 
                 // Calculate points for all users in latest race
                 Console.WriteLine("Start calculating point gained for all users in latest");
-                coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
+                await coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
                 Console.WriteLine("Database calculated point gained for all users in latest race.");
                 //wait 2 days
                 _logger.LogInformation("GeneralSyncWorker completed at: {time}", DateTimeOffset.Now);

@@ -63,7 +63,9 @@ public class CircuitSyncService : ICircuitSyncService
             {
                 condition = false;
             }
-
+            
+            tempCircuits.AddRange(apiResponse.MRData.CircuitTable.Circuits);
+            
             if (offset == 0 && apiResponse != null)
             {
                 using var scope = _scopeFactory.CreateScope();
@@ -76,10 +78,11 @@ public class CircuitSyncService : ICircuitSyncService
 
                 offset = currentCircuitsCount;
             }
+            else
+            {
+                offset += limit;
+            }
 
-            tempCircuits.AddRange(apiResponse.MRData.CircuitTable.Circuits);
-
-            offset += limit;
         }
 
         return tempCircuits;

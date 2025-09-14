@@ -9,12 +9,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
 
 public class PowerupService : IPowerupService
 {
-    private readonly IStaticDataRepository _staticDataRepository;
+    private readonly IDataSyncRepository _dataSyncRepository;
     private readonly WooF1Context _context;
 
-    public PowerupService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    public PowerupService(IDataSyncRepository dataSyncRepository, WooF1Context context)
     {
-        _staticDataRepository = staticDataRepository;
+        _dataSyncRepository = dataSyncRepository;
         _context = context;
     }
     
@@ -24,7 +24,7 @@ public class PowerupService : IPowerupService
 
         try
         {
-            Powerup existingPowerup = await _staticDataRepository.GetPowerupByTypeAsync(powerupDto.Type);
+            Powerup existingPowerup = await _dataSyncRepository.GetPowerupByTypeAsync(powerupDto.Type);
             if (existingPowerup != null)
             {
                 return null;
@@ -32,7 +32,7 @@ public class PowerupService : IPowerupService
             
             Powerup powerup = StaticDataDtoMapper.MapDtoToPowerup(powerupDto);
 
-            Powerup newPowerup = await _staticDataRepository.AddPowerupAsync(powerup);
+            Powerup newPowerup = await _dataSyncRepository.AddPowerupAsync(powerup);
 
             // Additional operations that need atomicity (example: logging the event)
             await _context.SaveChangesAsync();
@@ -61,7 +61,7 @@ public class PowerupService : IPowerupService
     
     public async Task<PowerupDto> GetPowerupByIdAsync(int id)
     {
-        Powerup powerup = await _staticDataRepository.GetPowerupByIdAsync(id);
+        Powerup powerup = await _dataSyncRepository.GetPowerupByIdAsync(id);
         if (powerup == null)
         {
             return null;
@@ -71,7 +71,7 @@ public class PowerupService : IPowerupService
 
     public async Task<PowerupDto> GetPowerupByTypeAsync(string type)
     {
-        Powerup powerup = await _staticDataRepository.GetPowerupByTypeAsync(type);
+        Powerup powerup = await _dataSyncRepository.GetPowerupByTypeAsync(type);
         if (powerup == null)
         {
             return null;

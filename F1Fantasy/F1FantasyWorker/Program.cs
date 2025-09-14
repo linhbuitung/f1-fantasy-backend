@@ -44,8 +44,9 @@ public static class ServiceExtensions
         services.AddScoped<IPowerupService, PowerupService> ();
         services.AddScoped<ISeasonService, SeasonService>();
         services.AddScoped<IRaceEntryService, RaceEntryService>();
-        
-        services.AddScoped<IStaticDataRepository, StaticDataRepository>();
+        services.AddScoped<IFantasyLineupService, FantasyLineupSerivce>();
+
+        services.AddScoped<IDataSyncRepository, DataSyncRepository>();
 
         services.AddScoped<IDriverSyncService, DriverSyncService>();
         services.AddScoped<IConstructorSyncService, ConstructorSyncService>();

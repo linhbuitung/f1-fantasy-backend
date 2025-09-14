@@ -23,9 +23,9 @@ namespace F1Fantasy.Core.Common
         public string Description { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public int OwnerId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
+        [ForeignKey(nameof(OwnerId))]
         public virtual ApplicationUser User { get; set; }
 
         // Navigation properties

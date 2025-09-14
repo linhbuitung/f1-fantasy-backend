@@ -7,4 +7,6 @@ public interface ICoreGameplayRepository
     Task<IEnumerable<RaceEntry>> GetRaceEntriesByRaceDateAsync(DateOnly date);
     
     Task<Race?> GetLatestFinishedRaceInCurrentSeasonWithResultAsync();
+    
+    Task<FantasyLineupDriver> AddFantasyLineupDriverAsync(FantasyLineupDriver fantasyLineupDriver);
 }

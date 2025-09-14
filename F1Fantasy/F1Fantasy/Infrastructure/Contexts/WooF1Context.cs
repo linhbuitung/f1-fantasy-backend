@@ -3,6 +3,7 @@ using F1Fantasy.Core.Common;
 using F1Fantasy.Core.TypeConfigurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace F1Fantasy.Infrastructure.Contexts
 {
@@ -23,7 +24,7 @@ namespace F1Fantasy.Infrastructure.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql("YourConnectionStringHere");
+                optionsBuilder.UseNpgsql("DefaultConnection");
             }
             // Ensure the required package is installed: Npgsql.EntityFrameworkCore.PostgreSQL.NamingConvention
 

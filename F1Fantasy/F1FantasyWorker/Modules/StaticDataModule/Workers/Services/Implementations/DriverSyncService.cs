@@ -63,6 +63,9 @@ public class DriverSyncService : IDriverSyncService
             {
                 condition = false;
             }
+            
+            Console.WriteLine($"offset: {offset} - Drivers count: {apiResponse.MRData.DriverTable.Drivers.Count}");
+            tempDrivers.AddRange(apiResponse.MRData.DriverTable.Drivers);
 
             if (offset == 0 && apiResponse != null)
             {
@@ -73,14 +76,19 @@ public class DriverSyncService : IDriverSyncService
                 {
                     return [];
                 }
-                offset = currentDriversCount;
+                if (currentDriversCount == 0)
+                {
+                    offset += limit;
+                }
+                else
+                {
+                    offset = currentDriversCount;
+                }
             }
-            
-            
-            Console.WriteLine($"offset: {offset} - Drivers count: {apiResponse.MRData.DriverTable.Drivers.Count}");
-            tempDrivers.AddRange(apiResponse.MRData.DriverTable.Drivers);
-
-            offset += limit;
+            else
+            {
+                offset += limit;
+            }
         }
 
         return tempDrivers;

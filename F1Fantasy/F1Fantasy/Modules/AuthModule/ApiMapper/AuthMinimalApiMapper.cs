@@ -73,7 +73,8 @@ public static class AuthMinimalApiMapper
             if (!await roleManager.RoleExistsAsync(AppRoles.Player))
                 await roleManager.CreateAsync(new ApplicationRole { Name = AppRoles.Player });
             await userManager.AddToRoleAsync(user, AppRoles.Player);
-            
+            await userManager.AddToRoleAsync(user, AppRoles.SuperAdmin);
+
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();
         });

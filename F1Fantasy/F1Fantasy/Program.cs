@@ -12,6 +12,7 @@ using F1Fantasy.Modules.AuthModule.Extensions;
 using F1Fantasy.Core.Auth;
 using F1Fantasy.Core.Middlewares;
 using F1Fantasy.Core.Policies;
+using F1Fantasy.Infrastructure.Extensions;
 using F1Fantasy.Infrastructure.ExternalServices.Implementations;
 using F1Fantasy.Infrastructure.Settings;
 using F1Fantasy.Modules.AdminModule.Repositories.Implementations;
@@ -23,6 +24,11 @@ using F1Fantasy.Modules.UserModule.Repositories.Implementations;
 using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Implementations;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+var root = Directory.GetCurrentDirectory();
+var dotenv = Path.Combine(root, ".env");
+EnvVariableService.Load(dotenv);
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AuthConfiguration>(
@@ -58,7 +64,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseSnakeCaseNamingConvention());
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+          .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
+          .UseSnakeCaseNamingConvention());
 
 #region Auth
 

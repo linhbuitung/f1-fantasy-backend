@@ -8,11 +8,11 @@ using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
 {
-    public class StaticDataRepository : IStaticDataRepository
+    public class DataSyncRepository : IDataSyncRepository
     {
         private readonly WooF1Context _context;
 
-        public StaticDataRepository(WooF1Context context)
+        public DataSyncRepository(WooF1Context context)
         {
             _context = context;
         }
@@ -111,6 +111,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
         }
 
+        public async Task<List<int>> GetAllRaceIdsByYearAsync(int year)
+        {
+            return await _context.Races.AsNoTracking().Where(r => r.Season.Year == year).Select(r => r.Id).ToListAsync();
+        }
         public async Task<Powerup> AddPowerupAsync(Powerup powerup)
         {
             _context.Powerups.Add(powerup);
@@ -180,6 +184,28 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return await _context.RaceEntries.AsNoTracking().Where(re => re.RaceId == raceId).ToListAsync();
         }
         
+        public async Task<FantasyLineup> AddFantasyLineupAsync(FantasyLineup fantasyLineup)
+        {
+            _context.FantasyLineups.Add(fantasyLineup);
+            await _context.SaveChangesAsync();
+            return fantasyLineup;
+        }
+
+        public async Task<FantasyLineup?> GetFantasyLineupByUserIdAndRaceId(int userId, int raceId)
+        {
+            return await _context.FantasyLineups.AsNoTracking().FirstOrDefaultAsync(f => f.UserId.Equals(userId) && f.RaceId.Equals(raceId));
+        }
+        
+        public async Task<AspNetUser> GetUserByIdAsync(int id)
+        {
+            return await _context.AspNetUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<List<int>> GetAllUserIdsAsync()
+        {
+            return await _context.AspNetUsers.Select(u => u.Id).ToListAsync();
+        }
+        
         #region GetCounts
 
         public async Task<int> GetDriversCountAsync()
@@ -211,7 +237,6 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
         {
             return await _context.RaceEntries.CountAsync();
         }
-
         #endregion
     }
 }

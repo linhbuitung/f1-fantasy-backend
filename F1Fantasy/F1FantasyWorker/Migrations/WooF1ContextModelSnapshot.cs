@@ -70,7 +70,7 @@ namespace F1FantasyWorker.Migrations
                     b.HasIndex(new[] { "NormalizedName" }, "RoleNameIndex")
                         .IsUnique();
 
-                    b.ToTable("AspNetRoles");
+                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("F1FantasyWorker.Core.Common.AspNetRoleClaim", b =>
@@ -99,7 +99,7 @@ namespace F1FantasyWorker.Migrations
 
                     b.HasIndex(new[] { "RoleId" }, "ix_asp_net_role_claims_role_id");
 
-                    b.ToTable("AspNetRoleClaims");
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("F1FantasyWorker.Core.Common.AspNetUser", b =>
@@ -219,7 +219,7 @@ namespace F1FantasyWorker.Migrations
 
                     b.HasIndex(new[] { "DriverId" }, "ix_asp_net_users_driver_id");
 
-                    b.ToTable("AspNetUsers");
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("F1FantasyWorker.Core.Common.AspNetUserClaim", b =>
@@ -248,7 +248,7 @@ namespace F1FantasyWorker.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "ix_asp_net_user_claims_user_id");
 
-                    b.ToTable("AspNetUserClaims");
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("F1FantasyWorker.Core.Common.AspNetUserLogin", b =>
@@ -274,7 +274,7 @@ namespace F1FantasyWorker.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "ix_asp_net_user_logins_user_id");
 
-                    b.ToTable("AspNetUserLogins");
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("F1FantasyWorker.Core.Common.AspNetUserToken", b =>
@@ -300,7 +300,7 @@ namespace F1FantasyWorker.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name")
                         .HasName("pk_asp_net_user_tokens");
 
-                    b.ToTable("AspNetUserTokens");
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("F1FantasyWorker.Core.Common.Circuit", b =>

@@ -10,7 +10,7 @@ namespace F1Fantasy.Core.TypeConfigurations
         {
             entity.HasOne(l => l.User)
                 .WithMany(u => u.Leagues)
-                .HasForeignKey(l => l.UserId)
+                .HasForeignKey(l => l.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

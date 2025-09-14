@@ -10,12 +10,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
 
 public class RaceEntryService : IRaceEntryService
 {
-    private readonly IStaticDataRepository _staticDataRepository;
+    private readonly IDataSyncRepository _dataSyncRepository;
     private readonly WooF1Context _context;
 
-    public RaceEntryService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    public RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Context context)
     {
-        _staticDataRepository = staticDataRepository;
+        _dataSyncRepository = dataSyncRepository;
         _context = context;
     }
     
@@ -26,9 +26,9 @@ public class RaceEntryService : IRaceEntryService
         try
         {
             // Check if driver and constructor exist
-            Driver driver = await _staticDataRepository.GetDriverByCodeAsync(raceEntryDto.DriverCode);
-            Constructor constructor = await _staticDataRepository.GetConstructorByCodeAsync(raceEntryDto.ConstructorCode);
-            Race race = await _staticDataRepository.GetRaceByRaceDateAsync(raceEntryDto.RaceDate.Value);
+            Driver driver = await _dataSyncRepository.GetDriverByCodeAsync(raceEntryDto.DriverCode);
+            Constructor constructor = await _dataSyncRepository.GetConstructorByCodeAsync(raceEntryDto.ConstructorCode);
+            Race race = await _dataSyncRepository.GetRaceByRaceDateAsync(raceEntryDto.RaceDate.Value);
             
             if(driver == null)
             {
@@ -45,7 +45,7 @@ public class RaceEntryService : IRaceEntryService
                 throw new Exception($"Race with date {raceEntryDto.RaceDate} not found");
             }
             
-            RaceEntry existingRaceEntry = await _staticDataRepository.GetRaceEntryByDriverIdAndRaceDate(driver.Id!, raceEntryDto.RaceDate.Value);
+            RaceEntry existingRaceEntry = await _dataSyncRepository.GetRaceEntryByDriverIdAndRaceDate(driver.Id!, raceEntryDto.RaceDate.Value);
             if (existingRaceEntry != null)
             {
                 return null;
@@ -56,7 +56,7 @@ public class RaceEntryService : IRaceEntryService
             raceEntry.ConstructorId = constructor.Id;
             raceEntry.RaceId = race.Id;
     
-            RaceEntry newRaceEntry = await _staticDataRepository.AddRaceEntryAsync(raceEntry);
+            RaceEntry newRaceEntry = await _dataSyncRepository.AddRaceEntryAsync(raceEntry);
     
             // Additional operations that need atomicity (example: logging the event)
             await _context.SaveChangesAsync();
@@ -84,7 +84,7 @@ public class RaceEntryService : IRaceEntryService
 
     public async Task<RaceEntryDto> GetRaceEntryByIdAsync(int id)
     {
-        RaceEntry raceEntry = await _staticDataRepository.GetRaceEntryByIdAsync(id);
+        RaceEntry raceEntry = await _dataSyncRepository.GetRaceEntryByIdAsync(id);
         if (raceEntry == null)
         {
             return null;
@@ -94,6 +94,6 @@ public class RaceEntryService : IRaceEntryService
 
     public async Task<int> GetRaceEntriesCountAsync()
     {
-        return await _staticDataRepository.GetRaceEntriesCountAsync();
+        return await _dataSyncRepository.GetRaceEntriesCountAsync();
     }
 }

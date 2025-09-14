@@ -62,6 +62,9 @@ public class SeasonSyncService : ISeasonSyncService
             {
                 condition = false;
             }
+            
+            Console.WriteLine($"offset: {offset} - Seasons count: {apiResponse.MRData.SeasonTable.Seasons.Count}");
+            tempSeasons.AddRange(apiResponse.MRData.SeasonTable.Seasons);
 
             if (offset == 0 && apiResponse != null)
             {
@@ -72,14 +75,19 @@ public class SeasonSyncService : ISeasonSyncService
                 {
                     return [];
                 }
-                offset = currentSeasonCount;
+                if (currentSeasonCount == 0)
+                {
+                    offset += limit;
+                }
+                else
+                {
+                    offset = currentSeasonCount;
+                }
             }
-         
-            
-            Console.WriteLine($"offset: {offset} - Seasons count: {apiResponse.MRData.SeasonTable.Seasons.Count}");
-            tempSeasons.AddRange(apiResponse.MRData.SeasonTable.Seasons);
-
-            offset += limit;
+            else
+            {
+                offset += limit;
+            }
         }
 
         return tempSeasons;

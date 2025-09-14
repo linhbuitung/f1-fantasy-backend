@@ -2,7 +2,7 @@
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
 {
-    public interface IStaticDataRepository
+    public interface IDataSyncRepository
     {
         //IEnumerable<DriverDto> GetAllDrivers();
         //DriverDto GetDriverById(int id);
@@ -36,6 +36,8 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
         Task<Race?> GetRaceByIdAsync(int id);
 
         Task<Race?> GetRaceByRaceDateAsync(DateOnly date);
+        
+        Task<List<int>> GetAllRaceIdsByYearAsync(int year);
 
         Task<Powerup> AddPowerupAsync(Powerup powerup);
 
@@ -60,6 +62,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
         Task<RaceEntry?> GetRaceEntryByDriverIdAndRaceDate(int driverId, DateOnly date);
 
         Task<List<RaceEntry>> GetRaceEntriesByRaceIdAsync(int raceId);
+        
+        Task<FantasyLineup> AddFantasyLineupAsync(FantasyLineup fantasyLineup);
+        
+        Task<FantasyLineup?> GetFantasyLineupByUserIdAndRaceId(int userId, int raceId);
+        
+        Task<AspNetUser> GetUserByIdAsync(int id);
+        
+        Task<List<int>> GetAllUserIdsAsync();
+
         
         #region GetCounts
 

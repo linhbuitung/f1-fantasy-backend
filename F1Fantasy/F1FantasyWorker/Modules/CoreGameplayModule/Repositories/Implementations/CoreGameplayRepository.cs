@@ -28,5 +28,11 @@ public class CoreGameplayRepository : ICoreGameplayRepository
             .AsTracking()
             .FirstOrDefaultAsync();
     }
-    
+
+    public async Task<FantasyLineupDriver> AddFantasyLineupDriverAsync(FantasyLineupDriver fantasyLineupDriver)
+    {
+        await _context.AddAsync(fantasyLineupDriver);
+        await _context.SaveChangesAsync();
+        return fantasyLineupDriver;
+    }
 }

@@ -11,13 +11,13 @@ public partial class Race
 
     public DateOnly DeadlineDate { get; set; }
 
+    public int Round { get; set; }
+
     public bool Calculated { get; set; }
 
     public int CircuitId { get; set; }
 
     public int SeasonId { get; set; }
-
-    public int Round { get; set; }
 
     public virtual Circuit Circuit { get; set; } = null!;
 

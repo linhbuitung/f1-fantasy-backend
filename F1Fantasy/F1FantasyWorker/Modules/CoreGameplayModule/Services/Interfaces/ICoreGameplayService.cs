@@ -4,6 +4,7 @@ namespace F1FantasyWorker.Modules.CoreGameplayModule.Services.Interfaces;
 
 public interface ICoreGameplayService
 {
-    void CalculatePointsForAllUsersInLastestFinishedRaceAsync();
+    Task CalculatePointsForAllUsersInLastestFinishedRaceAsync();
     
+    Task MigrateFantasyLineupsToRaceAsync(int raceToBeMigratedId);
 }

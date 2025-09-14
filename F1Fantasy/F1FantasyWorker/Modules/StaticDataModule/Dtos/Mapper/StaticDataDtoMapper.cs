@@ -151,5 +151,28 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 ConstructorId = raceEntryDto.ConstructorId ?? 0,
             };
         }
+        
+        public static FantasyLineup MapDtoToFantasyLineup(FantasyLineupDto fantasyLineupDto)
+        {
+            return new FantasyLineup
+            {
+                UserId = fantasyLineupDto.UserId,
+                RaceId = fantasyLineupDto.RaceId,
+                TotalAmount = 0,
+                TransferPointsDeducted = 0,
+                PointsGained = 0,
+            };
+        }
+
+        public static FantasyLineupDto MapFantasyLineupToDto(FantasyLineup fantasyLineup)
+        {
+            return new FantasyLineupDto(
+                fantasyLineup.Id, 
+                fantasyLineup.TotalAmount, 
+                fantasyLineup.TransferPointsDeducted, 
+                fantasyLineup.PointsGained, 
+                fantasyLineup.UserId, 
+                fantasyLineup.RaceId);
+        }
     }
 }

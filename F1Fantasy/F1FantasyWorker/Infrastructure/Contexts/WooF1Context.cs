@@ -40,8 +40,6 @@ public partial class WooF1Context : DbContext
 
     public virtual DbSet<FantasyLineup> FantasyLineups { get; set; }
 
-    public virtual DbSet<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
-
     public virtual DbSet<League> Leagues { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -342,6 +340,24 @@ public partial class WooF1Context : DbContext
             entity.HasOne(d => d.Country).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.CountryId)
                 .HasConstraintName("fk_driver_country_country_id");
+
+            entity.HasMany(d => d.FantasyLineups).WithMany(p => p.Drivers)
+                .UsingEntity<Dictionary<string, object>>(
+                    "DriverFantasyLineup",
+                    r => r.HasOne<FantasyLineup>().WithMany()
+                        .HasForeignKey("FantasyLineupsId")
+                        .HasConstraintName("fk_driver_fantasy_lineup_fantasy_lineup_fantasy_lineups_id"),
+                    l => l.HasOne<Driver>().WithMany()
+                        .HasForeignKey("DriversId")
+                        .HasConstraintName("fk_driver_fantasy_lineup_driver_drivers_id"),
+                    j =>
+                    {
+                        j.HasKey("DriversId", "FantasyLineupsId").HasName("pk_driver_fantasy_lineup");
+                        j.ToTable("driver_fantasy_lineup");
+                        j.HasIndex(new[] { "FantasyLineupsId" }, "ix_driver_fantasy_lineup_fantasy_lineups_id");
+                        j.IndexerProperty<int>("DriversId").HasColumnName("drivers_id");
+                        j.IndexerProperty<int>("FantasyLineupsId").HasColumnName("fantasy_lineups_id");
+                    });
         });
 
         modelBuilder.Entity<DriverPrediction>(entity =>
@@ -406,44 +422,44 @@ public partial class WooF1Context : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_fantasy_lineup_application_user_user_id");
-        });
 
-        modelBuilder.Entity<FantasyLineupDriver>(entity =>
-        {
-            entity.HasKey(e => new { e.FantasyLineupId, e.DriverId }).HasName("pk_fantasy_lineup_driver");
+            entity.HasMany(d => d.DriversNavigation).WithMany(p => p.FantasyLineupsNavigation)
+                .UsingEntity<Dictionary<string, object>>(
+                    "FantasyLineupDriver",
+                    r => r.HasOne<Driver>().WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_fantasy_lineup_driver_driver_driver_id"),
+                    l => l.HasOne<FantasyLineup>().WithMany()
+                        .HasForeignKey("FantasyLineupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_fantasy_lineup_driver_fantasy_lineup_fantasy_lineup_id"),
+                    j =>
+                    {
+                        j.HasKey("FantasyLineupId", "DriverId").HasName("pk_fantasy_lineup_driver");
+                        j.ToTable("fantasy_lineup_driver");
+                        j.HasIndex(new[] { "DriverId" }, "ix_fantasy_lineup_driver_driver_id");
+                        j.IndexerProperty<int>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
+                        j.IndexerProperty<int>("DriverId").HasColumnName("driver_id");
+                    });
 
-            entity.ToTable("fantasy_lineup_driver");
-
-            entity.HasIndex(e => e.DriverId, "ix_fantasy_lineup_driver_driver_id");
-
-            entity.HasIndex(e => e.DriverId1, "ix_fantasy_lineup_driver_driver_id1");
-
-            entity.HasIndex(e => e.FantasyLineupId1, "ix_fantasy_lineup_driver_fantasy_lineup_id1");
-
-            entity.Property(e => e.FantasyLineupId).HasColumnName("fantasy_lineup_id");
-            entity.Property(e => e.DriverId).HasColumnName("driver_id");
-            entity.Property(e => e.DriverId1)
-                .HasDefaultValue(0)
-                .HasColumnName("driver_id1");
-            entity.Property(e => e.FantasyLineupId1)
-                .HasDefaultValue(0)
-                .HasColumnName("fantasy_lineup_id1");
-
-            entity.HasOne(d => d.Driver).WithMany(p => p.FantasyLineupDriverDrivers)
-                .HasForeignKey(d => d.DriverId)
-                .HasConstraintName("fk_fantasy_lineup_driver_driver_driver_id");
-
-            entity.HasOne(d => d.DriverId1Navigation).WithMany(p => p.FantasyLineupDriverDriverId1Navigations)
-                .HasForeignKey(d => d.DriverId1)
-                .HasConstraintName("fk_fantasy_lineup_driver_driver_driver_id1");
-
-            entity.HasOne(d => d.FantasyLineup).WithMany(p => p.FantasyLineupDriverFantasyLineups)
-                .HasForeignKey(d => d.FantasyLineupId)
-                .HasConstraintName("fk_fantasy_lineup_driver_fantasy_lineup_fantasy_lineup_id");
-
-            entity.HasOne(d => d.FantasyLineupId1Navigation).WithMany(p => p.FantasyLineupDriverFantasyLineupId1Navigations)
-                .HasForeignKey(d => d.FantasyLineupId1)
-                .HasConstraintName("fk_fantasy_lineup_driver_fantasy_lineup_fantasy_lineup_id1");
+            entity.HasMany(d => d.Powerups).WithMany(p => p.FantasyLineups)
+                .UsingEntity<Dictionary<string, object>>(
+                    "FantasyLineupPowerup",
+                    r => r.HasOne<Powerup>().WithMany()
+                        .HasForeignKey("PowerupsId")
+                        .HasConstraintName("fk_fantasy_lineup_powerup_powerup_powerups_id"),
+                    l => l.HasOne<FantasyLineup>().WithMany()
+                        .HasForeignKey("FantasyLineupsId")
+                        .HasConstraintName("fk_fantasy_lineup_powerup_fantasy_lineup_fantasy_lineups_id"),
+                    j =>
+                    {
+                        j.HasKey("FantasyLineupsId", "PowerupsId").HasName("pk_fantasy_lineup_powerup");
+                        j.ToTable("fantasy_lineup_powerup");
+                        j.HasIndex(new[] { "PowerupsId" }, "ix_fantasy_lineup_powerup_powerups_id");
+                        j.IndexerProperty<int>("FantasyLineupsId").HasColumnName("fantasy_lineups_id");
+                        j.IndexerProperty<int>("PowerupsId").HasColumnName("powerups_id");
+                    });
         });
 
         modelBuilder.Entity<League>(entity =>
@@ -452,7 +468,7 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("league");
 
-            entity.HasIndex(e => e.UserId, "ix_league_user_id");
+            entity.HasIndex(e => e.OwnerId, "ix_league_owner_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description)
@@ -462,15 +478,15 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(200)
                 .HasColumnName("name");
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
             entity.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasColumnName("type");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Leagues)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.Owner).WithMany(p => p.Leagues)
+                .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("fk_league_application_user_user_id");
+                .HasConstraintName("fk_league_application_user_owner_id");
 
             entity.HasMany(d => d.Users).WithMany(p => p.LeaguesNavigation)
                 .UsingEntity<Dictionary<string, object>>(
@@ -547,42 +563,26 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.DriverId, "ix_powerup_fantasy_lineup_driver_id");
 
-            entity.HasIndex(e => e.FantasyLineupId1, "ix_powerup_fantasy_lineup_fantasy_lineup_id1");
-
             entity.HasIndex(e => e.PowerupId, "ix_powerup_fantasy_lineup_powerup_id");
-
-            entity.HasIndex(e => e.PowerupId1, "ix_powerup_fantasy_lineup_powerup_id1");
 
             entity.Property(e => e.FantasyLineupId).HasColumnName("fantasy_lineup_id");
             entity.Property(e => e.PowerupId).HasColumnName("powerup_id");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
-            entity.Property(e => e.FantasyLineupId1)
-                .HasDefaultValue(0)
-                .HasColumnName("fantasy_lineup_id1");
-            entity.Property(e => e.PowerupId1)
-                .HasDefaultValue(0)
-                .HasColumnName("powerup_id1");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.PowerupFantasyLineups)
                 .HasForeignKey(d => d.DriverId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_powerup_fantasy_lineup_driver_driver_id");
 
-            entity.HasOne(d => d.FantasyLineup).WithMany(p => p.PowerupFantasyLineupFantasyLineups)
+            entity.HasOne(d => d.FantasyLineup).WithMany(p => p.PowerupFantasyLineups)
                 .HasForeignKey(d => d.FantasyLineupId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_powerup_fantasy_lineup_fantasy_lineup_fantasy_lineup_id");
 
-            entity.HasOne(d => d.FantasyLineupId1Navigation).WithMany(p => p.PowerupFantasyLineupFantasyLineupId1Navigations)
-                .HasForeignKey(d => d.FantasyLineupId1)
-                .HasConstraintName("fk_powerup_fantasy_lineup_fantasy_lineup_fantasy_lineup_id1");
-
-            entity.HasOne(d => d.Powerup).WithMany(p => p.PowerupFantasyLineupPowerups)
+            entity.HasOne(d => d.Powerup).WithMany(p => p.PowerupFantasyLineups)
                 .HasForeignKey(d => d.PowerupId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id");
-
-            entity.HasOne(d => d.PowerupId1Navigation).WithMany(p => p.PowerupFantasyLineupPowerupId1Navigations)
-                .HasForeignKey(d => d.PowerupId1)
-                .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id1");
         });
 
         modelBuilder.Entity<Prediction>(entity =>
@@ -628,12 +628,8 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DeadlineDate).HasColumnName("deadline_date");
             entity.Property(e => e.RaceDate).HasColumnName("race_date");
-            entity.Property(e => e.Round)
-                .HasDefaultValue(0)
-                .HasColumnName("round");
-            entity.Property(e => e.SeasonId)
-                .HasDefaultValue(0)
-                .HasColumnName("season_id");
+            entity.Property(e => e.Round).HasColumnName("round");
+            entity.Property(e => e.SeasonId).HasColumnName("season_id");
 
             entity.HasOne(d => d.Circuit).WithMany(p => p.Races)
                 .HasForeignKey(d => d.CircuitId)
@@ -659,14 +655,10 @@ public partial class WooF1Context : DbContext
             entity.HasIndex(e => e.RaceId, "ix_race_entry_race_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ConstructorId)
-                .HasDefaultValue(0)
-                .HasColumnName("constructor_id");
+            entity.Property(e => e.ConstructorId).HasColumnName("constructor_id");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.FastestLap).HasColumnName("fastest_lap");
-            entity.Property(e => e.Finished)
-                .HasDefaultValue(false)
-                .HasColumnName("finished");
+            entity.Property(e => e.Finished).HasColumnName("finished");
             entity.Property(e => e.Grid).HasColumnName("grid");
             entity.Property(e => e.PointsGained).HasColumnName("points_gained");
             entity.Property(e => e.Position).HasColumnName("position");

@@ -14,8 +14,10 @@ namespace F1Fantasy.Core.Common
 
         public int? DriverId { get; set; }
 
+        [ForeignKey(nameof(FantasyLineupId))]
         public virtual FantasyLineup FantasyLineup { get; set; }
 
+        [ForeignKey(nameof(PowerupId))]
         public virtual Powerup Powerup { get; set; }
         
         [ForeignKey(nameof(DriverId))]
