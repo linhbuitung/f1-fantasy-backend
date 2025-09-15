@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using F1Fantasy.Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace F1Fantasy.Infrastructure.Contexts
 {
@@ -17,7 +19,10 @@ namespace F1Fantasy.Infrastructure.Contexts
 
             // Configure DbContextOptions
             var optionsBuilder = new DbContextOptionsBuilder<WooF1Context>();
-            optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+            optionsBuilder
+                .UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+                .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
+                .UseSnakeCaseNamingConvention();
 
             return new WooF1Context(optionsBuilder.Options);
         }

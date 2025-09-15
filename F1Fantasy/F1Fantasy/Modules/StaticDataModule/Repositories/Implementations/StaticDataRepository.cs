@@ -127,5 +127,23 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         {
             return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Type.Equals(type));
         }
+        
+        public async Task<Season> AddSeasonAsync(Season season)
+        {
+            _context.Seasons.Add(season);
+            
+            await _context.SaveChangesAsync();
+            return season;
+        }
+
+        public async Task<Season> GetSeasonByIdAsync(int id)
+        {
+            return await _context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        public async Task<Season> GetSeasonByYearAsync(int year)
+        {
+            return await _context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Year == year);
+        }
     }
 }

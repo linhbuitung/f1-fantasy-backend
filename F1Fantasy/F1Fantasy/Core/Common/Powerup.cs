@@ -20,6 +20,7 @@ namespace F1Fantasy.Core.Common
         public string ImgUrl { get; set; }
 
         // Navigation property
-        public ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
+        public virtual ICollection<FantasyLineup> FantasyLineups { get; set; }
+        public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
     }
 }

@@ -31,12 +31,13 @@
 
   <ItemGroup>
     <Folder Include="API\" />
-    <Folder Include="Downloads\Csv\" />
     <Folder Include="Infrastructure\ExternalServices\Interfaces\" />
-    <Folder Include="Infrastructure\Migrations\" />
     <Folder Include="Modules\AuthModule\Services\Implementation\" />
     <Folder Include="Modules\AuthModule\Services\Interfaces\" />
-    <Folder Include="Modules\CoreGameplayModule\" />
+    <Folder Include="Modules\CoreGameplayModule\Repositories\" />
+    <Folder Include="Modules\CoreGameplayModule\Services\" />
+    <Folder Include="Modules\LeagueModule\Dtos\Delete\" />
+    <Folder Include="Modules\LeagueModule\Dtos\Update\" />
   </ItemGroup>
 
 </Project>

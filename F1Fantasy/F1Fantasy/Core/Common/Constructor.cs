@@ -24,9 +24,11 @@ namespace F1Fantasy.Core.Common
         public string CountryId { get; set; }
 
         [ForeignKey(nameof(CountryId))]
-        public Country Country { get; set; }
+        public virtual Country Country { get; set; }
 
-        public ICollection<DriverPrediction> DriverPredictions { get; set; }
-        public ICollection<ApplicationUser> Users { get; set; }
+        public virtual ICollection<DriverPrediction> DriverPredictions { get; set; }
+        public virtual ICollection<ApplicationUser> Users { get; set; }
+        
+        public virtual ICollection<RaceEntry> RaceEntries { get; set; }
     }
 }

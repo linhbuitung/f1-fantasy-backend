@@ -73,7 +73,7 @@ public class TestController : ControllerBase
     [HttpGet("get-own-resource/{userId}")]
     public async Task<IActionResult> GetOwnResource(int userId)
     {
-        var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanAccessOwnResource);
+        var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();

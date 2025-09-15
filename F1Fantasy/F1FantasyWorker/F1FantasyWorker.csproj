@@ -32,5 +32,8 @@
     <Content Include="Static\powerups.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+      <Content Include="Static\initial.csv">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
   </ItemGroup>
 </Project>

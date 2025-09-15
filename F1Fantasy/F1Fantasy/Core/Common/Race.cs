@@ -9,7 +9,7 @@ namespace F1Fantasy.Core.Common
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
+        
         [Required]
         [Column(TypeName = "date")]
         public DateOnly RaceDate { get; set; }
@@ -19,6 +19,9 @@ namespace F1Fantasy.Core.Common
         public DateOnly DeadlineDate { get; set; }
 
         [Required]
+        public int Round { get; set; }
+        
+        [Required]
         public bool Calculated { get; set; }
 
         [Required]
@@ -26,10 +29,16 @@ namespace F1Fantasy.Core.Common
 
         [ForeignKey(nameof(CircuitId))]
         public Circuit Circuit { get; set; }
+        
+        [Required]
+        public int SeasonId { get; set; }
+
+        [ForeignKey(nameof(SeasonId))]
+        public virtual Season Season { get; set; }
 
         // Navigation properties
-        public ICollection<RaceEntry> RaceEntries { get; set; }
+        public virtual ICollection<RaceEntry> RaceEntries { get; set; }
 
-        public ICollection<FantasyLineup> FantasyLineups { get; set; }
+        public virtual ICollection<FantasyLineup> FantasyLineups { get; set; }
     }
 }

@@ -31,12 +31,18 @@ public class UserDetailController : ControllerBase
     }
 
     [HttpPut("{userId}/update")]
-    public async Task<IActionResult> UpdateUser(int userId, [FromBody] ApplicationUserUpdateDto userUpdateDto)
+    [Authorize]
+    public async Task<IActionResult> UpdateUser(int userId, [FromBody] Dtos.Update.ApplicationUserDto userUpdateDto)
     {
-        var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanAccessOwnResource);
+        var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
         
         var updatedUser = await _userService.UpdateUserAsync(userUpdateDto);

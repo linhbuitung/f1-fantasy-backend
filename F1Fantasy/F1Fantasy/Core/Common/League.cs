@@ -10,11 +10,11 @@ namespace F1Fantasy.Core.Common
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required]
+        [Required, Range(1, 100)]
         public int MaxPlayersNum { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Type { get; set; }
+        [Required]
+        public LeagueType Type { get; set; }
 
         [Required, MaxLength(200)]
         public string Name { get; set; }
@@ -23,12 +23,19 @@ namespace F1Fantasy.Core.Common
         public string Description { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public int OwnerId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; }
+        [ForeignKey(nameof(OwnerId))]
+        public virtual ApplicationUser User { get; set; }
 
         // Navigation properties
-        public ICollection<UserLeague> UserLeagues { get; set; }
+        public virtual ICollection<UserLeague> UserLeagues { get; set; }
+    }
+    
+    // Enum for type of league
+    public enum LeagueType
+    {
+        Public,
+        Private
     }
 }

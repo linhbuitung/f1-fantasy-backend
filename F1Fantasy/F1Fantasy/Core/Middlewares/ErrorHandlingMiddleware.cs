@@ -1,0 +1,47 @@
+﻿using F1Fantasy.Exceptions;
+
+namespace F1Fantasy.Core.Middlewares;
+
+public class ErrorHandlingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ErrorHandlingMiddleware> _logger;
+
+    public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task Invoke(HttpContext context)
+    {
+        try
+        {
+            await _next(context);
+        }
+        catch (NotFoundException ex)
+        {
+            _logger.LogError(ex, "Not found exception");
+            context.Response.StatusCode = 400;
+            context.Response.ContentType = "application/json";
+            var errorResponse = new
+            {
+                error = "An not found error occurred.",
+                message = ex.Message,
+            };
+            await context.Response.WriteAsJsonAsync(errorResponse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception");
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "application/json";
+            var errorResponse = new
+            {
+                error = "An error occurred.",
+                message = ex.Message,
+            };
+            await context.Response.WriteAsJsonAsync(errorResponse);
+        }
+    }
+}

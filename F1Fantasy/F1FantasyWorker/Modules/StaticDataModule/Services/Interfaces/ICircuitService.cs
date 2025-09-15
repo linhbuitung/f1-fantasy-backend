@@ -11,5 +11,6 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
         Task<CircuitDto> GetCircuitByIdAsync(int id);
 
         Task<CircuitDto> GetCircuitByCodeAsync(string code);
+        Task<int> GetCircuitsCountAsync();
     }
 }

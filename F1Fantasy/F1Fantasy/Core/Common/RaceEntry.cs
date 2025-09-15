@@ -11,22 +11,32 @@ namespace F1Fantasy.Core.Common
         public int Id { get; set; }
 
         public int? Position { get; set; }
+        
         public int? Grid { get; set; }
+        
         public int? FastestLap { get; set; }
 
         [Required]
         public int PointsGained { get; set; }
+        
+        public bool Finished { get; set; }
 
         [Required]
         public int DriverId { get; set; }
 
         [ForeignKey(nameof(DriverId))]
-        public Driver Driver { get; set; }
+        public virtual Driver Driver { get; set; }
 
         [Required]
         public int RaceId { get; set; }
 
         [ForeignKey(nameof(RaceId))]
-        public Race Race { get; set; }
+        public virtual Race Race { get; set; }
+        
+        [Required]
+        public int ConstructorId { get; set; }
+
+        [ForeignKey(nameof(ConstructorId))]
+        public virtual Constructor Constructor { get; set; }
     }
 }

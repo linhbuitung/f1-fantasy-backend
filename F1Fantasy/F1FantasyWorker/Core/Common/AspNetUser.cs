@@ -15,10 +15,6 @@ public partial class AspNetUser
 
     public int? LoginStreak { get; set; }
 
-    public string? RefreshToken { get; set; }
-
-    public DateTime RefreshTokenExpiryTime { get; set; }
-
     public DateTime? LastLogin { get; set; }
 
     public int? ConstructorId { get; set; }
@@ -75,7 +71,7 @@ public partial class AspNetUser
 
     public virtual ICollection<Prediction> Predictions { get; set; } = new List<Prediction>();
 
-    public virtual ICollection<League> LeaguesNavigation { get; set; } = new List<League>();
+    public virtual ICollection<UserLeague> UserLeagues { get; set; } = new List<UserLeague>();
 
     public virtual ICollection<AspNetRole> Roles { get; set; } = new List<AspNetRole>();
 }

@@ -8,9 +8,12 @@ namespace F1Fantasy.Core.TypeConfigurations
     {
         public void Configure(EntityTypeBuilder<League> entity)
         {
+            entity.Property(l => l.Type)
+                .HasConversion<string>();
+            
             entity.HasOne(l => l.User)
                 .WithMany(u => u.Leagues)
-                .HasForeignKey(l => l.UserId)
+                .HasForeignKey(l => l.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

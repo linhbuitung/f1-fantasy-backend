@@ -4,11 +4,11 @@ namespace F1Fantasy.Core.Policies;
 
 public static class Policies
 {
-    public const string CanAccessOwnResource = "CanAccessOwnResource";
+    public const string CanOperateOnOwnResource = "CanOperateOnOwnResource";
 
     public static void AddCustomPolicies(AuthorizationOptions options)
     {
-        options.AddPolicy(CanAccessOwnResource, policy =>
+        options.AddPolicy(CanOperateOnOwnResource, policy =>
             policy.RequireAssertion(context =>
             {
                 if (context.Resource is int userId)

@@ -46,15 +46,21 @@ public partial class WooF1Context : DbContext
 
     public virtual DbSet<Powerup> Powerups { get; set; }
 
+    public virtual DbSet<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
+
     public virtual DbSet<Prediction> Predictions { get; set; }
 
     public virtual DbSet<Race> Races { get; set; }
 
     public virtual DbSet<RaceEntry> RaceEntries { get; set; }
 
+    public virtual DbSet<Season> Seasons { get; set; }
+
+    public virtual DbSet<UserLeague> UserLeagues { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=woof1;Username=postgres;Password=Tunglinh2003.");
+        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -134,8 +140,6 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
             entity.Property(e => e.PhoneNumber).HasColumnName("phone_number");
             entity.Property(e => e.PhoneNumberConfirmed).HasColumnName("phone_number_confirmed");
-            entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
-            entity.Property(e => e.RefreshTokenExpiryTime).HasColumnName("refresh_token_expiry_time");
             entity.Property(e => e.SecurityStamp).HasColumnName("security_stamp");
             entity.Property(e => e.TwoFactorEnabled).HasColumnName("two_factor_enabled");
             entity.Property(e => e.UserName)
@@ -338,6 +342,24 @@ public partial class WooF1Context : DbContext
             entity.HasOne(d => d.Country).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.CountryId)
                 .HasConstraintName("fk_driver_country_country_id");
+
+            entity.HasMany(d => d.FantasyLineups).WithMany(p => p.Drivers)
+                .UsingEntity<Dictionary<string, object>>(
+                    "DriverFantasyLineup",
+                    r => r.HasOne<FantasyLineup>().WithMany()
+                        .HasForeignKey("FantasyLineupsId")
+                        .HasConstraintName("fk_driver_fantasy_lineup_fantasy_lineup_fantasy_lineups_id"),
+                    l => l.HasOne<Driver>().WithMany()
+                        .HasForeignKey("DriversId")
+                        .HasConstraintName("fk_driver_fantasy_lineup_driver_drivers_id"),
+                    j =>
+                    {
+                        j.HasKey("DriversId", "FantasyLineupsId").HasName("pk_driver_fantasy_lineup");
+                        j.ToTable("driver_fantasy_lineup");
+                        j.HasIndex(new[] { "FantasyLineupsId" }, "ix_driver_fantasy_lineup_fantasy_lineups_id");
+                        j.IndexerProperty<int>("DriversId").HasColumnName("drivers_id");
+                        j.IndexerProperty<int>("FantasyLineupsId").HasColumnName("fantasy_lineups_id");
+                    });
         });
 
         modelBuilder.Entity<DriverPrediction>(entity =>
@@ -403,7 +425,7 @@ public partial class WooF1Context : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_fantasy_lineup_application_user_user_id");
 
-            entity.HasMany(d => d.Drivers).WithMany(p => p.FantasyLineups)
+            entity.HasMany(d => d.DriversNavigation).WithMany(p => p.FantasyLineupsNavigation)
                 .UsingEntity<Dictionary<string, object>>(
                     "FantasyLineupDriver",
                     r => r.HasOne<Driver>().WithMany()
@@ -412,6 +434,7 @@ public partial class WooF1Context : DbContext
                         .HasConstraintName("fk_fantasy_lineup_driver_driver_driver_id"),
                     l => l.HasOne<FantasyLineup>().WithMany()
                         .HasForeignKey("FantasyLineupId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_fantasy_lineup_driver_fantasy_lineup_fantasy_lineup_id"),
                     j =>
                     {
@@ -424,20 +447,20 @@ public partial class WooF1Context : DbContext
 
             entity.HasMany(d => d.Powerups).WithMany(p => p.FantasyLineups)
                 .UsingEntity<Dictionary<string, object>>(
-                    "PowerupFantasyLineup",
+                    "FantasyLineupPowerup",
                     r => r.HasOne<Powerup>().WithMany()
-                        .HasForeignKey("PowerupId")
-                        .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id"),
+                        .HasForeignKey("PowerupsId")
+                        .HasConstraintName("fk_fantasy_lineup_powerup_powerup_powerups_id"),
                     l => l.HasOne<FantasyLineup>().WithMany()
-                        .HasForeignKey("FantasyLineupId")
-                        .HasConstraintName("fk_powerup_fantasy_lineup_fantasy_lineup_fantasy_lineup_id"),
+                        .HasForeignKey("FantasyLineupsId")
+                        .HasConstraintName("fk_fantasy_lineup_powerup_fantasy_lineup_fantasy_lineups_id"),
                     j =>
                     {
-                        j.HasKey("FantasyLineupId", "PowerupId").HasName("pk_powerup_fantasy_lineup");
-                        j.ToTable("powerup_fantasy_lineup");
-                        j.HasIndex(new[] { "PowerupId" }, "ix_powerup_fantasy_lineup_powerup_id");
-                        j.IndexerProperty<int>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
-                        j.IndexerProperty<int>("PowerupId").HasColumnName("powerup_id");
+                        j.HasKey("FantasyLineupsId", "PowerupsId").HasName("pk_fantasy_lineup_powerup");
+                        j.ToTable("fantasy_lineup_powerup");
+                        j.HasIndex(new[] { "PowerupsId" }, "ix_fantasy_lineup_powerup_powerups_id");
+                        j.IndexerProperty<int>("FantasyLineupsId").HasColumnName("fantasy_lineups_id");
+                        j.IndexerProperty<int>("PowerupsId").HasColumnName("powerups_id");
                     });
         });
 
@@ -447,7 +470,7 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("league");
 
-            entity.HasIndex(e => e.UserId, "ix_league_user_id");
+            entity.HasIndex(e => e.OwnerId, "ix_league_owner_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Description)
@@ -457,35 +480,13 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(200)
                 .HasColumnName("name");
-            entity.Property(e => e.Type)
-                .HasMaxLength(100)
-                .HasColumnName("type");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+            entity.Property(e => e.Type).HasColumnName("type");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Leagues)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.Owner).WithMany(p => p.Leagues)
+                .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("fk_league_application_user_user_id");
-
-            entity.HasMany(d => d.Users).WithMany(p => p.LeaguesNavigation)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserLeague",
-                    r => r.HasOne<AspNetUser>().WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_user_league_application_user_user_id"),
-                    l => l.HasOne<League>().WithMany()
-                        .HasForeignKey("LeagueId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_user_league_league_league_id"),
-                    j =>
-                    {
-                        j.HasKey("LeagueId", "UserId").HasName("pk_user_league");
-                        j.ToTable("user_league");
-                        j.HasIndex(new[] { "UserId" }, "ix_user_league_user_id");
-                        j.IndexerProperty<int>("LeagueId").HasColumnName("league_id");
-                        j.IndexerProperty<int>("UserId").HasColumnName("user_id");
-                    });
+                .HasConstraintName("fk_league_application_user_owner_id");
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -518,7 +519,11 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("powerup");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.HasIndex(e => e.Type, "ak_powerup_type").IsUnique();
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
             entity.Property(e => e.Description)
                 .HasMaxLength(500)
                 .HasColumnName("description");
@@ -528,6 +533,36 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasColumnName("type");
+        });
+
+        modelBuilder.Entity<PowerupFantasyLineup>(entity =>
+        {
+            entity.HasKey(e => new { e.FantasyLineupId, e.PowerupId }).HasName("pk_powerup_fantasy_lineup");
+
+            entity.ToTable("powerup_fantasy_lineup");
+
+            entity.HasIndex(e => e.DriverId, "ix_powerup_fantasy_lineup_driver_id");
+
+            entity.HasIndex(e => e.PowerupId, "ix_powerup_fantasy_lineup_powerup_id");
+
+            entity.Property(e => e.FantasyLineupId).HasColumnName("fantasy_lineup_id");
+            entity.Property(e => e.PowerupId).HasColumnName("powerup_id");
+            entity.Property(e => e.DriverId).HasColumnName("driver_id");
+
+            entity.HasOne(d => d.Driver).WithMany(p => p.PowerupFantasyLineups)
+                .HasForeignKey(d => d.DriverId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_powerup_fantasy_lineup_driver_driver_id");
+
+            entity.HasOne(d => d.FantasyLineup).WithMany(p => p.PowerupFantasyLineups)
+                .HasForeignKey(d => d.FantasyLineupId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_powerup_fantasy_lineup_fantasy_lineup_fantasy_lineup_id");
+
+            entity.HasOne(d => d.Powerup).WithMany(p => p.PowerupFantasyLineups)
+                .HasForeignKey(d => d.PowerupId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id");
         });
 
         modelBuilder.Entity<Prediction>(entity =>
@@ -566,16 +601,25 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.CircuitId, "ix_race_circuit_id");
 
+            entity.HasIndex(e => e.SeasonId, "ix_race_season_id");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Calculated).HasColumnName("calculated");
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DeadlineDate).HasColumnName("deadline_date");
             entity.Property(e => e.RaceDate).HasColumnName("race_date");
+            entity.Property(e => e.Round).HasColumnName("round");
+            entity.Property(e => e.SeasonId).HasColumnName("season_id");
 
             entity.HasOne(d => d.Circuit).WithMany(p => p.Races)
                 .HasForeignKey(d => d.CircuitId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_race_circuit_circuit_id");
+
+            entity.HasOne(d => d.Season).WithMany(p => p.Races)
+                .HasForeignKey(d => d.SeasonId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_race_season_season_id");
         });
 
         modelBuilder.Entity<RaceEntry>(entity =>
@@ -584,17 +628,26 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("race_entry");
 
+            entity.HasIndex(e => e.ConstructorId, "ix_race_entry_constructor_id");
+
             entity.HasIndex(e => e.DriverId, "ix_race_entry_driver_id");
 
             entity.HasIndex(e => e.RaceId, "ix_race_entry_race_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ConstructorId).HasColumnName("constructor_id");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.FastestLap).HasColumnName("fastest_lap");
+            entity.Property(e => e.Finished).HasColumnName("finished");
             entity.Property(e => e.Grid).HasColumnName("grid");
             entity.Property(e => e.PointsGained).HasColumnName("points_gained");
             entity.Property(e => e.Position).HasColumnName("position");
             entity.Property(e => e.RaceId).HasColumnName("race_id");
+
+            entity.HasOne(d => d.Constructor).WithMany(p => p.RaceEntries)
+                .HasForeignKey(d => d.ConstructorId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_race_entry_constructor_constructor_id");
 
             entity.HasOne(d => d.Driver).WithMany(p => p.RaceEntries)
                 .HasForeignKey(d => d.DriverId)
@@ -605,6 +658,44 @@ public partial class WooF1Context : DbContext
                 .HasForeignKey(d => d.RaceId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_race_entry_race_race_id");
+        });
+
+        modelBuilder.Entity<Season>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_season");
+
+            entity.ToTable("season");
+
+            entity.HasIndex(e => e.Year, "ak_season_year").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.Year).HasColumnName("year");
+        });
+
+        modelBuilder.Entity<UserLeague>(entity =>
+        {
+            entity.HasKey(e => new { e.LeagueId, e.UserId }).HasName("pk_user_league");
+
+            entity.ToTable("user_league");
+
+            entity.HasIndex(e => e.UserId, "ix_user_league_user_id");
+
+            entity.Property(e => e.LeagueId).HasColumnName("league_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.IsAccepted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_accepted");
+
+            entity.HasOne(d => d.League).WithMany(p => p.UserLeagues)
+                .HasForeignKey(d => d.LeagueId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_user_league_league_league_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserLeagues)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_user_league_application_user_user_id");
         });
 
         OnModelCreatingPartial(modelBuilder);

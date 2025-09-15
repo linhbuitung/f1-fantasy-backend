@@ -78,7 +78,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static RaceDto MapRaceToDto(Race race)
         {
-            return new RaceDto(race.Id, race.RaceDate, race.DeadlineDate, race.Calculated, race.CircuitId, null);
+            return new RaceDto(race.Id, race.RaceDate, race.Round, race.DeadlineDate, race.Calculated, race.SeasonId, race.CircuitId, null);
         }
 
         public static Race MapDtoToRace(RaceDto raceDto)
@@ -86,7 +86,9 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
             return new Race()
             {
                 RaceDate = raceDto.RaceDate,
+                Round = raceDto.Round,
                 Calculated = raceDto.Calculated,
+                SeasonId = raceDto.SeasonId ?? 0, // Default to 0 if SeasonId is null
                 CircuitId = raceDto.CircuitId ?? 0, // Default to 0 if CircuitId is null
                 DeadlineDate = raceDto.DeadlineDate
             };
@@ -105,6 +107,20 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
                 Type = powerupDto.Type,
                 Description = powerupDto.Description,
                 ImgUrl = powerupDto.ImgUrl
+            };
+        }
+        
+        public static SeasonDto MapSeasonToDto(Season season)
+        {
+            return new SeasonDto(season.Id, season.Year, season.IsActive);
+        }
+        
+        public static Season MapDtoToSeason(SeasonDto seasonDto)
+        {
+            return new Season
+            {
+                Year = seasonDto.Year,
+                IsActive = seasonDto.IsActive
             };
         }
     }

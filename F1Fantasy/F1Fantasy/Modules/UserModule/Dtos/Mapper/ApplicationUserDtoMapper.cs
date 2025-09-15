@@ -4,9 +4,9 @@ namespace F1Fantasy.Modules.UserModule.Dtos.Mapper;
 
 public class ApplicationUserDtoMapper
 {
-    public static ApplicationUserGetDto MapUserToGetDto(ApplicationUser user)
+    public static Get.ApplicationUserDto MapUserToGetDto(ApplicationUser user)
     {
-        return new ApplicationUserGetDto
+        return new Get.ApplicationUserDto
         {
             Id = user.Id,
             Email = user.Email!,
@@ -23,23 +23,23 @@ public class ApplicationUserDtoMapper
         };
     }
 
-    public static ApplicationUser MapUpdateDtoToUser(ApplicationUserUpdateDto dto)
+    public static ApplicationUser MapUpdateDtoToUser(Update.ApplicationUserDto dto, ApplicationUser existingUser)
     {
         return new ApplicationUser
         {
             Id = dto.Id,
-            DisplayName = dto.DisplayName,
-            DateOfBirth = dto.DateOfBirth,
-            AcceptNotification = dto.AcceptNotification,
-            ConstructorId = dto.ConstructorId,
-            DriverId = dto.DriverId,
-            CountryId = dto.CountryId
+            DisplayName = dto.DisplayName ?? existingUser.DisplayName,
+            DateOfBirth = dto.DateOfBirth ?? existingUser.DateOfBirth,
+            AcceptNotification = dto.AcceptNotification ?? existingUser.AcceptNotification,
+            ConstructorId = dto.ConstructorId ?? existingUser.ConstructorId,
+            DriverId = dto.DriverId ?? existingUser.DriverId,
+            CountryId = dto.CountryId ?? existingUser.CountryId
         };
     }
 
-    public static List<ApplicationUserGetDto> MapListUsersToDto(List<ApplicationUser> users)
+    public static List<Get.ApplicationUserDto> MapListUsersToDto(List<ApplicationUser> users)
     {
-        List<ApplicationUserGetDto> dtos = new List<ApplicationUserGetDto>();
+        List<Get.ApplicationUserDto> dtos = new List<Get.ApplicationUserDto>();
 
         foreach (var user in users)
         {

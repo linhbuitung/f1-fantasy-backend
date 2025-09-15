@@ -8,6 +8,9 @@ public class RaceDto
     public int? Id { get; set; }
 
     [Required]
+    public int Round { get; set; } 
+    
+    [Required]
     public DateOnly RaceDate { get; set; }
 
     [Required]
@@ -17,16 +20,20 @@ public class RaceDto
     public bool Calculated { get; set; }
 
 
+    public int? SeasonId { get; set; }
+
     public int? CircuitId { get; set; }
     
     public string? CircuitCode { get; set; }
 
-    public RaceDto(int? id, DateOnly raceDate, DateOnly deadlineDate, bool calculated, int? circuitId, string? circuitCode)
+    public RaceDto(int? id, DateOnly raceDate, int round, DateOnly deadlineDate, bool calculated, int? seasonId, int? circuitId, string? circuitCode)
     {
         Id = id ?? null;
         RaceDate = raceDate;
+        Round = round;
         DeadlineDate = deadlineDate;
         Calculated = calculated;
+        SeasonId = seasonId;
         CircuitId = circuitId;
         CircuitCode = circuitCode;
     }

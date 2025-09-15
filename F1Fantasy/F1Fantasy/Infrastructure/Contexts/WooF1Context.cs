@@ -3,6 +3,7 @@ using F1Fantasy.Core.Common;
 using F1Fantasy.Core.TypeConfigurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace F1Fantasy.Infrastructure.Contexts
 {
@@ -23,7 +24,7 @@ namespace F1Fantasy.Infrastructure.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql("YourConnectionStringHere");
+                optionsBuilder.UseNpgsql("DefaultConnection");
             }
             // Ensure the required package is installed: Npgsql.EntityFrameworkCore.PostgreSQL.NamingConvention
 
@@ -58,6 +59,8 @@ namespace F1Fantasy.Infrastructure.Contexts
 
         public virtual DbSet<UserLeague> UserLeagues { get; set; }
         
+        public virtual DbSet<Season> Seasons { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -78,6 +81,8 @@ namespace F1Fantasy.Infrastructure.Contexts
             modelBuilder.ApplyConfiguration(new ApplicationUserRoleConfiguration());
             modelBuilder.ApplyConfiguration(new ApplicationUserTokenConfiguration());
             modelBuilder.ApplyConfiguration(new CountryConfiguration());
+            modelBuilder.ApplyConfiguration(new PowerupConfiguration());
+            modelBuilder.ApplyConfiguration(new SeasonConfiguration());
         }
     }
 }

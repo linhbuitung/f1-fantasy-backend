@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using F1Fantasy.Core.Auth;
 using F1Fantasy.Core.Common;
+using F1Fantasy.Modules.AuthModule.Extensions;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -69,10 +70,11 @@ public static class AuthMinimalApiMapper
             }
             
             //Add a Player role to user
-            if (!await roleManager.RoleExistsAsync("Player"))
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Player" });
-            await userManager.AddToRoleAsync(user, "Player");
-            
+            if (!await roleManager.RoleExistsAsync(AppRoles.Player))
+                await roleManager.CreateAsync(new ApplicationRole { Name = AppRoles.Player });
+            await userManager.AddToRoleAsync(user, AppRoles.Player);
+            await userManager.AddToRoleAsync(user, AppRoles.SuperAdmin);
+
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();
         });

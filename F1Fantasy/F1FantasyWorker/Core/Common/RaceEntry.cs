@@ -15,9 +15,15 @@ public partial class RaceEntry
 
     public int PointsGained { get; set; }
 
+    public bool Finished { get; set; }
+
     public int DriverId { get; set; }
 
     public int RaceId { get; set; }
+
+    public int ConstructorId { get; set; }
+
+    public virtual Constructor Constructor { get; set; } = null!;
 
     public virtual Driver Driver { get; set; } = null!;
 

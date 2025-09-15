@@ -1,5 +1,6 @@
 ﻿using F1FantasyWorker.Core.Common;
 using F1FantasyWorker.Infrastructure.Contexts;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 using F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces;
@@ -9,12 +10,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 {
     public class ConstructorService : IConstructorService
     {
-        private readonly IStaticDataRepository _staticDataRepository;
+        private readonly IDataSyncRepository _dataSyncRepository;
         private readonly WooF1Context _context;
 
-        public ConstructorService(IStaticDataRepository staticDataRepository, WooF1Context context)
+        public ConstructorService(IDataSyncRepository dataSyncRepository, WooF1Context context)
         {
-            _staticDataRepository = staticDataRepository;
+            _dataSyncRepository = dataSyncRepository;
             _context = context;
         }
 
@@ -24,7 +25,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
             try
             {
-                Constructor existingConstructor = await _staticDataRepository.GetConstructorByCodeAsync(constructorDto.Code);
+                Constructor existingConstructor = await _dataSyncRepository.GetConstructorByCodeAsync(constructorDto.Code);
                 if (existingConstructor != null)
                 {
                     return null;
@@ -32,7 +33,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 constructorDto = FixSpecialCountryCase(constructorDto);
                 
                 // Constructor API returns nationality, so we need check for nationality.
-                Country country = await _staticDataRepository.GetCountryByNationalitityAsync(constructorDto.CountryId);
+                Country country = await _dataSyncRepository.GetCountryByNationalitityAsync(constructorDto.CountryId);
                 if (country == null)
                 {
                     throw new Exception($"Country with nationality {constructorDto.CountryId} not found");
@@ -41,7 +42,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 
                 Constructor constructor = StaticDataDtoMapper.MapDtoToConstructor(constructorDto);
 
-                Constructor newConstructor = await _staticDataRepository.AddConstructorAsync(constructor);
+                Constructor newConstructor = await _dataSyncRepository.AddConstructorAsync(constructor);
 
                 // Additional operations that need atomicity (example: logging the event)
                 await _context.SaveChangesAsync();
@@ -70,13 +71,13 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         //get
         public async Task<ConstructorDto> GetConstructorByIdAsync(int id)
         {
-            Constructor constructor = await _staticDataRepository.GetConstructorByIdAsync(id);
+            Constructor constructor = await _dataSyncRepository.GetConstructorByIdAsync(id);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
         }
 
         public async Task<ConstructorDto> GetConstructorByCodeAsync(string code)
         {
-            Constructor constructor = await _staticDataRepository.GetConstructorByCodeAsync(code);
+            Constructor constructor = await _dataSyncRepository.GetConstructorByCodeAsync(code);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
         }
         
@@ -92,6 +93,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             }
             
             return constructorDto;
+        }
+
+        public async Task<int> GetConstructorsCountAsync()
+        {
+            return await _dataSyncRepository.GetConstructorsCountAsync();
         }
     }
 }

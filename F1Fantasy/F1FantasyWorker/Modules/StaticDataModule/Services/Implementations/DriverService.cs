@@ -6,17 +6,18 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 using F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
+using F1FantasyWorker.Modules.StaticDataModule.Configs;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 {
     public class DriverService : IDriverService
     {
-        private readonly IStaticDataRepository _staticDataRepository;
+        private readonly IDataSyncRepository _dataSyncRepository;
         private readonly WooF1Context _context;
 
-        public DriverService(IStaticDataRepository staticDataRepository, WooF1Context context)
+        public DriverService(IDataSyncRepository dataSyncRepository, WooF1Context context)
         {
-            _staticDataRepository = staticDataRepository;
+            _dataSyncRepository = dataSyncRepository;
             _context = context;
         }
 
@@ -26,7 +27,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
             try
             {
-                Driver existingDriver = await _staticDataRepository.GetDriverByCodeAsync(driverDto.Code);
+                Driver existingDriver = await _dataSyncRepository.GetDriverByCodeAsync(driverDto.Code);
                 if (existingDriver != null)
                 {
                     return null;
@@ -35,7 +36,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 driverDto = FixSpecialCountryCase(driverDto);
                 
                 // Driver API returns nationality, so we need check for nationality.
-                Country country = await _staticDataRepository.GetCountryByNationalitityAsync(driverDto.CountryId);
+                Country country = await _dataSyncRepository.GetCountryByNationalitityAsync(driverDto.CountryId);
                 if (country == null)
                 {
                     throw new Exception($"Country with nationality {driverDto.CountryId} not found");
@@ -44,7 +45,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
                 Driver driver = StaticDataDtoMapper.MapDtoToDriver(driverDto);
 
-                Driver newDriver = await _staticDataRepository.AddDriverAsync(driver);
+                Driver newDriver = await _dataSyncRepository.AddDriverAsync(driver);
 
                 // Additional operations that need atomicity (example: logging the event)
                 await _context.SaveChangesAsync();
@@ -73,7 +74,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<DriverDto> GetDriverByIdAsync(int id)
         {
-            Driver driver = await _staticDataRepository.GetDriverByIdAsync(id);
+            Driver driver = await _dataSyncRepository.GetDriverByIdAsync(id);
             if (driver == null)
             {
                 return null;
@@ -83,7 +84,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<DriverDto> GetDriverByCodeAsync(string code)
         {
-            Driver driver = await _staticDataRepository.GetDriverByCodeAsync(code);
+            Driver driver = await _dataSyncRepository.GetDriverByCodeAsync(code);
             if (driver == null)
             {
                 return null;
@@ -104,6 +105,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             
 
             return driverDto;
+        }
+        
+        public async Task<int> GetDriversCountAsync()
+        {
+            return await _dataSyncRepository.GetDriversCountAsync();
         }
     }
 }
