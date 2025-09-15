@@ -56,6 +56,8 @@ public partial class WooF1Context : DbContext
 
     public virtual DbSet<Season> Seasons { get; set; }
 
+    public virtual DbSet<UserLeague> UserLeagues { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true");
@@ -479,34 +481,12 @@ public partial class WooF1Context : DbContext
                 .HasMaxLength(200)
                 .HasColumnName("name");
             entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-            entity.Property(e => e.Type)
-                .HasMaxLength(100)
-                .HasColumnName("type");
+            entity.Property(e => e.Type).HasColumnName("type");
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Leagues)
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_league_application_user_owner_id");
-
-            entity.HasMany(d => d.Users).WithMany(p => p.LeaguesNavigation)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserLeague",
-                    r => r.HasOne<AspNetUser>().WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_user_league_application_user_user_id"),
-                    l => l.HasOne<League>().WithMany()
-                        .HasForeignKey("LeagueId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_user_league_league_league_id"),
-                    j =>
-                    {
-                        j.HasKey("LeagueId", "UserId").HasName("pk_user_league");
-                        j.ToTable("user_league");
-                        j.HasIndex(new[] { "UserId" }, "ix_user_league_user_id");
-                        j.IndexerProperty<int>("LeagueId").HasColumnName("league_id");
-                        j.IndexerProperty<int>("UserId").HasColumnName("user_id");
-                    });
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -691,6 +671,31 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.Year).HasColumnName("year");
+        });
+
+        modelBuilder.Entity<UserLeague>(entity =>
+        {
+            entity.HasKey(e => new { e.LeagueId, e.UserId }).HasName("pk_user_league");
+
+            entity.ToTable("user_league");
+
+            entity.HasIndex(e => e.UserId, "ix_user_league_user_id");
+
+            entity.Property(e => e.LeagueId).HasColumnName("league_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.IsAccepted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_accepted");
+
+            entity.HasOne(d => d.League).WithMany(p => p.UserLeagues)
+                .HasForeignKey(d => d.LeagueId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_user_league_league_league_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserLeagues)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_user_league_application_user_user_id");
         });
 
         OnModelCreatingPartial(modelBuilder);

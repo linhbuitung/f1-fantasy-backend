@@ -1,4 +1,5 @@
 ﻿using F1Fantasy.Core.Common;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Dtos;
@@ -19,16 +20,16 @@ public class UserService : IUserService
         _context = context;
     }
 
-    public async Task<ApplicationUserGetDto> UpdateUserAsync(ApplicationUserUpdateDto userUpdateDto)
+    public async Task<Dtos.Get.ApplicationUserDto> UpdateUserAsync(Dtos.Update.ApplicationUserDto userUpdateDto)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
-            ApplicationUser existingUser = await _userRepository.GetUserByIdAsync(userUpdateDto.Id);
+            ApplicationUser? existingUser = await _userRepository.GetUserByIdAsync(userUpdateDto.Id);
             if (existingUser is null)
             {
-                throw new ApplicationException($"User with id {userUpdateDto.Id} not found");
+                throw new NotFoundException($"User with id {userUpdateDto.Id} not found");
             }
                 
             ApplicationUser user = ApplicationUserDtoMapper.MapUpdateDtoToUser(userUpdateDto, existingUser);
@@ -51,17 +52,17 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<ApplicationUserGetDto> GetUserByIdAsync(int id)
+    public async Task<Dtos.Get.ApplicationUserDto> GetUserByIdAsync(int id)
     {
-        ApplicationUser user = await _userRepository.GetUserByIdAsync(id);
+        ApplicationUser? user = await _userRepository.GetUserByIdAsync(id);
         if (user == null)
         {
-            return null;
+            throw new NotFoundException($"User with id {id} not found");
         }
         return ApplicationUserDtoMapper.MapUserToGetDto(user);
     }
 
-    public async Task<List<ApplicationUserGetDto>> FindUserByDisplayNameAsync(string name)
+    public async Task<List<Dtos.Get.ApplicationUserDto>> FindUserByDisplayNameAsync(string name)
     {
         List<ApplicationUser> users = await _userRepository.FindUserByDisplayNameAsync(name);
         if (users == null)

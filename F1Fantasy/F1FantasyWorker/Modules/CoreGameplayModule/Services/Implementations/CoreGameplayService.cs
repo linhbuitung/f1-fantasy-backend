@@ -26,7 +26,7 @@ public class CoreGameplayService : ICoreGameplayService
           _context = context;
      }
     
-     public async Task CalculatePointsForAllUsersInLastestFinishedRaceAsync()
+     public async Task<Race?> CalculatePointsForAllUsersInLastestFinishedRaceAsync()
      {
           using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -36,7 +36,7 @@ public class CoreGameplayService : ICoreGameplayService
           {
                var lastestFinishedRace = GetLatestFinishedRaceInCurrentSeasonWithResultAsync().Result;
           
-               if(lastestFinishedRace == null || lastestFinishedRace.Calculated) return;
+               if(lastestFinishedRace == null || lastestFinishedRace.Calculated) return null;
                
                foreach (var raceEntry in lastestFinishedRace.RaceEntries)
                {
@@ -54,11 +54,11 @@ public class CoreGameplayService : ICoreGameplayService
 
                foreach (var lineup in lastestFinishedRace.FantasyLineups)
                {
-                    await _context.Entry(lineup).Collection(l => l.Drivers).LoadAsync();
+                    await _context.Entry(lineup).Collection(l => l.DriversNavigation).LoadAsync();
 
                     // Create dictionary to hold driverId and points
                     var pointFromOwnedDriversInLineUp = new Dictionary<int, int>();
-                    foreach (var driverId in lineup.Drivers.Select(ld => ld.Id))
+                    foreach (var driverId in lineup.DriversNavigation.Select(ld => ld.Id))
                     {
                          if (driverPoints.TryGetValue(driverId, out var points))
                          {
@@ -94,6 +94,8 @@ public class CoreGameplayService : ICoreGameplayService
                
                await _context.SaveChangesAsync();
                await transaction.CommitAsync();
+               
+               return lastestFinishedRace;
           }
           catch (Exception ex)
           {
@@ -154,24 +156,16 @@ public class CoreGameplayService : ICoreGameplayService
      }
 
      // This method is to migrate / copy fantasy lineups from the previous race to this race
-     public async Task MigrateFantasyLineupsToRaceAsync(int raceToBeMigratedId)
+     public async Task MigrateFantasyLineupsToNextRaceAsync(Race previousRace)
      {
           using var transaction = await _context.Database.BeginTransactionAsync();
           
           try
           {
                // Get race to be migrated to
-               Race raceToBeMigratedTo = await _context.Races.FirstOrDefaultAsync(r => r.Id == raceToBeMigratedId);
+               Race raceToBeMigratedTo = await _context.Races.FirstOrDefaultAsync(r => r.SeasonId == previousRace.SeasonId && r.Round == previousRace.Round + 1);
                
                if (raceToBeMigratedTo == null || raceToBeMigratedTo.Round == 1 )
-               {
-                    return;
-               }
-               
-               // Get previous race
-               Race previousRace = await _context.Races.FirstOrDefaultAsync(r => r.Id == raceToBeMigratedTo.Id - 1);
-
-               if (previousRace == null)
                {
                     return;
                }
@@ -179,32 +173,29 @@ public class CoreGameplayService : ICoreGameplayService
                // Load fantasy lineups for the 2 races
                await _context.Entry(raceToBeMigratedTo).Collection(r => r.FantasyLineups).LoadAsync();
                await _context.Entry(previousRace).Collection(r => r.FantasyLineups).LoadAsync();
-               foreach (var previousfFantasyLineup in previousRace.FantasyLineups)
+               foreach (var previousFantasyLineup in previousRace.FantasyLineups)
                {
-                    var newFantasyLineup = raceToBeMigratedTo.FantasyLineups.FirstOrDefault(f => f.UserId == previousfFantasyLineup.UserId);
+                    var newFantasyLineup = raceToBeMigratedTo.FantasyLineups.FirstOrDefault(f => f.UserId == previousFantasyLineup.UserId);
                     if (newFantasyLineup == null)
                     {
                          throw new Exception("New FantasyLineup not existed");
                     }
                     
-                    await _context.Entry(previousfFantasyLineup).Collection(f => f.Drivers).LoadAsync();
-                    await _context.Entry(newFantasyLineup).Collection(f => f.Drivers).LoadAsync();
+                    await _context.Entry(previousFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
+                    await _context.Entry(newFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
 
                     // copy all connection to drivers from previous race to new
-                    foreach (var driver in previousfFantasyLineup.Drivers)
+                    foreach (var driver in previousFantasyLineup.DriversNavigation)
                     {
-                         if (newFantasyLineup.Drivers.Contains(driver))
+                         if (newFantasyLineup.DriversNavigation.Contains(driver))
                          {
                               continue;
                          }
-                         var fantasyLineupDriver = new FantasyLineupDriver
-                         {
-                              FantasyLineupId = newFantasyLineup.Id, // or set the navigation property
-                              DriverId = driver.Id
-                         };
                          
-                         await _coreGameplayRepository.AddFantasyLineupDriverAsync(fantasyLineupDriver);
+                         await _coreGameplayRepository.AddFantasyLineupDriverAsync(newFantasyLineup, driver);
                     }
+                    // transfer points deducted
+                    newFantasyLineup.TransferPointsDeducted = 0;
                }
                
                await _context.SaveChangesAsync();

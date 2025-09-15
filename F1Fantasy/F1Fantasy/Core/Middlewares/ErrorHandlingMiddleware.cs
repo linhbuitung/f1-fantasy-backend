@@ -33,12 +33,12 @@ public class ErrorHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            _logger.LogError(ex, "Exception");
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
             var errorResponse = new
             {
-                error = "An unexpected error occurred.",
+                error = "An error occurred.",
                 message = ex.Message,
             };
             await context.Response.WriteAsJsonAsync(errorResponse);

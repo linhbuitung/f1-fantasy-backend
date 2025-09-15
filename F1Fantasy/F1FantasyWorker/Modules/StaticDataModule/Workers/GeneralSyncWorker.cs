@@ -64,27 +64,27 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 }
                 
                 // Sync powerups
-                Console.WriteLine("Start syncing powerups");
+                _logger.LogInformation("Start syncing powerups");
                 
                 List<PowerupDto> newPowerups = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
                 foreach (var powerupDto in newPowerups)
                 {
                     await powerupService.AddPowerupAsync(powerupDto);
                 }
-                Console.WriteLine("Database synced with new powerups.");
+                _logger.LogInformation("Database synced with new powerups.");
                 
                 // Sync countries
-                Console.WriteLine("Start syncing countries");
+                _logger.LogInformation("Start syncing countries");
                 
                 List<CountryDto> newCountryDtos = await countrySyncService.GetCountriesFromStaticResourcesAsync();
                 foreach (var countryDto in newCountryDtos)
                 {
                     await countryService.AddCountryAsync(countryDto);
                 }
-                Console.WriteLine("Database synced with new countries.");
+                _logger.LogInformation("Database synced with new countries.");
 
                 // Sync drivers
-                Console.WriteLine("Start syncing drivers");
+                _logger.LogInformation("Start syncing drivers");
                 
                 List<DriverApiDto> newTempDrivers = await driveSyncService.GetDriversFromApiAsync();
                 List<DriverDto> newDriverDtos = new List<DriverDto>();
@@ -98,10 +98,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await driverService.AddDriverAsync(driverDto);
                 }
 
-                Console.WriteLine("Database synced with new drivers.");
+                _logger.LogInformation("Database synced with new drivers.");
 
                 // Sync constructor
-                Console.WriteLine("Start syncing constructors");
+                _logger.LogInformation("Start syncing constructors");
                 
                 List<ConstructorApiDto> newTempConstructors = await constructorSyncService.GetConstructorsFromApiAsync();
 
@@ -116,10 +116,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await constructorService.AddConstructorAsync(constructorDto);
                 }
 
-                Console.WriteLine("Database synced with new constructors.");
+                _logger.LogInformation("Database synced with new constructors.");
 
                 // Sync circuits
-                Console.WriteLine("Start syncing circuits");
+                _logger.LogInformation("Start syncing circuits");
                 
                 List<CircuitApiDto> newTempCircuits = await circuitSyncService.GetCircuitsFromApiAsync();
 
@@ -134,10 +134,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await circuitService.AddCircuitAsync(circuitDto);
                 }
 
-                Console.WriteLine("Database synced with new circuits.");
+                _logger.LogInformation("Database synced with new circuits.");
                 
                 // Sync seasons
-                Console.WriteLine("Start syncing seasons");
+                _logger.LogInformation("Start syncing seasons");
                 
                 List<SeasonApiDto> newTempSeasons = await seasonSyncService.GetSeasonsFromApiAsync();
                 
@@ -152,10 +152,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await seasonService.AddSeasonAsync(seasonDto);
                 }
                 
-                Console.WriteLine("Database synced with new seasons.");
+                _logger.LogInformation("Database synced with new seasons.");
                 
                 // Sync races and add fantasy lineups for all users for new races
-                Console.WriteLine("Start syncing races");
+                _logger.LogInformation("Start syncing races");
                 
                 List<RaceApiDto> newTempRaces = await raceSyncService.GetRacesFromApiAsync();
                 List<RaceDto> newRaceDtos = new List<RaceDto>();
@@ -169,15 +169,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await raceService.AddRaceAsync(raceDto);
                 }
 
-                Console.WriteLine("Database synced with new races");
+                _logger.LogInformation("Database synced with new races");
                 
                 // Add fantasy lineups for all users for current season
-                Console.WriteLine("Start adding fantasy lineups for all users in current season");
+                _logger.LogInformation("Start adding fantasy lineups for all users in current season");
                 await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.Now.Year);
-                Console.WriteLine("Database synced with new fantasy lineups");
+                _logger.LogInformation("Database synced with new fantasy lineups");
                 
                 // Sync race entries
-                Console.WriteLine("Start syncing race entries for the current year from API");
+                _logger.LogInformation("Start syncing race entries for the current year from API");
                 
                 List<RaceEntryApiDto> newTempRaceEntries = await raceEntrySyncService.GetRaceEntriesForCurrentYearFromApiAsync();
                 List<RaceEntryDto> newRaceEntryDtos = new List<RaceEntryDto>();
@@ -215,12 +215,21 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 {
                     await raceEntryService.AddRaceEntryAsync(raceEntry);
                 }*/
-                Console.WriteLine("Database synced with static race entries.");
+                _logger.LogInformation("Database synced with static race entries.");
                 
                 // Calculate points for all users in latest race
-                Console.WriteLine("Start calculating point gained for all users in latest");
-                await coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
-                Console.WriteLine("Database calculated point gained for all users in latest race.");
+                _logger.LogInformation("Start calculating point gained for all users in latest");
+                var calculatedRace = await coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
+                _logger.LogInformation("Database calculated point gained for all users in latest race.");
+                
+                // Migrate fantasy lineups to next race
+                if (calculatedRace != null)
+                {
+                    _logger.LogInformation("Start migrating fantasy lineups to next race");
+                    await coreGameplayService.MigrateFantasyLineupsToNextRaceAsync(calculatedRace);
+                    _logger.LogInformation("Migrated fantasy lineups to next race");
+                }
+
                 //wait 2 days
                 _logger.LogInformation("GeneralSyncWorker completed at: {time}", DateTimeOffset.Now);
                 _logger.LogInformation("Next synchronization will occur at: {time}", DateTimeOffset.Now.AddDays(2));

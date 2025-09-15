@@ -40,7 +40,7 @@ public class UserRepository : IUserRepository
         throw new InvalidOperationException();
     }
 
-    public async Task<ApplicationUser> GetUserByIdAsync(int id)
+    public async Task<ApplicationUser?> GetUserByIdAsync(int id)
     {
         return await _context.Users
             .Include(u => u.Constructor)

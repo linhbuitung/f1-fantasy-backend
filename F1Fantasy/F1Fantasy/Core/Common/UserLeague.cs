@@ -12,6 +12,9 @@ namespace F1Fantasy.Core.Common
         [Key, Column(Order = 2)]
         public int UserId { get; set; }
 
+        [Required]
+        public bool IsAccepted { get; set; }
+        
         [ForeignKey(nameof(LeagueId))]
         public virtual League League { get; set; }
 

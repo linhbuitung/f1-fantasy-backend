@@ -2,9 +2,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using F1Fantasy.Core.Common;
 
-namespace F1Fantasy.Modules.UserModule.Dtos;
+namespace F1Fantasy.Modules.UserModule.Dtos.Get;
 
-public class ApplicationUserGetDto
+public class ApplicationUserDto
 {
     public int Id { get; set; }
     [MaxLength(100)]

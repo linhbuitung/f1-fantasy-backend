@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using F1Fantasy.Core.Common;
 
-namespace F1Fantasy.Modules.UserModule.Dtos;
+namespace F1Fantasy.Modules.UserModule.Dtos.Update;
 
-public class ApplicationUserUpdateDto
+public class ApplicationUserDto
 {
+    [Required]
     public int Id { get; set; }
     [MaxLength(100)]
     public string? DisplayName { get; set; }

@@ -19,5 +19,5 @@ public partial class League
 
     public virtual AspNetUser Owner { get; set; } = null!;
 
-    public virtual ICollection<AspNetUser> Users { get; set; } = new List<AspNetUser>();
+    public virtual ICollection<UserLeague> UserLeagues { get; set; } = new List<UserLeague>();
 }
