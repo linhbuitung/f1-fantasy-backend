@@ -44,6 +44,8 @@ public partial class WooF1Context : DbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
+    public virtual DbSet<PickableItem> PickableItems { get; set; }
+
     public virtual DbSet<Powerup> Powerups { get; set; }
 
     public virtual DbSet<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
@@ -277,6 +279,8 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.CountryId, "ix_constructor_country_id");
 
+            entity.HasIndex(e => e.PickableItemId, "ix_constructor_pickable_item_id");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
                 .HasMaxLength(50)
@@ -290,10 +294,37 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(300)
                 .HasColumnName("name");
+            entity.Property(e => e.PickableItemId).HasColumnName("pickable_item_id");
+            entity.Property(e => e.Price)
+                .HasDefaultValue(0)
+                .HasColumnName("price");
 
             entity.HasOne(d => d.Country).WithMany(p => p.Constructors)
                 .HasForeignKey(d => d.CountryId)
                 .HasConstraintName("fk_constructor_country_country_id");
+
+            entity.HasOne(d => d.PickableItem).WithMany(p => p.Constructors)
+                .HasForeignKey(d => d.PickableItemId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_constructor_pickable_item_pickable_item_id");
+
+            entity.HasMany(d => d.FantasyLineups).WithMany(p => p.Constructors)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ConstructorFantasyLineup",
+                    r => r.HasOne<FantasyLineup>().WithMany()
+                        .HasForeignKey("FantasyLineupsId")
+                        .HasConstraintName("fk_constructor_fantasy_lineup_fantasy_lineup_fantasy_lineups_id"),
+                    l => l.HasOne<Constructor>().WithMany()
+                        .HasForeignKey("ConstructorsId")
+                        .HasConstraintName("fk_constructor_fantasy_lineup_constructor_constructors_id"),
+                    j =>
+                    {
+                        j.HasKey("ConstructorsId", "FantasyLineupsId").HasName("pk_constructor_fantasy_lineup");
+                        j.ToTable("constructor_fantasy_lineup");
+                        j.HasIndex(new[] { "FantasyLineupsId" }, "ix_constructor_fantasy_lineup_fantasy_lineups_id");
+                        j.IndexerProperty<int>("ConstructorsId").HasColumnName("constructors_id");
+                        j.IndexerProperty<int>("FantasyLineupsId").HasColumnName("fantasy_lineups_id");
+                    });
         });
 
         modelBuilder.Entity<Country>(entity =>
@@ -321,6 +352,8 @@ public partial class WooF1Context : DbContext
 
             entity.HasIndex(e => e.CountryId, "ix_driver_country_id");
 
+            entity.HasIndex(e => e.PickableItemId, "ix_driver_pickable_item_id");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Code)
                 .HasMaxLength(50)
@@ -338,10 +371,19 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.ImgUrl)
                 .HasMaxLength(300)
                 .HasColumnName("img_url");
+            entity.Property(e => e.PickableItemId).HasColumnName("pickable_item_id");
+            entity.Property(e => e.Price)
+                .HasDefaultValue(0)
+                .HasColumnName("price");
 
             entity.HasOne(d => d.Country).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.CountryId)
                 .HasConstraintName("fk_driver_country_country_id");
+
+            entity.HasOne(d => d.PickableItem).WithMany(p => p.Drivers)
+                .HasForeignKey(d => d.PickableItemId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_driver_pickable_item_pickable_item_id");
 
             entity.HasMany(d => d.FantasyLineups).WithMany(p => p.Drivers)
                 .UsingEntity<Dictionary<string, object>>(
@@ -412,7 +454,7 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.PointsGained).HasColumnName("points_gained");
             entity.Property(e => e.RaceId).HasColumnName("race_id");
             entity.Property(e => e.TotalAmount).HasColumnName("total_amount");
-            entity.Property(e => e.TransferPointsDeducted).HasColumnName("transfer_points_deducted");
+            entity.Property(e => e.TransfersMade).HasColumnName("transfers_made");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Race).WithMany(p => p.FantasyLineups)
@@ -424,6 +466,26 @@ public partial class WooF1Context : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_fantasy_lineup_application_user_user_id");
+
+            entity.HasMany(d => d.ConstructorsNavigation).WithMany(p => p.FantasyLineupsNavigation)
+                .UsingEntity<Dictionary<string, object>>(
+                    "FantasyLineupConstructor",
+                    r => r.HasOne<Constructor>().WithMany()
+                        .HasForeignKey("ConstructorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_fantasy_lineup_constructor_constructor_constructor_id"),
+                    l => l.HasOne<FantasyLineup>().WithMany()
+                        .HasForeignKey("FantasyLineupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_fantasy_lineup_constructor_fantasy_lineup_fantasy_lineup_id"),
+                    j =>
+                    {
+                        j.HasKey("FantasyLineupId", "ConstructorId").HasName("pk_fantasy_lineup_constructor");
+                        j.ToTable("fantasy_lineup_constructor");
+                        j.HasIndex(new[] { "ConstructorId" }, "ix_fantasy_lineup_constructor_constructor_id");
+                        j.IndexerProperty<int>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
+                        j.IndexerProperty<int>("ConstructorId").HasColumnName("constructor_id");
+                    });
 
             entity.HasMany(d => d.DriversNavigation).WithMany(p => p.FantasyLineupsNavigation)
                 .UsingEntity<Dictionary<string, object>>(
@@ -511,6 +573,17 @@ public partial class WooF1Context : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("fk_notification_application_user_user_id");
+        });
+
+        modelBuilder.Entity<PickableItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_pickable_item");
+
+            entity.ToTable("pickable_item");
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
         });
 
         modelBuilder.Entity<Powerup>(entity =>

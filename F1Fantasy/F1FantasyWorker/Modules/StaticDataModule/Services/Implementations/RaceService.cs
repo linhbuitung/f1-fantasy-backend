@@ -9,34 +9,29 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
 
-public class RaceService : IRaceService
+public class RaceService(
+    IDataSyncRepository dataSyncRepository,
+    IFantasyLineupService fantasyLineupService,
+    WooF1Context context)
+    : IRaceService
 {
-    private readonly IDataSyncRepository _dataSyncRepository;
-    private readonly IFantasyLineupService _fantasyLineupService;
-    private readonly WooF1Context _context;
+    private readonly IFantasyLineupService _fantasyLineupService = fantasyLineupService;
 
-    public RaceService(IDataSyncRepository dataSyncRepository, IFantasyLineupService fantasyLineupService, WooF1Context context)
-    {
-        _dataSyncRepository = dataSyncRepository;
-        _fantasyLineupService = fantasyLineupService;
-        _context = context;
-    }
-    
     // Add new race and  add new fantasy lineups for all users for the new race
     public async Task<RaceDto> AddRaceAsync(RaceDto raceDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            Race existingRace = await _dataSyncRepository.GetRaceByRaceDateAsync(raceDto.RaceDate);
+            Race existingRace = await dataSyncRepository.GetRaceByRaceDateAsync(raceDto.RaceDate);
             if (existingRace != null)
             {
                 return null;
             }
             
             // Race API returns circuit, so we need check for circuit.
-            Circuit circuit = await _dataSyncRepository.GetCircuitByCodeAsync(raceDto.CircuitCode);
+            Circuit circuit = await dataSyncRepository.GetCircuitByCodeAsync(raceDto.CircuitCode);
             if (circuit == null)
             {
                 throw new Exception($"Circuit with code {raceDto.CircuitCode} not found");
@@ -44,7 +39,7 @@ public class RaceService : IRaceService
             raceDto.CircuitId = circuit.Id;
             
             // Race API returns season, so we need check for season.
-            Season season = await _dataSyncRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
+            Season season = await dataSyncRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
             if (season == null)
             {
                 throw new Exception($"Season with year {raceDto.RaceDate.Year} not found");
@@ -53,10 +48,10 @@ public class RaceService : IRaceService
 
             Race race = StaticDataDtoMapper.MapDtoToRace(raceDto);
 
-            Race newRace = await _dataSyncRepository.AddRaceAsync(race);
+            Race newRace = await dataSyncRepository.AddRaceAsync(race);
             
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -82,7 +77,7 @@ public class RaceService : IRaceService
     
     public async Task<RaceDto> GetRaceByIdAsync(int id)
     {
-        Race race = await _dataSyncRepository.GetRaceByIdAsync(id);
+        Race race = await dataSyncRepository.GetRaceByIdAsync(id);
         if (race == null)
         {
             return null;
@@ -92,7 +87,7 @@ public class RaceService : IRaceService
 
     public async Task<RaceDto> GetRaceByRaceDateAsync(DateOnly date)
     {
-        Race race = await _dataSyncRepository.GetRaceByRaceDateAsync(date);
+        Race race = await dataSyncRepository.GetRaceByRaceDateAsync(date);
         if (race == null)
         {
             return null;
@@ -102,7 +97,7 @@ public class RaceService : IRaceService
 
     public async Task<int> GetRacesCountAsync()
     {
-        return await _dataSyncRepository.GetRacesCountAsync();
+        return await dataSyncRepository.GetRacesCountAsync();
     }
 
 }

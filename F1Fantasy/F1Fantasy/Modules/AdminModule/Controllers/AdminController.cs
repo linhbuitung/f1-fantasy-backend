@@ -16,36 +16,26 @@ namespace F1Fantasy.Modules.AdminModule.Controllers;
 
 [ApiController]
 [Route("api/admin")]
-public class AdminController : ControllerBase
+public class AdminController(
+    IUserService userService,
+    IAuthorizationService authorizationService,
+    IAdminService adminService,
+    ISeasonService seasonService)
+    : ControllerBase
 {
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IUserService _userService;
-    private readonly IAdminService _adminService;
-    private readonly ISeasonService _seasonService;
-
-    public AdminController(
-        IUserService userService,
-        IAuthorizationService authorizationService,
-        IAdminService adminService,
-        ISeasonService seasonService)
-    {
-        _userService = userService;
-        _authorizationService = authorizationService;
-        _adminService = adminService;
-        _seasonService = seasonService;
-    }
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     [HttpPut("user/{userId}/update-roles")]
     [Authorize(Roles = AppRoles.SuperAdmin)]
     public async Task<IActionResult> UpdateUserRoles(int userId, [FromBody] ApplicationUserForAdminUpdateDto dto)
     {
-        var user = await _userService.GetUserByIdAsync(userId);
+        var user = await userService.GetUserByIdAsync(userId);
         if (user == null)
         {
             return NotFound();
         }
         
-        ApplicationUserForAdminGetDto updatedUser = await _adminService.UpdateUserRoleAsync(userId, dto.Roles);
+        ApplicationUserForAdminGetDto updatedUser = await adminService.UpdateUserRoleAsync(userId, dto.Roles);
         return Ok(updatedUser);
     }
 
@@ -53,20 +43,20 @@ public class AdminController : ControllerBase
     [Authorize(Roles = AppRoles.SuperAdmin)]
     public async Task<IActionResult> StartSeason(int year)
     {
-        StaticDataModule.Dtos.SeasonDto seasonDto = await _seasonService.GetSeasonByYearAsync(year);
+        StaticDataModule.Dtos.SeasonDto seasonDto = await seasonService.GetSeasonByYearAsync(year);
         if (seasonDto == null)
         {
             return NotFound($"Season with year {year} does not exist.");
         }
         
-        SeasonDto startSeason = await _adminService.StartSeasonAsync(year);
+        SeasonDto startSeason = await adminService.StartSeasonAsync(year);
         return Ok(startSeason);
     }
     
     [HttpGet("season/active")]
     public async Task<IActionResult> GetActiveSeasonAsync()
     {
-        SeasonDto? seasonDto = await _adminService.GetActiveSeasonAsync();
+        SeasonDto? seasonDto = await adminService.GetActiveSeasonAsync();
         if (seasonDto == null)
         {
             return NotFound($"There is no active season currently");
@@ -79,13 +69,13 @@ public class AdminController : ControllerBase
     [Authorize(Roles = AppRoles.SuperAdmin)]
     public async Task<IActionResult> DeactivateActiveSeasonAsync()
     {
-        SeasonDto seasonDto = await _adminService.GetActiveSeasonAsync();
+        SeasonDto seasonDto = await adminService.GetActiveSeasonAsync();
         if (seasonDto == null)
         {
             return NotFound($"There is no active season currently");
         }
 
-        await _adminService.DeactivateActiveSeasonAsync();
+        await adminService.DeactivateActiveSeasonAsync();
         
         return Ok();
     }

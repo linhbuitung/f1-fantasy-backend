@@ -1,17 +1,10 @@
 ﻿namespace F1FantasyWorker.Modules.StaticDataModule.Dtos;
 
-public class SeasonDto
+public class SeasonDto(int? id, int year, bool isActive)
 {
-    public int? Id { get; set; }
+    public int? Id { get; set; } = id ?? null;
 
-    public int Year { get; set; }
+    public int Year { get; set; } = year;
 
-    public bool IsActive { get; set; }
-    
-    public SeasonDto(int? id, int year, bool isActive)
-    {
-        Id = id ?? null;
-        Year = year;
-        IsActive = isActive;
-    }
+    public bool IsActive { get; set; } = isActive;
 }

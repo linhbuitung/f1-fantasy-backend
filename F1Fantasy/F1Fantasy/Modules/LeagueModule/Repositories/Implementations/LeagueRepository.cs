@@ -5,32 +5,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Modules.LeagueModule.Repositories.Implementations;
 
-public class LeagueRepository : ILeagueRepository
+public class LeagueRepository(WooF1Context context) : ILeagueRepository
 {
-    private readonly WooF1Context _context;
-
-    public LeagueRepository(WooF1Context context)
-    {
-        _context = context;
-    }
-    
     public async Task<League> AddLeagueAsync(League league)
     {
-        _context.Leagues.Add(league);
-        await _context.SaveChangesAsync();
+        context.Leagues.Add(league);
+        await context.SaveChangesAsync();
         return league;
     }
 
     public async Task<UserLeague> AddUserLeagueAsync(UserLeague userLeague)
     {
-        _context.UserLeagues.Add(userLeague);
-        await _context.SaveChangesAsync();
+        context.UserLeagues.Add(userLeague);
+        await context.SaveChangesAsync();
         return userLeague;
     }
 
     public async Task<League?> GetLeagueByIdIncludesOwnerAndPlayersAsync(int leagueId)
     {
-        return await _context.Leagues
+        return await context.Leagues
             .Include(l => l.UserLeagues)
             .ThenInclude(ul => ul.User)
             .Include(l => l.User).FirstOrDefaultAsync(l => l.Id == leagueId);
@@ -38,15 +31,15 @@ public class LeagueRepository : ILeagueRepository
     
     public async Task<List<League>> GetAllLeaguesByOwnerIdAsync(int ownerId)
     {
-        return await _context.Leagues
+        return await context.Leagues
             .Where(l => l.OwnerId == ownerId)
             .ToListAsync();
     }
     
-    public async Task<List<League>> GetAllLeaguesByJoinedPlayerIdAsync(int ownerId)
+    public async Task<List<League>> GetAllLeaguesByJoinedPlayerIdAsync(int playerId)
     {
-        return await _context.UserLeagues
-            .Where(ul => ul.UserId == ownerId)
+        return await context.UserLeagues
+            .Where(ul => ul.UserId == playerId && ul.IsAccepted)
             .Select(ul => ul.League)
             .ToListAsync();
     }
@@ -54,14 +47,55 @@ public class LeagueRepository : ILeagueRepository
     public async Task DeleteLeagueByIdAsync(int leagueId)
     {
         // Delete related UserLeagues first due to foreign key constraints
-        var userLeagues = _context.UserLeagues.Where(ul => ul.LeagueId == leagueId);
-        _context.UserLeagues.RemoveRange(userLeagues);
+        var userLeagues = context.UserLeagues.Where(ul => ul.LeagueId == leagueId);
+        context.UserLeagues.RemoveRange(userLeagues);
         
-        var league = await _context.Leagues.FindAsync(leagueId);
+        var league = await context.Leagues.FindAsync(leagueId);
         if (league != null)
         {
-            _context.Leagues.Remove(league);
-            await _context.SaveChangesAsync();
+            context.Leagues.Remove(league);
+            await context.SaveChangesAsync();
         }
+    }
+
+    public async Task<UserLeague?> GetUserLeagueByIdAsync(int leagueId, int playerId)
+    {
+        return await context.UserLeagues.FirstOrDefaultAsync(ul => ul.LeagueId == leagueId && ul.UserId == playerId);
+    }
+
+    public async Task<UserLeague> UpdateUserLeagueAsync(UserLeague userLeague)
+    {
+        var existingUserLeague = await context.UserLeagues
+            .AsTracking()
+            .FirstOrDefaultAsync(ul => ul.LeagueId == userLeague.LeagueId && ul.UserId == userLeague.UserId);
+        
+        if (existingUserLeague != null)
+        {
+            existingUserLeague.IsAccepted = userLeague.IsAccepted;
+            await context.SaveChangesAsync();
+            return existingUserLeague;
+        }
+
+        throw new InvalidOperationException("UserLeague not found.");
+    }
+
+    public async Task DeleteUserLeagueByIdAsync(int leagueId, int playerId)
+    {
+        var existingUserLeague = await context.UserLeagues
+            .AsTracking()
+            .FirstOrDefaultAsync(ul => ul.LeagueId == leagueId && ul.UserId == playerId);
+        
+        if (existingUserLeague != null)
+        {
+            context.UserLeagues.Remove(existingUserLeague);
+            await context.SaveChangesAsync();
+            return;
+        }
+
+        throw new InvalidOperationException("UserLeague not found.");
+    }
+    public async Task<List<UserLeague>> GetAllWaitingJoinRequestsByLeagueIdAsync(int leagueId)
+    {
+        return await context.UserLeagues.Where(ul => ul.LeagueId == leagueId && !ul.IsAccepted).ToListAsync();
     }
 }

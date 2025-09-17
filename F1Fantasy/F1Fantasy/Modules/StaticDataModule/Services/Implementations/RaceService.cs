@@ -1,4 +1,5 @@
 ﻿using F1Fantasy.Core.Common;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.StaticDataModule.Dtos;
 using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
@@ -7,51 +8,43 @@ using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 
-public class RaceService : IRaceService
+public class RaceService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    : IRaceService
 {
-    private readonly IStaticDataRepository _staticDataRepository;
-    private readonly WooF1Context _context;
-
-    public RaceService(IStaticDataRepository staticDataRepository, WooF1Context context)
-    {
-        _staticDataRepository = staticDataRepository;
-        _context = context;
-    }
-    
     public async Task<RaceDto> AddRaceAsync(RaceDto raceDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            Race existingRace = await _staticDataRepository.GetRaceByRaceDateAsync(raceDto.RaceDate);
+            Race? existingRace = await staticDataRepository.GetRaceByRaceDateAsync(raceDto.RaceDate);
             if (existingRace != null)
             {
                 return null;
             }
             
             // Race API returns circuit, so we need check for circuit.
-            Circuit circuit = await _staticDataRepository.GetCircuitByCodeAsync(raceDto.CircuitCode);
+            Circuit? circuit = await staticDataRepository.GetCircuitByCodeAsync(raceDto.CircuitCode);
             if (circuit == null)
             {
-                throw new Exception($"Circuit with code {raceDto.CircuitCode} not found");
+                throw new NotFoundException($"Circuit with code {raceDto.CircuitCode} not found");
             }
             raceDto.CircuitId = circuit.Id;
             
             // Race API returns season, so we need check for season.
-            Season season = await _staticDataRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
+            Season? season = await staticDataRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
             if (season == null)
             {
-                throw new Exception($"Season with year {raceDto.RaceDate.Year} not found");
+                throw new NotFoundException($"Season with year {raceDto.RaceDate.Year} not found");
             }
             raceDto.SeasonId = season.Id;
 
             Race race = StaticDataDtoMapper.MapDtoToRace(raceDto);
 
-            Race newRace = await _staticDataRepository.AddRaceAsync(race);
+            Race newRace = await staticDataRepository.AddRaceAsync(race);
 
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -77,20 +70,20 @@ public class RaceService : IRaceService
     
     public async Task<RaceDto> GetRaceByIdAsync(int id)
     {
-        Race race = await _staticDataRepository.GetRaceByIdAsync(id);
+        Race? race = await staticDataRepository.GetRaceByIdAsync(id);
         if (race == null)
         {
-            return null;
+            throw new NotFoundException($"Race with id {id} not found");
         }
         return StaticDataDtoMapper.MapRaceToDto(race);
     }
 
     public async Task<RaceDto> GetRaceByRaceDateAsync(DateOnly date)
     {
-        Race race = await _staticDataRepository.GetRaceByRaceDateAsync(date);
+        Race? race = await staticDataRepository.GetRaceByRaceDateAsync(date);
         if (race == null)
         {
-            return null;
+            throw new NotFoundException($"Race with date {date} not found");
         }
         return StaticDataDtoMapper.MapRaceToDto(race);
     }

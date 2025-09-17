@@ -8,24 +8,16 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 {
-    public class ConstructorService : IConstructorService
+    public class ConstructorService(IDataSyncRepository dataSyncRepository, WooF1Context context)
+        : IConstructorService
     {
-        private readonly IDataSyncRepository _dataSyncRepository;
-        private readonly WooF1Context _context;
-
-        public ConstructorService(IDataSyncRepository dataSyncRepository, WooF1Context context)
-        {
-            _dataSyncRepository = dataSyncRepository;
-            _context = context;
-        }
-
         public async Task<ConstructorDto> AddConstructorAsync(ConstructorDto constructorDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
-                Constructor existingConstructor = await _dataSyncRepository.GetConstructorByCodeAsync(constructorDto.Code);
+                Constructor existingConstructor = await dataSyncRepository.GetConstructorByCodeAsync(constructorDto.Code);
                 if (existingConstructor != null)
                 {
                     return null;
@@ -33,7 +25,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 constructorDto = FixSpecialCountryCase(constructorDto);
                 
                 // Constructor API returns nationality, so we need check for nationality.
-                Country country = await _dataSyncRepository.GetCountryByNationalitityAsync(constructorDto.CountryId);
+                Country country = await dataSyncRepository.GetCountryByNationalitityAsync(constructorDto.CountryId);
                 if (country == null)
                 {
                     throw new Exception($"Country with nationality {constructorDto.CountryId} not found");
@@ -42,10 +34,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 
                 Constructor constructor = StaticDataDtoMapper.MapDtoToConstructor(constructorDto);
 
-                Constructor newConstructor = await _dataSyncRepository.AddConstructorAsync(constructor);
+                Constructor newConstructor = await dataSyncRepository.AddConstructorAsync(constructor);
 
                 // Additional operations that need atomicity (example: logging the event)
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -71,13 +63,13 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         //get
         public async Task<ConstructorDto> GetConstructorByIdAsync(int id)
         {
-            Constructor constructor = await _dataSyncRepository.GetConstructorByIdAsync(id);
+            Constructor constructor = await dataSyncRepository.GetConstructorByIdAsync(id);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
         }
 
         public async Task<ConstructorDto> GetConstructorByCodeAsync(string code)
         {
-            Constructor constructor = await _dataSyncRepository.GetConstructorByCodeAsync(code);
+            Constructor constructor = await dataSyncRepository.GetConstructorByCodeAsync(code);
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
         }
         
@@ -97,7 +89,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<int> GetConstructorsCountAsync()
         {
-            return await _dataSyncRepository.GetConstructorsCountAsync();
+            return await dataSyncRepository.GetConstructorsCountAsync();
         }
     }
 }

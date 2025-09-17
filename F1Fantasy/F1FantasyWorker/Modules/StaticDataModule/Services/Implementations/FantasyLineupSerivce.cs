@@ -8,25 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
 
-public class FantasyLineupSerivce : IFantasyLineupService
+public class FantasyLineupSerivce(IDataSyncRepository dataSyncRepository, WooF1Context context)
+    : IFantasyLineupService
 {
-    private readonly IDataSyncRepository _dataSyncRepository;
-    private readonly WooF1Context _context;
-
-    public FantasyLineupSerivce(IDataSyncRepository dataSyncRepository, WooF1Context context)
-    {
-        _dataSyncRepository = dataSyncRepository;
-        _context = context;
-    }
-
     // This does not have transaction since its used in the scope of another transaction in Race Service
     public async Task<FantasyLineupDto> AddFantasyLineupAsyncWithNoTransaction(FantasyLineupDto fantasyLineupDto)
     {
         try
         {
             // Check if user and race exist
-            AspNetUser user = await _dataSyncRepository.GetUserByIdAsync(fantasyLineupDto.UserId);
-            Race race = await _dataSyncRepository.GetRaceByIdAsync(fantasyLineupDto.RaceId);
+            AspNetUser user = await dataSyncRepository.GetUserByIdAsync(fantasyLineupDto.UserId);
+            Race race = await dataSyncRepository.GetRaceByIdAsync(fantasyLineupDto.RaceId);
 
             if(user == null)
             {
@@ -38,7 +30,7 @@ public class FantasyLineupSerivce : IFantasyLineupService
                 throw new Exception($"Race with id {fantasyLineupDto.RaceId} not found");
             }
 
-            FantasyLineup existingFantasyLineup = await _dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(fantasyLineupDto.UserId, fantasyLineupDto.RaceId);
+            FantasyLineup existingFantasyLineup = await dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(fantasyLineupDto.UserId, fantasyLineupDto.RaceId);
             if (existingFantasyLineup != null)
             {
                 return null;
@@ -46,10 +38,10 @@ public class FantasyLineupSerivce : IFantasyLineupService
 
             FantasyLineup fantasyLineup = StaticDataDtoMapper.MapDtoToFantasyLineup(fantasyLineupDto);
 
-            FantasyLineup newFantasyLineup = await _dataSyncRepository.AddFantasyLineupAsync(fantasyLineup);
+            FantasyLineup newFantasyLineup = await dataSyncRepository.AddFantasyLineupAsync(fantasyLineup);
 
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             
             return StaticDataDtoMapper.MapFantasyLineupToDto(newFantasyLineup);
         }
@@ -63,18 +55,18 @@ public class FantasyLineupSerivce : IFantasyLineupService
 
     public async Task AddFantasyLineupForAllUsersInASeasonAsync(int year)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            var userIds = await _dataSyncRepository.GetAllUserIdsAsync();
-            var racesInSeason = await _dataSyncRepository.GetAllRaceIdsByYearAsync(year);
+            var userIds = await dataSyncRepository.GetAllUserIdsAsync();
+            var racesInSeason = await dataSyncRepository.GetAllRaceIdsByYearAsync(year);
 
             foreach (var userId in userIds)
             {
                 foreach (var raceId in racesInSeason)
                 {
-                    FantasyLineup existingFantasyLineup = await _dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(userId, raceId);
+                    FantasyLineup existingFantasyLineup = await dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(userId, raceId);
                     if (existingFantasyLineup != null)
                     {
                         continue;
@@ -88,7 +80,7 @@ public class FantasyLineupSerivce : IFantasyLineupService
                     
                     FantasyLineup fantasyLineup = StaticDataDtoMapper.MapDtoToFantasyLineup(fantasyLineupDto);
 
-                    FantasyLineup newFantasyLineup = await _dataSyncRepository.AddFantasyLineupAsync(fantasyLineup);
+                    FantasyLineup newFantasyLineup = await dataSyncRepository.AddFantasyLineupAsync(fantasyLineup);
                 }
             }
             await transaction.CommitAsync();

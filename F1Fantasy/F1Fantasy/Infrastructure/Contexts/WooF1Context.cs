@@ -7,19 +7,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace F1Fantasy.Infrastructure.Contexts
 {
-    public class WooF1Context : IdentityDbContext<ApplicationUser,
+    public class WooF1Context(DbContextOptions<WooF1Context> options) : IdentityDbContext<ApplicationUser,
         ApplicationRole,
         /*key type*/int,
         ApplicationUserClaim,
         ApplicationUserRole,
         ApplicationUserLogin,
         ApplicationRoleClaim,
-        ApplicationUserToken>
+        ApplicationUserToken>(options)
     {
-        public WooF1Context(DbContextOptions<WooF1Context> options) : base(options)
-        {
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -42,6 +38,8 @@ namespace F1Fantasy.Infrastructure.Contexts
         public virtual DbSet<FantasyLineup> FantasyLineups { get; set; }
 
         public virtual DbSet<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
+        
+        public virtual DbSet<FantasyLineupConstructor> FantasyLineupConstructors { get; set; }
 
         public virtual DbSet<League> Leagues { get; set; }
 
@@ -61,6 +59,8 @@ namespace F1Fantasy.Infrastructure.Contexts
         
         public virtual DbSet<Season> Seasons { get; set; }
         
+        public virtual DbSet<PickableItem> PickableItems { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -70,6 +70,7 @@ namespace F1Fantasy.Infrastructure.Contexts
             modelBuilder.ApplyConfiguration(new DriverPredictionConfiguration());
             modelBuilder.ApplyConfiguration(new FantasyLineupConfiguration());
             modelBuilder.ApplyConfiguration(new FantasyLineupDriverConfiguration());
+            modelBuilder.ApplyConfiguration(new FantasyLineupConstructorConfiguration());
             modelBuilder.ApplyConfiguration(new PowerupFantasyLineupConfiguration());
             modelBuilder.ApplyConfiguration(new UserLeagueConfiguration());
             modelBuilder.ApplyConfiguration(new LeagueConfiguration());
@@ -83,6 +84,7 @@ namespace F1Fantasy.Infrastructure.Contexts
             modelBuilder.ApplyConfiguration(new CountryConfiguration());
             modelBuilder.ApplyConfiguration(new PowerupConfiguration());
             modelBuilder.ApplyConfiguration(new SeasonConfiguration());
+            modelBuilder.ApplyConfiguration(new PickableItemConfiguration());
         }
     }
 }

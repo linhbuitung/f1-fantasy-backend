@@ -8,46 +8,46 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
         //DriverDto GetDriverById(int id);
         Task<Driver> AddDriverAsync(Driver driver);
 
-        Task<Driver> GetDriverByIdAsync(int id);
+        Task<Driver?> GetDriverByIdAsync(int id);
 
-        Task<Driver> GetDriverByCodeAsync(string code);
+        Task<Driver?> GetDriverByCodeAsync(string code);
 
         Task<Constructor> AddConstructorAsync(Constructor constructor);
 
-        Task<Constructor> GetConstructorByIdAsync(int id);
+        Task<Constructor?> GetConstructorByIdAsync(int id);
 
-        Task<Constructor> GetConstructorByCodeAsync(string code);
+        Task<Constructor?> GetConstructorByCodeAsync(string code);
 
         Task<Circuit> AddCircuitAsync(Circuit circuit);
 
-        Task<Circuit> GetCircuitByIdAsync(int id);
+        Task<Circuit?> GetCircuitByIdAsync(int id);
 
-        Task<Circuit> GetCircuitByCodeAsync(string code);
+        Task<Circuit?> GetCircuitByCodeAsync(string code);
 
         Task<Country> AddCountryAsync(Country country);
 
-        Task<Country> GetCountryByIdAsync(string id);
+        Task<Country?> GetCountryByIdAsync(string id);
 
-        Task<Country> GetCountryByNationalitityAsync(string nationality);
+        Task<Country?> GetCountryByNationalityAsync(string nationality);
 
-        Task<Country> GetCountryByShortNameAsync(string shortName);
+        Task<Country?> GetCountryByShortNameAsync(string shortName);
         Task<Race> AddRaceAsync(Race race);
 
-        Task<Race> GetRaceByIdAsync(int id);
+        Task<Race?> GetRaceByIdAsync(int id);
 
-        Task<Race> GetRaceByRaceDateAsync(DateOnly date);
+        Task<Race?> GetRaceByRaceDateAsync(DateOnly date);
 
         Task<Powerup> AddPowerupAsync(Powerup powerup);
 
-        Task<Powerup> GetPowerupByIdAsync(int id);
+        Task<Powerup?> GetPowerupByIdAsync(int id);
 
-        Task<Powerup> GetPowerupByTypeAsync(string type);
+        Task<Powerup?> GetPowerupByTypeAsync(string type);
 
         Task<Season> AddSeasonAsync(Season season);
 
-        Task<Season> GetSeasonByIdAsync(int id);
+        Task<Season?> GetSeasonByIdAsync(int id);
 
-        Task<Season> GetSeasonByYearAsync(int year);
+        Task<Season?> GetSeasonByYearAsync(int year);
         //void UpdateDriver(DriverDto driver);
         // void DeleteDriver(int id);
     }

@@ -8,24 +8,16 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
 
-public class SeasonService : ISeasonService
+public class SeasonService(IDataSyncRepository dataSyncRepository, WooF1Context context)
+    : ISeasonService
 {
-    private readonly IDataSyncRepository _dataSyncRepository;
-    private readonly WooF1Context _context;
-
-    public SeasonService(IDataSyncRepository dataSyncRepository, WooF1Context context)
-    {
-        _dataSyncRepository = dataSyncRepository;
-        _context = context;
-    }
-    
     public async Task<SeasonDto> AddSeasonAsync(SeasonDto seasonDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            Season existingSeason = await _dataSyncRepository.GetSeasonByYearAsync(seasonDto.Year);
+            Season existingSeason = await dataSyncRepository.GetSeasonByYearAsync(seasonDto.Year);
             if (existingSeason != null)
             {
                 return null;
@@ -33,10 +25,10 @@ public class SeasonService : ISeasonService
 
             Season season = StaticDataDtoMapper.MapDtoToSeason(seasonDto);
 
-            Season newSeason = await _dataSyncRepository.AddSeasonAsync(season);
+            Season newSeason = await dataSyncRepository.AddSeasonAsync(season);
 
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -62,7 +54,7 @@ public class SeasonService : ISeasonService
 
     public async Task<SeasonDto> GetSeasonByIdAsync(int id)
     {
-        Season season = await _dataSyncRepository.GetSeasonByIdAsync(id);
+        Season season = await dataSyncRepository.GetSeasonByIdAsync(id);
         if (season == null)
         {
             return null;
@@ -72,7 +64,7 @@ public class SeasonService : ISeasonService
 
     public async Task<SeasonDto> GetSeasonByYearAsync(int year)
     {
-        Season season = await _dataSyncRepository.GetSeasonByYearAsync(year);
+        Season season = await dataSyncRepository.GetSeasonByYearAsync(year);
         if (season == null)
         {
             return null;
@@ -82,6 +74,6 @@ public class SeasonService : ISeasonService
     
     public async Task<int> GetSeasonsCountAsync()
     {
-        return await _dataSyncRepository.GetSeasonsCountAsync();
+        return await dataSyncRepository.GetSeasonsCountAsync();
     }
 }

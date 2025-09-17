@@ -6,15 +6,8 @@ namespace F1Fantasy.Modules.TestModule.Controllers;
 
 [ApiController]
 [Route("api/test")]
-public class TestController : ControllerBase
+public class TestController(IAuthorizationService authorizationService) : ControllerBase
 {
-    private readonly IAuthorizationService _authorizationService;
-
-    public TestController(IAuthorizationService authorizationService)
-    {
-        _authorizationService = authorizationService;
-    }
-    
     [HttpGet("health")]
     public IActionResult GeatHealthCheck()
     {
@@ -73,7 +66,7 @@ public class TestController : ControllerBase
     [HttpGet("get-own-resource/{userId}")]
     public async Task<IActionResult> GetOwnResource(int userId)
     {
-        var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();

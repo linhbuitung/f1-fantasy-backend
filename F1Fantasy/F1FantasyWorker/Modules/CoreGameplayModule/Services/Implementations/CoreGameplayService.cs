@@ -13,31 +13,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1FantasyWorker.Modules.CoreGameplayModule.Services.Implementations;
 
-public class CoreGameplayService : ICoreGameplayService
+public class CoreGameplayService(
+     IPowerupSyncService powerupSyncService,
+     ICoreGameplayRepository coreGameplayRepository,
+     IConfiguration configuration,
+     WooF1Context context)
+     : ICoreGameplayService
 {
-     private readonly IPowerupSyncService _powerupSyncService;
-     private readonly ICoreGameplayRepository _coreGameplayRepository;
-     private readonly WooF1Context _context;
-
-     public CoreGameplayService(IPowerupSyncService powerupSyncService, ICoreGameplayRepository coreGameplayRepository, WooF1Context context)
-     {
-          _powerupSyncService = powerupSyncService;
-          _coreGameplayRepository = coreGameplayRepository;
-          _context = context;
-     }
-    
      public async Task<Race?> CalculatePointsForAllUsersInLastestFinishedRaceAsync()
      {
-          using var transaction = await _context.Database.BeginTransactionAsync();
+          using var transaction = await context.Database.BeginTransactionAsync();
 
           // Get powerups
-          var powerupDtos = await _powerupSyncService.GetPowerupsFromStaticResourcesAsync();
+          var powerupDtos = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
           try
           {
                var lastestFinishedRace = GetLatestFinishedRaceInCurrentSeasonWithResultAsync().Result;
-          
+               
                if(lastestFinishedRace == null || lastestFinishedRace.Calculated) return null;
                
+               // Ensure its at least a day currently after the race date
+               var raceCalculationDeadline = lastestFinishedRace.RaceDate.AddDays(1);
+               if(raceCalculationDeadline <= DateOnly.FromDateTime(DateTime.Now)) return null;
+                    
                foreach (var raceEntry in lastestFinishedRace.RaceEntries)
                {
                     int point = 0;
@@ -48,13 +46,13 @@ public class CoreGameplayService : ICoreGameplayService
                     raceEntry.PointsGained = point;
                }
           
-               await _context.Entry(lastestFinishedRace).Collection(r => r.FantasyLineups).LoadAsync();
+               await context.Entry(lastestFinishedRace).Collection(r => r.FantasyLineups).LoadAsync();
 
                var driverPoints = lastestFinishedRace.RaceEntries.ToDictionary(e => e.DriverId, e => e.PointsGained);
 
                foreach (var lineup in lastestFinishedRace.FantasyLineups)
                {
-                    await _context.Entry(lineup).Collection(l => l.DriversNavigation).LoadAsync();
+                    await context.Entry(lineup).Collection(l => l.DriversNavigation).LoadAsync();
 
                     // Create dictionary to hold driverId and points
                     var pointFromOwnedDriversInLineUp = new Dictionary<int, int>();
@@ -70,7 +68,7 @@ public class CoreGameplayService : ICoreGameplayService
                          }
                     }
                     // Load powerups from fantasy lineup
-                    await _context.Entry(lineup).Collection(l => l.PowerupFantasyLineups).LoadAsync();
+                    await context.Entry(lineup).Collection(l => l.PowerupFantasyLineups).LoadAsync();
                     
                     // Get all powerups in the lineup by joining with powerups table
                     var powerUpOwned = lineup.PowerupFantasyLineups
@@ -80,7 +78,7 @@ public class CoreGameplayService : ICoreGameplayService
                               (pl, p) => CoreGameplayDtoMapper.MapToPowerupForPointApplicationDto(p, pl))
                          .ToList();
                     
-                    int transferPointsDeducted = ApplyPowerupToDriverPointsAndCalculateTransferPointDeducted(pointFromOwnedDriversInLineUp, powerUpOwned, lineup.TransferPointsDeducted);
+                    int transferPointsDeducted = ApplyPowerupToDriverPointsAndCalculateTransferPointDeducted(pointFromOwnedDriversInLineUp, powerUpOwned, lineup.TransfersMade);
 
                     // sum up all points from drivers in lineup
                     var totalPointFromDrivers = pointFromOwnedDriversInLineUp.Values.Sum();
@@ -92,7 +90,7 @@ public class CoreGameplayService : ICoreGameplayService
 
                lastestFinishedRace.Calculated = true;
                
-               await _context.SaveChangesAsync();
+               await context.SaveChangesAsync();
                await transaction.CommitAsync();
                
                return lastestFinishedRace;
@@ -108,9 +106,12 @@ public class CoreGameplayService : ICoreGameplayService
      }
      
      // Apply powerup effects to the points of drivers in the lineup and return the final transfer points deducted
-     private int ApplyPowerupToDriverPointsAndCalculateTransferPointDeducted(Dictionary<int, int> pointFromOwnedDriversInLineUp, List<PowerupForPointApplicationDto> powerupsUsed, int transferPointsDeducted)
+     private int ApplyPowerupToDriverPointsAndCalculateTransferPointDeducted(Dictionary<int, int> pointFromOwnedDriversInLineUp, List<PowerupForPointApplicationDto> powerupsUsed, int transfersMade)
      {
-          var finalTransferPointsDeducted = transferPointsDeducted;
+          var freeChanges = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:FreeLineupChanges").Get<int>();
+          var penaltyPerExceedingItem = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:PenaltyPerExceedingItem").Get<int>();
+
+          var finalTransferPointsDeducted = transfersMade - freeChanges > 0 ? (transfersMade - freeChanges) * penaltyPerExceedingItem : 0;
           foreach (var powerupUsed in powerupsUsed)
           {
                switch (powerupUsed.Type)
@@ -147,7 +148,7 @@ public class CoreGameplayService : ICoreGameplayService
      private async Task<Race?> GetLatestFinishedRaceInCurrentSeasonWithResultAsync()
      {
           DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
-          return await _context.Races
+          return await context.Races
                .Where(r => r.DeadlineDate < currentDate)
                .OrderByDescending(r => r.DeadlineDate)
                .Include(r => r.RaceEntries)
@@ -158,12 +159,12 @@ public class CoreGameplayService : ICoreGameplayService
      // This method is to migrate / copy fantasy lineups from the previous race to this race
      public async Task MigrateFantasyLineupsToNextRaceAsync(Race previousRace)
      {
-          using var transaction = await _context.Database.BeginTransactionAsync();
+          using var transaction = await context.Database.BeginTransactionAsync();
           
           try
           {
                // Get race to be migrated to
-               Race raceToBeMigratedTo = await _context.Races.FirstOrDefaultAsync(r => r.SeasonId == previousRace.SeasonId && r.Round == previousRace.Round + 1);
+               Race raceToBeMigratedTo = await context.Races.FirstOrDefaultAsync(r => r.SeasonId == previousRace.SeasonId && r.Round == previousRace.Round + 1);
                
                if (raceToBeMigratedTo == null || raceToBeMigratedTo.Round == 1 )
                {
@@ -171,8 +172,8 @@ public class CoreGameplayService : ICoreGameplayService
                }
                
                // Load fantasy lineups for the 2 races
-               await _context.Entry(raceToBeMigratedTo).Collection(r => r.FantasyLineups).LoadAsync();
-               await _context.Entry(previousRace).Collection(r => r.FantasyLineups).LoadAsync();
+               await context.Entry(raceToBeMigratedTo).Collection(r => r.FantasyLineups).LoadAsync();
+               await context.Entry(previousRace).Collection(r => r.FantasyLineups).LoadAsync();
                foreach (var previousFantasyLineup in previousRace.FantasyLineups)
                {
                     var newFantasyLineup = raceToBeMigratedTo.FantasyLineups.FirstOrDefault(f => f.UserId == previousFantasyLineup.UserId);
@@ -181,8 +182,8 @@ public class CoreGameplayService : ICoreGameplayService
                          throw new Exception("New FantasyLineup not existed");
                     }
                     
-                    await _context.Entry(previousFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
-                    await _context.Entry(newFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
+                    await context.Entry(previousFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
+                    await context.Entry(newFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
 
                     // copy all connection to drivers from previous race to new
                     foreach (var driver in previousFantasyLineup.DriversNavigation)
@@ -192,13 +193,13 @@ public class CoreGameplayService : ICoreGameplayService
                               continue;
                          }
                          
-                         await _coreGameplayRepository.AddFantasyLineupDriverAsync(newFantasyLineup, driver);
+                         await coreGameplayRepository.AddFantasyLineupDriverAsync(newFantasyLineup, driver);
                     }
-                    // transfer points deducted
-                    newFantasyLineup.TransferPointsDeducted = 0;
+                    // transfer made
+                    newFantasyLineup.TransfersMade = 0;
                }
                
-               await _context.SaveChangesAsync();
+               await context.SaveChangesAsync();
                await transaction.CommitAsync();
           }
           catch (Exception ex)

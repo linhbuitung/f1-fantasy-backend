@@ -1,4 +1,5 @@
 ﻿using F1Fantasy.Core.Common;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.StaticDataModule.Dtos;
 using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
@@ -7,24 +8,16 @@ using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 
-public class PowerupService : IPowerupService
+public class PowerupService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    : IPowerupService
 {
-    private readonly IStaticDataRepository _staticDataRepository;
-    private readonly WooF1Context _context;
-
-    public PowerupService(IStaticDataRepository staticDataRepository, WooF1Context context)
-    {
-        _staticDataRepository = staticDataRepository;
-        _context = context;
-    }
-    
     public async Task<PowerupDto> AddPowerupAsync(PowerupDto powerupDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            Powerup existingPowerup = await _staticDataRepository.GetPowerupByTypeAsync(powerupDto.Type);
+            Powerup? existingPowerup = await staticDataRepository.GetPowerupByTypeAsync(powerupDto.Type);
             if (existingPowerup != null)
             {
                 return null;
@@ -32,10 +25,10 @@ public class PowerupService : IPowerupService
             
             Powerup powerup = StaticDataDtoMapper.MapDtoToPowerup(powerupDto);
 
-            Powerup newPowerup = await _staticDataRepository.AddPowerupAsync(powerup);
+            Powerup newPowerup = await staticDataRepository.AddPowerupAsync(powerup);
 
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -61,20 +54,20 @@ public class PowerupService : IPowerupService
     
     public async Task<PowerupDto> GetPowerupByIdAsync(int id)
     {
-        Powerup powerup = await _staticDataRepository.GetPowerupByIdAsync(id);
+        Powerup? powerup = await staticDataRepository.GetPowerupByIdAsync(id);
         if (powerup == null)
         {
-            return null;
+            throw new NotFoundException($"Powerup with id {id} not found");
         }
         return StaticDataDtoMapper.MapPowerupToDto(powerup);
     }
 
     public async Task<PowerupDto> GetPowerupByTypeAsync(string type)
     {
-        Powerup powerup = await _staticDataRepository.GetPowerupByTypeAsync(type);
+        Powerup? powerup = await staticDataRepository.GetPowerupByTypeAsync(type);
         if (powerup == null)
         {
-            return null;
+            throw new NotFoundException($"Powerup with type {type} not found");
         }
         return StaticDataDtoMapper.MapPowerupToDto(powerup);
     }

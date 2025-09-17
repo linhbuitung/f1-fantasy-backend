@@ -5,18 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Modules.UserModule.Repositories.Implementations;
 
-public class UserRepository : IUserRepository
+public class UserRepository(WooF1Context context) : IUserRepository
 {
-    private readonly WooF1Context _context;
-
-    public UserRepository(WooF1Context context)
-    {
-        _context = context;
-    }
-
     public async Task<ApplicationUser> UpdateUserAsync(ApplicationUser user)
     {
-        ApplicationUser existingUser = await _context.Users.AsTracking().FirstOrDefaultAsync(u => u.Id == user.Id);
+        ApplicationUser existingUser = await context.Users.AsTracking().FirstOrDefaultAsync(u => u.Id == user.Id);
         // Update only the properties ưe want to allow
         if (existingUser != null)
         {
@@ -27,9 +20,9 @@ public class UserRepository : IUserRepository
             existingUser.DriverId = user.DriverId;
             existingUser.CountryId = user.CountryId;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             
-            return await _context.Users
+            return await context.Users
                 .Include(u => u.Constructor)
                 .Include(u => u.Driver)
                 .Include(u => u.Country)
@@ -42,7 +35,7 @@ public class UserRepository : IUserRepository
 
     public async Task<ApplicationUser?> GetUserByIdAsync(int id)
     {
-        return await _context.Users
+        return await context.Users
             .Include(u => u.Constructor)
             .Include(u => u.Driver)
             .Include(u => u.Country)
@@ -52,7 +45,7 @@ public class UserRepository : IUserRepository
 
     public async Task<List<ApplicationUser>> FindUserByDisplayNameAsync(string name)
     {
-        return await _context.Users
+        return await context.Users
             .Include(u => u.Constructor)
             .Include(u => u.Driver)
             .Include(u => u.Country)

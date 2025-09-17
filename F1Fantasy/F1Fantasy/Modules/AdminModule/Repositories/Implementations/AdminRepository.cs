@@ -8,36 +8,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Modules.AdminModule.Repositories.Implementations;
 
-public class AdminRepository : IAdminRepository
+public class AdminRepository(WooF1Context context) : IAdminRepository
 {
-    private readonly WooF1Context _context;
-
-    public AdminRepository(WooF1Context context)
-    {
-        _context = context;
-    }
-    
     public async Task<Season> UpdateSeasonStatusAsync(int year, bool isActive)
     {
-        Season season = await _context.Seasons.AsTracking().FirstOrDefaultAsync(s => s.Year == year);
+        Season season = await context.Seasons.AsTracking().FirstOrDefaultAsync(s => s.Year == year);
         if (season == null)
         {
             throw new InvalidOperationException($"Season with year {year} does not exist.");
         } 
         season.IsActive = isActive;
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return season;
     }
     
     public async Task<Season?> GetActiveSeasonAsync()
     {
-        return await _context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.IsActive);
+        return await context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.IsActive);
     }
 
     public async Task<List<ApplicationRole>> GetAllRolesAsync()
     {
-        return await _context.Roles.AsNoTracking().ToListAsync();
+        return await context.Roles.AsNoTracking().ToListAsync();
     }
     public async Task<ApplicationUser> UpdateUserRoleAsync(int userId, List<string> roleNames)
     {
@@ -49,23 +42,23 @@ public class AdminRepository : IAdminRepository
         }*/
 
         // Get all roles from DB
-        List<ApplicationRole> availableRoles = await _context.Roles.AsNoTracking().ToListAsync();
+        List<ApplicationRole> availableRoles = await context.Roles.AsNoTracking().ToListAsync();
         var selectedRoles = availableRoles.Where(r => roleNames.Contains(r.Name)).ToList();
 
         // Remove all existing roles 
-        List<ApplicationUserRole> userRoles = await _context.UserRoles
+        List<ApplicationUserRole> userRoles = await context.UserRoles
             .Where(ur => ur.UserId == userId)
             .ToListAsync();
-        _context.UserRoles.RemoveRange(userRoles);
+        context.UserRoles.RemoveRange(userRoles);
 
         // Add missing roles 
         foreach (var role in selectedRoles)
         {
-            _context.UserRoles.Add(new ApplicationUserRole { UserId = userId, RoleId = role.Id });
+            context.UserRoles.Add(new ApplicationUserRole { UserId = userId, RoleId = role.Id });
         }
 
-        await _context.SaveChangesAsync();
-        return await _context.Users
+        await context.SaveChangesAsync();
+        return await context.Users
             .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == userId);    

@@ -8,31 +8,23 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 {
-    public class CircuitService : ICircuitService
+    public class CircuitService(IDataSyncRepository dataSyncRepository, WooF1Context context)
+        : ICircuitService
     {
-        private readonly IDataSyncRepository _dataSyncRepository;
-        private readonly WooF1Context _context;
-
-        public CircuitService(IDataSyncRepository dataSyncRepository, WooF1Context context)
-        {
-            _dataSyncRepository = dataSyncRepository;
-            _context = context;
-        }
-
         public async Task<CircuitDto> AddCircuitAsync(CircuitDto circuitDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
-                Circuit existingCircuit = await _dataSyncRepository.GetCircuitByCodeAsync(circuitDto.Code);
+                Circuit existingCircuit = await dataSyncRepository.GetCircuitByCodeAsync(circuitDto.Code);
                 if (existingCircuit != null)
                 {
                     return null;
                 }
                 
                 // Circuit API returns country name, so we need check for short name.
-                Country country = await _dataSyncRepository.GetCountryByShortNameAsync(circuitDto.CountryId);
+                Country country = await dataSyncRepository.GetCountryByShortNameAsync(circuitDto.CountryId);
                 if (country == null)
                 {
                     throw new Exception($"Country with name {circuitDto.CountryId} not found");
@@ -41,10 +33,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 
                 Circuit circuit = StaticDataDtoMapper.MapDtoToCircuit(circuitDto);
 
-                Circuit newDircuit = await _dataSyncRepository.AddCircuitAsync(circuit);
+                Circuit newDircuit = await dataSyncRepository.AddCircuitAsync(circuit);
 
                 // Additional operations that need atomicity (example: logging the event)
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -70,7 +62,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         //get
         public async Task<CircuitDto> GetCircuitByIdAsync(int id)
         {
-            Circuit circuit = await _dataSyncRepository.GetCircuitByIdAsync(id);
+            Circuit circuit = await dataSyncRepository.GetCircuitByIdAsync(id);
             if (circuit == null)
             {
                 return null;
@@ -80,7 +72,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<CircuitDto> GetCircuitByCodeAsync(string code)
         {
-            Circuit circuit = await _dataSyncRepository.GetCircuitByCodeAsync(code);
+            Circuit circuit = await dataSyncRepository.GetCircuitByCodeAsync(code);
             if (circuit == null)
             {
                 return null;
@@ -90,7 +82,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<int> GetCircuitsCountAsync()
         {
-            return await _dataSyncRepository.GetCircuitsCountAsync();
+            return await dataSyncRepository.GetCircuitsCountAsync();
         }
     }
 }

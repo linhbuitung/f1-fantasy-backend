@@ -12,7 +12,14 @@ public interface ILeagueRepository
 
     Task<List<League>> GetAllLeaguesByOwnerIdAsync(int ownerId);
 
-    Task<List<League>> GetAllLeaguesByJoinedPlayerIdAsync(int ownerId);
+    Task<List<League>> GetAllLeaguesByJoinedPlayerIdAsync(int playerId);
     
+    Task<List<UserLeague>> GetAllWaitingJoinRequestsByLeagueIdAsync(int leagueId);
+    
+    Task<UserLeague?> GetUserLeagueByIdAsync(int leagueId, int playerId);
+    
+    Task<UserLeague> UpdateUserLeagueAsync(UserLeague userLeague);
+    
+    Task DeleteUserLeagueByIdAsync(int leagueId, int playerId);
     Task DeleteLeagueByIdAsync(int leagueId);
 }

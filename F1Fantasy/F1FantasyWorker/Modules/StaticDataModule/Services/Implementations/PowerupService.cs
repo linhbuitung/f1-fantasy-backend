@@ -7,24 +7,16 @@ using F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations;
 
-public class PowerupService : IPowerupService
+public class PowerupService(IDataSyncRepository dataSyncRepository, WooF1Context context)
+    : IPowerupService
 {
-    private readonly IDataSyncRepository _dataSyncRepository;
-    private readonly WooF1Context _context;
-
-    public PowerupService(IDataSyncRepository dataSyncRepository, WooF1Context context)
-    {
-        _dataSyncRepository = dataSyncRepository;
-        _context = context;
-    }
-    
     public async Task<PowerupDto> AddPowerupAsync(PowerupDto powerupDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            Powerup existingPowerup = await _dataSyncRepository.GetPowerupByTypeAsync(powerupDto.Type);
+            Powerup existingPowerup = await dataSyncRepository.GetPowerupByTypeAsync(powerupDto.Type);
             if (existingPowerup != null)
             {
                 return null;
@@ -32,10 +24,10 @@ public class PowerupService : IPowerupService
             
             Powerup powerup = StaticDataDtoMapper.MapDtoToPowerup(powerupDto);
 
-            Powerup newPowerup = await _dataSyncRepository.AddPowerupAsync(powerup);
+            Powerup newPowerup = await dataSyncRepository.AddPowerupAsync(powerup);
 
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -61,7 +53,7 @@ public class PowerupService : IPowerupService
     
     public async Task<PowerupDto> GetPowerupByIdAsync(int id)
     {
-        Powerup powerup = await _dataSyncRepository.GetPowerupByIdAsync(id);
+        Powerup powerup = await dataSyncRepository.GetPowerupByIdAsync(id);
         if (powerup == null)
         {
             return null;
@@ -71,7 +63,7 @@ public class PowerupService : IPowerupService
 
     public async Task<PowerupDto> GetPowerupByTypeAsync(string type)
     {
-        Powerup powerup = await _dataSyncRepository.GetPowerupByTypeAsync(type);
+        Powerup powerup = await dataSyncRepository.GetPowerupByTypeAsync(type);
         if (powerup == null)
         {
             return null;

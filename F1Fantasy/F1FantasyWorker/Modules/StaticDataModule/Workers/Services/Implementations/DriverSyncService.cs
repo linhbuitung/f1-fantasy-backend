@@ -6,18 +6,12 @@ using Newtonsoft.Json;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services.Implementations;
 
-public class DriverSyncService : IDriverSyncService
+public class DriverSyncService(
+    HttpClient httpClient,
+    IServiceScopeFactory scopeFactory,
+    WorkerConfigurationService workerConfig)
+    : IDriverSyncService
 {
-    private readonly WorkerConfigurationService _workerConfig;
-    private readonly HttpClient _httpClient;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public DriverSyncService(HttpClient httpClient, IServiceScopeFactory scopeFactory, WorkerConfigurationService workerConfig)
-    {
-        _scopeFactory = scopeFactory;
-        _httpClient = httpClient;
-        _workerConfig = workerConfig;
-    }
     public class DriverTableDto
     {
         public List<DriverApiDto> Drivers { get; set; }
@@ -36,7 +30,7 @@ public class DriverSyncService : IDriverSyncService
 
     public async Task<List<DriverApiDto>> GetDriversFromApiAsync()
     {
-        int limit = _workerConfig.SyncRequestLimit;
+        int limit = workerConfig.SyncRequestLimit;
         int offset = 0;
         string queryParams;
         string apiUrl;
@@ -46,12 +40,12 @@ public class DriverSyncService : IDriverSyncService
         bool condition = true;
         while (condition)
         {
-            await Task.Delay(_workerConfig.DelayBetweenRequests);
+            await Task.Delay(workerConfig.DelayBetweenRequests);
 
             queryParams = $"limit={limit}&offset={offset}";
             apiUrl = $"https://api.jolpi.ca/ergast/f1/drivers/?{queryParams}";
 
-            var response = await _httpClient.GetStringAsync(apiUrl);
+            var response = await httpClient.GetStringAsync(apiUrl);
             if (string.IsNullOrEmpty(response))
             {
                 break;
@@ -69,7 +63,7 @@ public class DriverSyncService : IDriverSyncService
 
             if (offset == 0 && apiResponse != null)
             {
-                using var scope = _scopeFactory.CreateScope();
+                using var scope = scopeFactory.CreateScope();
                 var driverService = scope.ServiceProvider.GetRequiredService<IDriverService>();
                 int currentDriversCount = await driverService.GetDriversCountAsync();
                 if (apiResponse.MRData.Total == currentDriversCount)

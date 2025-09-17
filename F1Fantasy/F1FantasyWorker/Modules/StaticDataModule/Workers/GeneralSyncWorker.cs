@@ -12,24 +12,16 @@ using F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 {
-    internal class GeneralSyncWorker : BackgroundService
+    internal class GeneralSyncWorker(
+        IServiceScopeFactory scopeFactory,
+        ILogger<GeneralSyncWorker> logger)
+        : BackgroundService
     {
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<GeneralSyncWorker> _logger;
-
-        public GeneralSyncWorker(
-            IServiceScopeFactory scopeFactory,
-            ILogger<GeneralSyncWorker> logger)
-        {
-            _scopeFactory = scopeFactory;
-            _logger = logger;
-        }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             #region AddScopedServices
 
-            using var scope = _scopeFactory.CreateScope();
+            using var scope = scopeFactory.CreateScope();
             
             var seasonService = scope.ServiceProvider.GetRequiredService<ISeasonService>();
             var driverService = scope.ServiceProvider.GetRequiredService<IDriverService>();
@@ -56,41 +48,41 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_logger.IsEnabled(LogLevel.Information))
+                if (logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("GeneralSyncWorker running at: {time}", DateTimeOffset.Now);
+                    logger.LogInformation("GeneralSyncWorker running at: {time}", DateTimeOffset.Now);
 
-                    _logger.LogInformation("Starting F1 data synchronization...");
+                    logger.LogInformation("Starting F1 data synchronization...");
                 }
                 
                 // Sync powerups
-                _logger.LogInformation("Start syncing powerups");
+                logger.LogInformation("Start syncing powerups");
                 
                 List<PowerupDto> newPowerups = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
                 foreach (var powerupDto in newPowerups)
                 {
                     await powerupService.AddPowerupAsync(powerupDto);
                 }
-                _logger.LogInformation("Database synced with new powerups.");
+                logger.LogInformation("Database synced with new powerups.");
                 
                 // Sync countries
-                _logger.LogInformation("Start syncing countries");
+                logger.LogInformation("Start syncing countries");
                 
                 List<CountryDto> newCountryDtos = await countrySyncService.GetCountriesFromStaticResourcesAsync();
                 foreach (var countryDto in newCountryDtos)
                 {
                     await countryService.AddCountryAsync(countryDto);
                 }
-                _logger.LogInformation("Database synced with new countries.");
+                logger.LogInformation("Database synced with new countries.");
 
                 // Sync drivers
-                _logger.LogInformation("Start syncing drivers");
+                logger.LogInformation("Start syncing drivers");
                 
                 List<DriverApiDto> newTempDrivers = await driveSyncService.GetDriversFromApiAsync();
                 List<DriverDto> newDriverDtos = new List<DriverDto>();
                 foreach (var tempDriver in newTempDrivers)
                 {
-                    newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, null));
+                    newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, 0, null));
                 }
 
                 foreach (var driverDto in newDriverDtos)
@@ -98,10 +90,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await driverService.AddDriverAsync(driverDto);
                 }
 
-                _logger.LogInformation("Database synced with new drivers.");
+                logger.LogInformation("Database synced with new drivers.");
 
                 // Sync constructor
-                _logger.LogInformation("Start syncing constructors");
+                logger.LogInformation("Start syncing constructors");
                 
                 List<ConstructorApiDto> newTempConstructors = await constructorSyncService.GetConstructorsFromApiAsync();
 
@@ -116,10 +108,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await constructorService.AddConstructorAsync(constructorDto);
                 }
 
-                _logger.LogInformation("Database synced with new constructors.");
+                logger.LogInformation("Database synced with new constructors.");
 
                 // Sync circuits
-                _logger.LogInformation("Start syncing circuits");
+                logger.LogInformation("Start syncing circuits");
                 
                 List<CircuitApiDto> newTempCircuits = await circuitSyncService.GetCircuitsFromApiAsync();
 
@@ -134,10 +126,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await circuitService.AddCircuitAsync(circuitDto);
                 }
 
-                _logger.LogInformation("Database synced with new circuits.");
+                logger.LogInformation("Database synced with new circuits.");
                 
                 // Sync seasons
-                _logger.LogInformation("Start syncing seasons");
+                logger.LogInformation("Start syncing seasons");
                 
                 List<SeasonApiDto> newTempSeasons = await seasonSyncService.GetSeasonsFromApiAsync();
                 
@@ -152,10 +144,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await seasonService.AddSeasonAsync(seasonDto);
                 }
                 
-                _logger.LogInformation("Database synced with new seasons.");
+                logger.LogInformation("Database synced with new seasons.");
                 
                 // Sync races and add fantasy lineups for all users for new races
-                _logger.LogInformation("Start syncing races");
+                logger.LogInformation("Start syncing races");
                 
                 List<RaceApiDto> newTempRaces = await raceSyncService.GetRacesFromApiAsync();
                 List<RaceDto> newRaceDtos = new List<RaceDto>();
@@ -169,15 +161,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     await raceService.AddRaceAsync(raceDto);
                 }
 
-                _logger.LogInformation("Database synced with new races");
+                logger.LogInformation("Database synced with new races");
                 
                 // Add fantasy lineups for all users for current season
-                _logger.LogInformation("Start adding fantasy lineups for all users in current season");
+                logger.LogInformation("Start adding fantasy lineups for all users in current season");
                 await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.Now.Year);
-                _logger.LogInformation("Database synced with new fantasy lineups");
+                logger.LogInformation("Database synced with new fantasy lineups");
                 
                 // Sync race entries
-                _logger.LogInformation("Start syncing race entries for the current year from API");
+                logger.LogInformation("Start syncing race entries for the current year from API");
                 
                 List<RaceEntryApiDto> newTempRaceEntries = await raceEntrySyncService.GetRaceEntriesForCurrentYearFromApiAsync();
                 List<RaceEntryDto> newRaceEntryDtos = new List<RaceEntryDto>();
@@ -215,31 +207,31 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 {
                     await raceEntryService.AddRaceEntryAsync(raceEntry);
                 }*/
-                _logger.LogInformation("Database synced with static race entries.");
+                logger.LogInformation("Database synced with static race entries.");
                 
                 // Calculate points for all users in latest race
-                _logger.LogInformation("Start calculating point gained for all users in latest");
+                logger.LogInformation("Start calculating point gained for all users in latest");
                 var calculatedRace = await coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
-                _logger.LogInformation("Database calculated point gained for all users in latest race.");
+                logger.LogInformation("Database calculated point gained for all users in latest race.");
                 
                 // Migrate fantasy lineups to next race
                 if (calculatedRace != null)
                 {
-                    _logger.LogInformation("Start migrating fantasy lineups to next race");
+                    logger.LogInformation("Start migrating fantasy lineups to next race");
                     await coreGameplayService.MigrateFantasyLineupsToNextRaceAsync(calculatedRace);
-                    _logger.LogInformation("Migrated fantasy lineups to next race");
+                    logger.LogInformation("Migrated fantasy lineups to next race");
                 }
 
                 //wait 2 days
-                _logger.LogInformation("GeneralSyncWorker completed at: {time}", DateTimeOffset.Now);
-                _logger.LogInformation("Next synchronization will occur at: {time}", DateTimeOffset.Now.AddDays(2));
+                logger.LogInformation("GeneralSyncWorker completed at: {time}", DateTimeOffset.Now);
+                logger.LogInformation("Next synchronization will occur at: {time}", DateTimeOffset.Now.AddDays(2));
                 await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
             }
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Sync Service is stopping.");
+            logger.LogInformation("Sync Service is stopping.");
 
             await base.StopAsync(stoppingToken);
         }

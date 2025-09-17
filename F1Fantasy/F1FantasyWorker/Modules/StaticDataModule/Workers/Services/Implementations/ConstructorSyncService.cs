@@ -6,19 +6,12 @@ using Newtonsoft.Json;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services.Implementations;
 
-public class ConstructorSyncService : IConstructorSyncService
+public class ConstructorSyncService(
+    HttpClient httpClient,
+    IServiceScopeFactory scopeFactory,
+    WorkerConfigurationService workerConfig)
+    : IConstructorSyncService
 {
-    private readonly WorkerConfigurationService _workerConfig;
-    private readonly HttpClient _httpClient;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public ConstructorSyncService(HttpClient httpClient, IServiceScopeFactory scopeFactory, WorkerConfigurationService workerConfig)
-    {
-        _scopeFactory = scopeFactory;
-        _httpClient = httpClient;
-        _workerConfig = workerConfig;
-    }
-    
     public class ConstructorTableDto
     {
         public List<ConstructorApiDto> Constructors { get; set; }
@@ -37,7 +30,7 @@ public class ConstructorSyncService : IConstructorSyncService
 
     public async Task<List<ConstructorApiDto>> GetConstructorsFromApiAsync()
     {
-        int limit = _workerConfig.SyncRequestLimit;
+        int limit = workerConfig.SyncRequestLimit;
         int offset = 0;
         string queryParams;
         string apiUrl;
@@ -47,12 +40,12 @@ public class ConstructorSyncService : IConstructorSyncService
         bool condition = true;
         while (condition)
         {
-            await Task.Delay(_workerConfig.DelayBetweenRequests);
+            await Task.Delay(workerConfig.DelayBetweenRequests);
 
             queryParams = $"limit={limit}&offset={offset}";
             apiUrl = $"https://api.jolpi.ca/ergast/f1/constructors/?{queryParams}";
 
-            var response = await _httpClient.GetStringAsync(apiUrl);
+            var response = await httpClient.GetStringAsync(apiUrl);
             if (string.IsNullOrEmpty(response))
             {
                 break;
@@ -70,7 +63,7 @@ public class ConstructorSyncService : IConstructorSyncService
 
             if (offset == 0 && apiResponse != null)
             {
-                using var scope = _scopeFactory.CreateScope();
+                using var scope = scopeFactory.CreateScope();
                 var constructorService = scope.ServiceProvider.GetRequiredService<IConstructorService>();
                 int currentConstructorCount = await constructorService.GetConstructorsCountAsync();
                 if (apiResponse.MRData.Total == currentConstructorCount)

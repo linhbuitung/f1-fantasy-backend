@@ -44,4 +44,24 @@ public class LeagueDtoMapper
             CountryName = user.Country?.ShortName ?? string.Empty,
         };
     }
+
+    public static Get.UserLeagueDto MapUserLeagueToDto(UserLeague userLeague)
+    {
+        return new Get.UserLeagueDto
+        {
+            UserId = userLeague.UserId,
+            LeagueId = userLeague.LeagueId,
+            IsAccepted = userLeague.IsAccepted,
+        };
+    }
+    
+    public static UserLeague MapUpdateDtoToUserLeague(Dtos.Update.UserLeagueDto dto)
+    {
+        return new UserLeague
+        {
+            UserId = dto.UserId,
+            LeagueId = dto.LeagueId,
+            IsAccepted = dto.IsAccepted,
+        };
+    }
 } 

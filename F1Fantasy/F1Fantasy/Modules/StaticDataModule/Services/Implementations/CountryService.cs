@@ -1,4 +1,5 @@
 ﻿using F1Fantasy.Core.Common;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.StaticDataModule.Dtos;
 using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
@@ -8,24 +9,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 {
-    public class CountryService : ICountryService
+    public class CountryService(IStaticDataRepository staticDataRepository, WooF1Context context)
+        : ICountryService
     {
-        private readonly IStaticDataRepository _staticDataRepository;
-        private readonly WooF1Context _context;
-
-        public CountryService(IStaticDataRepository staticDataRepository, WooF1Context context)
-        {
-            _staticDataRepository = staticDataRepository;
-            _context = context;
-        }
-
         public async Task<CountryDto> AddCountryAsync(CountryDto countryDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
-                Country existingCountry = await _staticDataRepository.GetCountryByIdAsync(countryDto.CountryId);
+                Country existingCountry = await staticDataRepository.GetCountryByIdAsync(countryDto.CountryId);
                 if (existingCountry != null)
                 {
                     return null;
@@ -35,10 +28,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 
                 Country country = StaticDataDtoMapper.MapDtoToCountry(countryDto);
 
-                Country newCountry = await _staticDataRepository.AddCountryAsync(country);
+                Country newCountry = await staticDataRepository.AddCountryAsync(country);
 
                 // Additional operations that need atomicity (example: logging the event)
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -64,30 +57,30 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 
         public async Task<CountryDto> GetCountryByIdAsync(string id)
         {
-            Country country = await _staticDataRepository.GetCountryByIdAsync(id);
+            Country? country = await staticDataRepository.GetCountryByIdAsync(id);
             if (country == null)
             {
-                return null;
+                throw new NotFoundException($"Country with ID {id} not found");
             }
             return StaticDataDtoMapper.MapCountryToDto(country);
         }
 
         public async Task<CountryDto> GetCountryByNationalityAsync(string nationality)
         {
-            Country country = await _staticDataRepository.GetCountryByNationalitityAsync(nationality);
+            Country? country = await staticDataRepository.GetCountryByNationalityAsync(nationality);
             if (country == null)
             {
-                return null;
+                throw new NotFoundException($"Country with Nationality {nationality} not found");
             }
             return StaticDataDtoMapper.MapCountryToDto(country);
         }
 
         public async Task<CountryDto> GetCountryByShortNameAsync(string shortName)
         {
-            Country country = await _staticDataRepository.GetCountryByShortNameAsync(shortName);
+            Country? country = await staticDataRepository.GetCountryByShortNameAsync(shortName);
             if (country == null)
             {
-                return null;
+                throw new NotFoundException($"Country with ShortName {shortName} not found");
             }
             return StaticDataDtoMapper.MapCountryToDto(country);
         }

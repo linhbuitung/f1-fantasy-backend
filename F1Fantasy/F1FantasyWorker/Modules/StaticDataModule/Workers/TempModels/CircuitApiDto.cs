@@ -6,22 +6,21 @@ using Newtonsoft.Json;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
 {
-    public class CircuitApiDto
+    public class CircuitApiDto(
+        string circuitId,
+        string circuitName,
+        string url,
+        decimal lat,
+        decimal lng,
+        string locality,
+        string country)
     {
-        public string CircuitId { get; set; }
-        public string CircuitName { get; set; }
-        public string Url { get; set; }
+        public string CircuitId { get; set; } = circuitId;
+        public string CircuitName { get; set; } = circuitName;
+        public string Url { get; set; } = url;
 
         [JsonProperty("Location")]
-        public LocationApiDto Location { get; set; }
-
-        public CircuitApiDto(string circuitId, string circuitName, string url, decimal lat, decimal lng, string locality, string country)
-        {
-            CircuitId = circuitId;
-            CircuitName = circuitName;
-            Url = url;
-            Location = new LocationApiDto(lat, lng, locality, country);
-        }
+        public LocationApiDto Location { get; set; } = new(lat, lng, locality, country);
 
         public override string ToString()
         {
@@ -29,27 +28,19 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
             return result;
         }
 
-        public class LocationApiDto
+        public class LocationApiDto(decimal lat, decimal lng, string locality, string country)
         {
             [JsonProperty("lat")]
-            public decimal Lat { get; set; }
+            public decimal Lat { get; set; } = lat;
 
             [JsonProperty("long")]
-            public decimal Long { get; set; }
+            public decimal Long { get; set; } = lng;
 
             [JsonProperty("locality")]
-            public string Locality { get; set; }
+            public string Locality { get; set; } = locality;
 
             [JsonProperty("country")]
-            public string Country { get; set; }
-
-            public LocationApiDto(decimal lat, decimal lng, string locality, string country)
-            {
-                Lat = lat;
-                Long = lng;
-                Locality = locality;
-                Country = country;
-            }
+            public string Country { get; set; } = country;
 
             public override string ToString()
             {

@@ -8,7 +8,7 @@ public class FantasyLineupDto
 
     public int TransferPointsDeducted { get; set; }
 
-    public int PointsGained { get; set; }
+    public int TransfersMade { get; set; }
 
     public int UserId { get; set; }
 
@@ -19,12 +19,12 @@ public class FantasyLineupDto
         UserId = userId;
         RaceId = raceId;
     }
-    public FantasyLineupDto(int? id, int totalAmount, int transferPointsDeducted, int pointsGained, int userId, int raceId)
+    public FantasyLineupDto(int? id, int totalAmount, int transferPointsDeducted, int transfersMade, int userId, int raceId)
     {
         Id = id ?? null;
         TotalAmount = totalAmount;
         TransferPointsDeducted = transferPointsDeducted;
-        PointsGained = pointsGained;
+        TransfersMade = transfersMade;
         UserId = userId;
         RaceId = raceId;
     }

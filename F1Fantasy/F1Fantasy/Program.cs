@@ -20,6 +20,10 @@ using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Implementations;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.AuthModule.ApiMapper;
+using F1Fantasy.Modules.CoreGameplayModule.Repositories.Implementations;
+using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
+using F1Fantasy.Modules.CoreGameplayModule.Services.Implementations;
+using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
 using F1Fantasy.Modules.LeagueModule.Repositories.Implementations;
 using F1Fantasy.Modules.LeagueModule.Repositories.Interfaces;
 using F1Fantasy.Modules.LeagueModule.Services.Implementations;
@@ -155,6 +159,10 @@ public static class ServiceExtensions
         services.AddScoped<ILeagueService, LeagueService>();
         services.AddScoped<ILeagueRepository, LeagueRepository>();
 
+        services.AddScoped<ICoreGameplayService, CoreGameplayService>();
+        services.AddScoped<IFantasyLineupRepository, FantasyLineupRepository>();
+        services.AddScoped<ICoreGameplayRepository, CoreGameplayRepository>();
+        
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
 
 
