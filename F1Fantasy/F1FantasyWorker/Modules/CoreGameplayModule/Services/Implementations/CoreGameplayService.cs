@@ -67,6 +67,55 @@ public class CoreGameplayService(
                               pointFromOwnedDriversInLineUp.Add(driverId, 0);
                          }
                     }
+                    
+                    // Load constructors from fantasy lineup
+                    await context.Entry(lineup).Collection(l => l.ConstructorsNavigation).LoadAsync();
+
+                    /*
+                         Both drivers in top 3: 10 points
+                         One driver in top 3: 5 points
+                         Both drivers in top 10: 3 points
+                         One driver in top 10: 1 point
+                         Neither in top 10: -1 point
+                     */
+                    int totalPointsFromConstructor = 0;
+
+                    foreach (var constructor in lineup.ConstructorsNavigation)
+                    {
+                         // Get all drivers for this constructor in the race
+                         var raceEntriesForConstructorPointCalculation = lastestFinishedRace.RaceEntries
+                              .Where(e => e.ConstructorId == constructor.Id)
+                              .ToList();
+
+                         // Get their positions
+                         var positions = raceEntriesForConstructorPointCalculation.Select(d => d.Position).ToList();
+
+
+                         if (positions.Count == 2)
+                         {
+                              bool bothTop3 = positions.All(p => p > 0 && p <= 3);
+                              bool oneTop3 = positions.Count(p => p > 0 && p <= 3) == 1;
+                              bool bothTop10 = positions.All(p => p > 0 && p <= 10);
+                              bool oneTop10 = positions.Count(p => p > 0 && p <= 10) == 1;
+
+                              if (bothTop3)
+                                   totalPointsFromConstructor += 10;
+                              else if (oneTop3)
+                                   totalPointsFromConstructor += 5;
+                              else if (bothTop10)
+                                   totalPointsFromConstructor += 3;
+                              else if (oneTop10)
+                                   totalPointsFromConstructor += 1;
+                              else
+                                   totalPointsFromConstructor += -1;
+                         }
+                         else
+                         {
+                              // Handle missing drivers if needed
+                              totalPointsFromConstructor = -1;
+                         }
+                    }
+                    
                     // Load powerups from fantasy lineup
                     await context.Entry(lineup).Collection(l => l.PowerupFantasyLineups).LoadAsync();
                     
@@ -84,7 +133,7 @@ public class CoreGameplayService(
                     var totalPointFromDrivers = pointFromOwnedDriversInLineUp.Values.Sum();
 
                     lineup.PointsGained = totalPointFromDrivers;
-                    lineup.TotalAmount = totalPointFromDrivers - transferPointsDeducted;
+                    lineup.TotalAmount = totalPointFromDrivers + totalPointsFromConstructor - transferPointsDeducted;
                     // Use totalPoints as needed
                }
 

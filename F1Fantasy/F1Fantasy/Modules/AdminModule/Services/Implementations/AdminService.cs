@@ -1,40 +1,42 @@
 ﻿using F1Fantasy.Core.Auth;
 using F1Fantasy.Core.Common;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.AdminModule.Dtos;
 using F1Fantasy.Modules.AdminModule.Dtos.Mapper;
 using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.AuthModule.Extensions;
+using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
+using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 
 namespace F1Fantasy.Modules.AdminModule.Services.Implementations;
 
-public class AdminService(IAdminRepository adminRepository, WooF1Context context) : IAdminService
+public class AdminService(IAdminRepository adminRepository, IStaticDataRepository staticDataRepository, ICoreGameplayService coreGameplayService, WooF1Context context) : IAdminService
 {
-    private readonly WooF1Context _context = context;
-
     public async Task<SeasonDto> StartSeasonAsync(int year)
     {
-        Season currentActiveSeason = await adminRepository.GetActiveSeasonAsync();
+        Season? currentActiveSeason = await adminRepository.GetActiveSeasonAsync();
         if (currentActiveSeason != null)
         {
             throw new InvalidOperationException("There is already an active season. Please deactivate it before starting a new one.");
         }
         
         Season activeSeason = await adminRepository.UpdateSeasonStatusAsync(year, isActive: true);
+        await coreGameplayService.ResetFantasyLineupsBySeasonYearAsync(activeSeason.Year);
         
         SeasonDto returnDto = AdminDtoMapper.MapSeasonToDto(activeSeason);
         return returnDto;
     }
 
-    public async Task<SeasonDto?> GetActiveSeasonAsync()
+    public async Task<SeasonDto> GetActiveSeasonAsync()
     {
         Season? currentlyActiveSeason = await adminRepository.GetActiveSeasonAsync();
         if (currentlyActiveSeason == null)
         {
-            return null;
+            throw new NotFoundException("There is no active season.");
         }
         SeasonDto returnDto = AdminDtoMapper.MapSeasonToDto(currentlyActiveSeason);
         return returnDto;
@@ -42,16 +44,16 @@ public class AdminService(IAdminRepository adminRepository, WooF1Context context
 
     public async Task DeactivateActiveSeasonAsync()
     {
-        Season currentlyActiveSeason = await adminRepository.GetActiveSeasonAsync();
+        Season? currentlyActiveSeason = await adminRepository.GetActiveSeasonAsync();
         if (currentlyActiveSeason == null)
         {
-            throw new InvalidOperationException("There is no active season.");
+            throw new NotFoundException("There is no active season.");
         }
         
         // Deactivate all seasons
         await adminRepository.UpdateSeasonStatusAsync(currentlyActiveSeason.Year, isActive: false);
     }
-    public async Task<ApplicationUserForAdminGetDto> UpdateUserRoleAsync(int userId, List<string> roleNames)
+    public async Task<Dtos.Get.ApplicationUserForAdminDto> UpdateUserRoleAsync(int userId, List<string> roleNames)
     {
         // Always ensure Player role is present
         if (!roleNames.Contains(AppRoles.Player))
@@ -66,9 +68,9 @@ public class AdminService(IAdminRepository adminRepository, WooF1Context context
         
         ApplicationUser updatedUser = await adminRepository.UpdateUserRoleAsync(userId, roleNames);
 
-        ApplicationUserForAdminGetDto returnGetDto = AdminDtoMapper.MapUserToApplicationUserForAdminDto(updatedUser, updatedUser.UserRoles.Select(ur => ur.Role).ToList());
+        var returnDto = AdminDtoMapper.MapUserToApplicationUserForAdminDto(updatedUser, updatedUser.UserRoles.Select(ur => ur.Role).ToList());
         
-        return returnGetDto;
+        return returnDto;
     }
     
     // This return list of roles that are not found in the database
@@ -85,5 +87,100 @@ public class AdminService(IAdminRepository adminRepository, WooF1Context context
             }
         }
         return notFoundRoles;
+    }
+
+    public async Task<Dtos.Get.PickableItemDto> GetPickableItemAsync()
+    {
+        var pickableItem = await adminRepository.GetPickableItemAsync();
+        if (pickableItem == null)
+        {
+            throw new NotFoundException("Pickable item not found.");
+        }
+        return AdminDtoMapper.MapPickableItemToDto(pickableItem);
+    }
+
+    public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemAsync(Dtos.Update.PickableItemDto dto)
+    {
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var pickableItem = await adminRepository.GetPickableItemAsync();
+            if (pickableItem == null)
+            {
+                throw new NotFoundException("Pickable item not found.");
+            }
+            
+            // Delete all driver connections in the pickable item that are not in the dto
+            var driversToRemove = pickableItem.Drivers.Where(d => !dto.DriverIds.Contains(d.Id)).ToList();
+            foreach (var driver in driversToRemove)
+            {
+                pickableItem.Drivers.Remove(driver);
+            }
+            
+            // Add new driver connections from the dto that are not already in the pickable item
+            var existingDriverIds = pickableItem.Drivers.Select(d => d.Id).ToHashSet();
+            var driversToAdd = dto.DriverIds.Where(id => !existingDriverIds.Contains(id)).ToList();
+            foreach (var driverId in driversToAdd)
+            {
+                var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
+                if (driver == null)
+                {
+                    throw new NotFoundException($"Driver with ID {driverId} not found.");
+                }
+
+                pickableItem.Drivers.Add(driver);
+            }
+            
+            // Delete all constructor connections in the pickable item that are not in the dto
+            var constructorsToRemove = pickableItem.Constructors.Where(c => !dto.ConstructorIds.Contains(c.Id)).ToList();
+            foreach (var constructor in constructorsToRemove)
+            {
+                pickableItem.Constructors.Remove(constructor);
+            }
+            
+            // Add new constructor connections from the dto that are not already in the pickable item
+            var existingConstructorIds = pickableItem.Constructors.Select(c => c.Id).ToHashSet();
+            var constructorsToAdd = dto.ConstructorIds.Where(id => !existingConstructorIds.Contains(id)).ToList();
+            foreach (var constructorId in constructorsToAdd)
+            {
+                var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
+                if (constructor == null)
+                {
+                    throw new NotFoundException($"Constructor with ID {constructorId} not found.");
+                }   
+                pickableItem.Constructors.Add(constructor);
+            }
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            return AdminDtoMapper.MapPickableItemToDto(pickableItem);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error updating pickable item: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemFromAllDriversInASeasonYearAsync(int seasonYear)
+    {
+        var season = await staticDataRepository.GetSeasonByYearAsync(seasonYear);
+        if (season == null)
+        {
+            throw new NotFoundException($"Season with year {seasonYear} not found.");
+        }
+        
+        var allDriverIdsInSeason = (await staticDataRepository.GetAllDriversBySeasonIdAsync(season.Id)).Select(d => d.Id).ToList();
+        var allConstructorIdsInSeason = (await staticDataRepository.GetAllConstructorsBySeasonIdAsync(season.Id)).Select(c => c.Id).ToList();
+        
+        var pickableItemDto = new Dtos.Update.PickableItemDto
+        {
+            DriverIds = allDriverIdsInSeason,
+            ConstructorIds = allConstructorIdsInSeason
+        };
+        
+        return await UpdatePickableItemAsync(pickableItemDto);
     }
 }

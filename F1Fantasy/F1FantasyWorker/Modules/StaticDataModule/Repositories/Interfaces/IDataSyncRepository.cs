@@ -71,7 +71,9 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Interfaces
         
         Task<List<int>> GetAllUserIdsAsync();
 
+        Task<PickableItem?> GetPickableItemAsync();
         
+        Task<PickableItem> AddPickableItemAsync();
         #region GetCounts
 
         Task<int> GetDriversCountAsync();

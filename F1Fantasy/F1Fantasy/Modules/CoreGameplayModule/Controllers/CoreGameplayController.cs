@@ -55,7 +55,8 @@ public class CoreGameplayController(
         {
             return Forbid();
         }
-
+        
+        fantasyLineupDto.Id = fantasyLineupGetDto.Id;
         var updatedFantasyLineupDto = await coreGameplayService.UpdateFantasyLineupAsync(fantasyLineupDto);
         return Ok(updatedFantasyLineupDto);
     }

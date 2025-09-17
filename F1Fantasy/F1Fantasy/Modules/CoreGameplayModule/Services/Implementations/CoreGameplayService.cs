@@ -4,10 +4,12 @@ using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.CoreGameplayModule.Dtos.Mapper;
 using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
+using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
+using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.CoreGameplayModule.Services.Implementations;
 
-public class CoreGameplayService(IFantasyLineupRepository fantasyLineupRepository, ICoreGameplayRepository coreGameplayRepository, WooF1Context context, IConfiguration configuration) : ICoreGameplayService
+public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFantasyLineupRepository fantasyLineupRepository, ICoreGameplayRepository coreGameplayRepository, WooF1Context context, IConfiguration configuration) : ICoreGameplayService
 {
     public async Task<Dtos.Get.FantasyLineupDto> GetFantasyLineupByIdAsync(int fantasyLineupId)
     {
@@ -155,4 +157,30 @@ public class CoreGameplayService(IFantasyLineupRepository fantasyLineupRepositor
             throw new NotFoundException($"The following powerup ids do not exist: {string.Join(", ", nonExistingPowerups.Result)}");
         }
     }
+
+     public async Task ResetFantasyLineupsBySeasonYearAsync(int year)
+    {
+        var season = await staticDataRepository.GetSeasonByYearAsync(year);
+        if (season == null)
+        {
+            throw new NotFoundException($"Season {year} not found");
+        }
+        
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            // Delete all connections to drivers, constructors and powerups from all fantasy lineups from the year inserted
+            await fantasyLineupRepository.ResetFantasyLineupsBySeasonAsync(season);
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error resetting fantasy lineup for season {year}: {ex.Message}");
+            throw;
+        }
+    }
+
 }

@@ -21,7 +21,8 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddHttpClient();
 builder.Services.AddDbContext<WooF1Context>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),  
+        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
 builder.Services.AddApplicationBackground();
 builder.Services.AddApplicationScoped();
@@ -45,6 +46,7 @@ public static class ServiceExtensions
         services.AddScoped<ISeasonService, SeasonService>();
         services.AddScoped<IRaceEntryService, RaceEntryService>();
         services.AddScoped<IFantasyLineupService, FantasyLineupSerivce>();
+        services.AddScoped<IPickableItemService, PickableItemService>();
 
         services.AddScoped<IDataSyncRepository, DataSyncRepository>();
 

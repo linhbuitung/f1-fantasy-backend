@@ -11,12 +11,16 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
         Task<Driver?> GetDriverByIdAsync(int id);
 
         Task<Driver?> GetDriverByCodeAsync(string code);
+        
+        Task<List<Driver>> GetAllDriversBySeasonIdAsync(int seasonId);
 
         Task<Constructor> AddConstructorAsync(Constructor constructor);
 
         Task<Constructor?> GetConstructorByIdAsync(int id);
 
         Task<Constructor?> GetConstructorByCodeAsync(string code);
+        
+        Task<List<Constructor>> GetAllConstructorsBySeasonIdAsync(int seasonId);
 
         Task<Circuit> AddCircuitAsync(Circuit circuit);
 

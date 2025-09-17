@@ -26,6 +26,13 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
+        public async Task<List<Driver>> GetAllDriversBySeasonIdAsync(int seasonId)
+        {
+            return await context.Drivers.AsNoTracking()
+                .Where(d => d.RaceEntries.Any(re => re.Race.SeasonId == seasonId))
+                .ToListAsync();  
+        }
+
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
         {
             context.Constructors.Add(constructor);
@@ -43,6 +50,13 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
+        public async Task<List<Constructor>> GetAllConstructorsBySeasonIdAsync(int seasonId)
+        {
+            return await context.Constructors.AsNoTracking()
+                .Where(d => d.RaceEntries.Any(re => re.Race.SeasonId == seasonId))
+                .ToListAsync();  
+        }
+        
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
         {
             context.Circuits.Add(circuit);

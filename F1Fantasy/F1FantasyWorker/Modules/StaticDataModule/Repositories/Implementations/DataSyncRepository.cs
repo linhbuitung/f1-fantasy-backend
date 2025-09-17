@@ -198,7 +198,19 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.AspNetUsers.Select(u => u.Id).ToListAsync();
         }
-        
+
+        public async Task<PickableItem?> GetPickableItemAsync()
+        {
+            return await context.PickableItems.FirstOrDefaultAsync(p => p.Id == 1);
+        }
+
+        public async Task<PickableItem> AddPickableItemAsync()
+        {
+            var item = new PickableItem{Id = 1};
+            context.PickableItems.Add(item);
+            await context.SaveChangesAsync();
+            return item;
+        }
         #region GetCounts
 
         public async Task<int> GetDriversCountAsync()

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace F1Fantasy.Modules.AdminModule.Dtos;
+namespace F1Fantasy.Modules.AdminModule.Dtos.Get;
 
-public class ApplicationUserForAdminGetDto
+public class ApplicationUserForAdminDto
 {
     public int Id { get; set; }
     

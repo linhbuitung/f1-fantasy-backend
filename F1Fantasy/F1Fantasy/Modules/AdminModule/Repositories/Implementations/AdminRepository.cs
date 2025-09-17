@@ -63,4 +63,12 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == userId);    
     }
+
+    public async Task<PickableItem?> GetPickableItemAsync()
+    {
+        return await context.PickableItems
+            .Include(p => p.Drivers)
+            .Include(p => p.Constructors)
+            .AsTracking().FirstOrDefaultAsync(p => p.Id == 1);
+    }
 }

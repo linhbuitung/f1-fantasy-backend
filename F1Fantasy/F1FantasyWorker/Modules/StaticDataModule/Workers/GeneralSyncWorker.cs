@@ -32,6 +32,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             var powerupService = scope.ServiceProvider.GetRequiredService<IPowerupService>();
             var raceEntryService = scope.ServiceProvider.GetRequiredService<IRaceEntryService>();
             var fantasyLineupService = scope.ServiceProvider.GetRequiredService<IFantasyLineupService>();
+            var pickableItemService = scope.ServiceProvider.GetRequiredService<IPickableItemService>();
             
             var seasonSyncService = scope.ServiceProvider.GetRequiredService<ISeasonSyncService>();
             var driveSyncService = scope.ServiceProvider.GetRequiredService<IDriverSyncService>();
@@ -54,7 +55,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
 
                     logger.LogInformation("Starting F1 data synchronization...");
                 }
-                
+                logger.LogInformation("Start syncing pickable items");
+                var pickableItemId = await pickableItemService.GetPickableItemAsync();
+                if (pickableItemId == null)
+                {
+                    await pickableItemService.AddPickableItemAsync();
+                }
+                logger.LogInformation("Database synced with 1 edition of pickable.");
+
                 // Sync powerups
                 logger.LogInformation("Start syncing powerups");
                 

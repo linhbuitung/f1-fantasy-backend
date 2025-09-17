@@ -6,5 +6,5 @@ public interface ICoreGameplayService
     Task<Dtos.Get.FantasyLineupDto> GetFantasyLineupByUserIdAndRaceIdAsync(int userId, int raceId);
     Task<Dtos.Get.FantasyLineupDto> GetCurrentFantasyLineupByUserIdAsync(int userId);
     Task<Dtos.Get.FantasyLineupDto> UpdateFantasyLineupAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto);
-
+    Task ResetFantasyLineupsBySeasonYearAsync(int year);
 }

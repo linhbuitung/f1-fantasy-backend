@@ -72,7 +72,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),  
+              o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
           .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
           .UseSnakeCaseNamingConvention());
 
