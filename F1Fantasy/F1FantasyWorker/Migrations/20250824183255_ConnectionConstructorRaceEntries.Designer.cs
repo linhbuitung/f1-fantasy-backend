@@ -349,10 +349,10 @@ namespace F1FantasyWorker.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("locality");
 
-                    b.Property<decimal>("Longtitude")
+                    b.Property<decimal>("Longitude")
                         .HasPrecision(10, 7)
                         .HasColumnType("numeric(10,7)")
-                        .HasColumnName("longtitude");
+                        .HasColumnName("longitude");
 
                     b.HasKey("Id")
                         .HasName("pk_circuit");

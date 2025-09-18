@@ -2,7 +2,7 @@
 
 namespace F1Fantasy.Core.Policies;
 
-public static class Policies
+public static class AuthPolicies
 {
     public const string CanOperateOnOwnResource = "CanOperateOnOwnResource";
 
@@ -19,5 +19,6 @@ public static class Policies
                 return false;
             })
         );
+        
     }
 }

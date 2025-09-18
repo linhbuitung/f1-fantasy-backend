@@ -8,21 +8,13 @@ namespace F1Fantasy.Modules.UserModule.Controllers;
 
 [ApiController]
 [Route("api/user")]
-public class UserDetailController : ControllerBase
+public class UserDetailController(IUserService userService, IAuthorizationService authorizationService)
+    : ControllerBase
 {
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IUserService _userService;
-
-    public UserDetailController(IUserService userService, IAuthorizationService authorizationService)
-    {
-        _userService = userService;
-        _authorizationService = authorizationService;
-    }
-
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetUserById(int userId)
     {
-        var user = await _userService.GetUserByIdAsync(userId);
+        var user = await userService.GetUserByIdAsync(userId);
         if (user == null)
         {
             return NotFound();
@@ -34,7 +26,7 @@ public class UserDetailController : ControllerBase
     [Authorize]
     public async Task<IActionResult> UpdateUser(int userId, [FromBody] Dtos.Update.ApplicationUserDto userUpdateDto)
     {
-        var authResult = await _authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
@@ -45,14 +37,14 @@ public class UserDetailController : ControllerBase
             return BadRequest(ModelState);
         }
         
-        var updatedUser = await _userService.UpdateUserAsync(userUpdateDto);
+        var updatedUser = await userService.UpdateUserAsync(userUpdateDto);
         return Ok(updatedUser);
     }
 
     [HttpGet("search")]
     public async Task<IActionResult> FindUserByDisplayName(string name)
     {
-        var users = await _userService.FindUserByDisplayNameAsync(name);
+        var users = await userService.FindUserByDisplayNameAsync(name);
         return Ok(users);
     }
 }

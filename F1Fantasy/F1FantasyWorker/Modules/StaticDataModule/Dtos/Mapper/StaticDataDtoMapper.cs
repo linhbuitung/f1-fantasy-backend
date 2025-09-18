@@ -7,7 +7,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
     {
         public static DriverDto MapDriverToDto(Driver driver)
         {
-            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.ImgUrl);
+            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.Price, driver.ImgUrl);
         }
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
@@ -19,6 +19,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 FamilyName = driverDto.FamilyName,
                 DateOfBirth = driverDto.DateOfBirth,
                 CountryId = driverDto.CountryId,
+                Price = driverDto.Price,
                 Code = driverDto.Code,
                 ImgUrl = driverDto.ImgUrl
             };
@@ -43,7 +44,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 
         public static CircuitDto MapCircuitToDto(Circuit circuit)
         {
-            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longtitude, circuit.Locality, circuit.CountryId, circuit.ImgUrl);
+            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longitude, circuit.Locality, circuit.CountryId, circuit.ImgUrl);
         }
 
         public static Circuit MapDtoToCircuit(CircuitDto circuitDto)
@@ -53,7 +54,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 CircuitName = circuitDto.CircuitName,
                 Code = circuitDto.Code,
                 Latitude = circuitDto.Latitude,
-                Longtitude = circuitDto.Longtitude,
+                Longitude = circuitDto.Longitude,
                 Locality = circuitDto.Locality,
                 CountryId = circuitDto.CountryId,
                 ImgUrl = circuitDto.ImgUrl
@@ -159,7 +160,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
                 UserId = fantasyLineupDto.UserId,
                 RaceId = fantasyLineupDto.RaceId,
                 TotalAmount = 0,
-                TransferPointsDeducted = 0,
+                TransfersMade = 0,
                 PointsGained = 0,
             };
         }
@@ -169,7 +170,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
             return new FantasyLineupDto(
                 fantasyLineup.Id, 
                 fantasyLineup.TotalAmount, 
-                fantasyLineup.TransferPointsDeducted, 
+                fantasyLineup.TransfersMade, 
                 fantasyLineup.PointsGained, 
                 fantasyLineup.UserId, 
                 fantasyLineup.RaceId);

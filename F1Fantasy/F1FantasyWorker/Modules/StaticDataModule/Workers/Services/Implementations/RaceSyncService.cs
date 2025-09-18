@@ -6,18 +6,12 @@ using Newtonsoft.Json;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Workers.Services.Implementations;
 
-public class RaceSyncService : IRaceSyncService
+public class RaceSyncService(
+    HttpClient httpClient,
+    IServiceScopeFactory scopeFactory,
+    WorkerConfigurationService workerConfig)
+    : IRaceSyncService
 {
-    private readonly WorkerConfigurationService _workerConfig;
-    private readonly HttpClient _httpClient;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public RaceSyncService(HttpClient httpClient, IServiceScopeFactory scopeFactory, WorkerConfigurationService workerConfig)
-    {
-        _scopeFactory = scopeFactory;
-        _httpClient = httpClient;
-        _workerConfig = workerConfig;
-    }
     public class RaceTableDto
     {
         public List<RaceApiDto> Races { get; set; }
@@ -35,7 +29,7 @@ public class RaceSyncService : IRaceSyncService
     
     public async Task<List<RaceApiDto>> GetRacesFromApiAsync()
     {
-        int limit = _workerConfig.SyncRequestLimit;
+        int limit = workerConfig.SyncRequestLimit;
         int offset = 0;
         string queryParams;
         string apiUrl;
@@ -45,12 +39,12 @@ public class RaceSyncService : IRaceSyncService
         bool condition = true;
         while (condition)
         {
-            await Task.Delay(_workerConfig.DelayBetweenRequests);
+            await Task.Delay(workerConfig.DelayBetweenRequests);
 
             queryParams = $"limit={limit}&offset={offset}";
             apiUrl = $"https://api.jolpi.ca/ergast/f1/races/?{queryParams}";
 
-            var response = await _httpClient.GetStringAsync(apiUrl);
+            var response = await httpClient.GetStringAsync(apiUrl);
             if (string.IsNullOrEmpty(response))
             {
                 break;
@@ -67,7 +61,7 @@ public class RaceSyncService : IRaceSyncService
 
             if (offset == 0 && apiResponse != null)
             {
-                using var scope = _scopeFactory.CreateScope();
+                using var scope = scopeFactory.CreateScope();
                 var raceService = scope.ServiceProvider.GetRequiredService<IRaceService>();
                 int currentRacesCount = await raceService.GetRacesCountAsync();
                 if (apiResponse.MRData.Total == currentRacesCount)

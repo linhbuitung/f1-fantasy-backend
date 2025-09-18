@@ -13,24 +13,16 @@ using System.Threading.Tasks;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 {
-    public class CountryService : ICountryService
+    public class CountryService(IDataSyncRepository dataSyncRepository, WooF1Context context)
+        : ICountryService
     {
-        private readonly IDataSyncRepository _dataSyncRepository;
-        private readonly WooF1Context _context;
-
-        public CountryService(IDataSyncRepository dataSyncRepository, WooF1Context context)
-        {
-            _dataSyncRepository = dataSyncRepository;
-            _context = context;
-        }
-
         public async Task<CountryDto> AddCountryAsync(CountryDto countryDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
-                Country existingCountry = await _dataSyncRepository.GetCountryByIdAsync(countryDto.CountryId);
+                Country existingCountry = await dataSyncRepository.GetCountryByIdAsync(countryDto.CountryId);
                 if (existingCountry != null)
                 {
                     return null;
@@ -40,10 +32,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
                 Country country = StaticDataDtoMapper.MapDtoToCountry(countryDto);
 
-                Country newCountry = await _dataSyncRepository.AddCountryAsync(country);
+                Country newCountry = await dataSyncRepository.AddCountryAsync(country);
 
                 // Additional operations that need atomicity (example: logging the event)
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -69,7 +61,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<CountryDto> GetCountryByIdAsync(string id)
         {
-            Country country = await _dataSyncRepository.GetCountryByIdAsync(id);
+            Country country = await dataSyncRepository.GetCountryByIdAsync(id);
             if (country == null)
             {
                 return null;
@@ -79,7 +71,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<CountryDto> GetCountryByNationalityAsync(string nationality)
         {
-            Country country = await _dataSyncRepository.GetCountryByNationalitityAsync(nationality);
+            Country country = await dataSyncRepository.GetCountryByNationalitityAsync(nationality);
             if (country == null)
             {
                 return null;
@@ -89,7 +81,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task<CountryDto> GetCountryByShortNameAsync(string shortName)
         {
-            Country country = await _dataSyncRepository.GetCountryByShortNameAsync(shortName);
+            Country country = await dataSyncRepository.GetCountryByShortNameAsync(shortName);
             if (country == null)
             {
                 return null;

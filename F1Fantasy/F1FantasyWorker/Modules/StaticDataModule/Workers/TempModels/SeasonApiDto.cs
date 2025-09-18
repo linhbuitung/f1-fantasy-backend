@@ -1,16 +1,10 @@
 ﻿namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels;
 
-public class SeasonApiDto
+public class SeasonApiDto(int season, string url)
 {
-    public int Season { get; set; }
-    
-    public string Url { get; set; }
-    
-    public SeasonApiDto(int season, string url)
-    {
-        Season = season;
-        Url = url;
-    }
+    public int Season { get; set; } = season;
+
+    public string Url { get; set; } = url;
 
     public override string ToString()
     {

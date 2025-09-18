@@ -6,27 +6,20 @@ using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
+using F1Fantasy.Exceptions;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 {
-    public class DriverService : IDriverService
+    public class DriverService(IStaticDataRepository staticDataRepository, WooF1Context context)
+        : IDriverService
     {
-        private readonly IStaticDataRepository _staticDataRepository;
-        private readonly WooF1Context _context;
-
-        public DriverService(IStaticDataRepository staticDataRepository, WooF1Context context)
-        {
-            _staticDataRepository = staticDataRepository;
-            _context = context;
-        }
-
         public async Task<DriverDto> AddDriverAsync(DriverDto driverDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
-                Driver existingDriver = await _staticDataRepository.GetDriverByCodeAsync(driverDto.Code);
+                Driver? existingDriver = await staticDataRepository.GetDriverByCodeAsync(driverDto.Code);
                 if (existingDriver != null)
                 {
                     return null;
@@ -35,19 +28,19 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
                 driverDto = FixSpecialCountryCase(driverDto);
                 
                 // Driver API returns nationality, so we need check for nationality.
-                Country country = await _staticDataRepository.GetCountryByNationalitityAsync(driverDto.CountryId);
+                Country? country = await staticDataRepository.GetCountryByNationalityAsync(driverDto.CountryId);
                 if (country == null)
                 {
-                    throw new Exception($"Country with nationality {driverDto.CountryId} not found");
+                    throw new NotFoundException($"Country with nationality {driverDto.CountryId} not found");
                 }
                 driverDto.CountryId = country.Id;
 
                 Driver driver = StaticDataDtoMapper.MapDtoToDriver(driverDto);
 
-                Driver newDriver = await _staticDataRepository.AddDriverAsync(driver);
+                Driver newDriver = await staticDataRepository.AddDriverAsync(driver);
 
                 // Additional operations that need atomicity (example: logging the event)
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -73,20 +66,20 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 
         public async Task<DriverDto> GetDriverByIdAsync(int id)
         {
-            Driver driver = await _staticDataRepository.GetDriverByIdAsync(id);
+            Driver? driver = await staticDataRepository.GetDriverByIdAsync(id);
             if (driver == null)
             {
-                return null;
+                throw new NotFoundException($"Driver with id {id} not found");
             }
             return StaticDataDtoMapper.MapDriverToDto(driver);
         }
 
         public async Task<DriverDto> GetDriverByCodeAsync(string code)
         {
-            Driver driver = await _staticDataRepository.GetDriverByCodeAsync(code);
+            Driver? driver = await staticDataRepository.GetDriverByCodeAsync(code);
             if (driver == null)
             {
-                return null;
+                throw new NotFoundException($"Driver with code {code} not found");
             }
             return StaticDataDtoMapper.MapDriverToDto(driver);
         }

@@ -1,4 +1,5 @@
 ﻿using F1Fantasy.Core.Common;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.StaticDataModule.Dtos;
 using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
@@ -7,24 +8,16 @@ using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations;
 
-public class SeasonService : ISeasonService
+public class SeasonService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    : ISeasonService
 {
-    private readonly IStaticDataRepository _staticDataRepository;
-    private readonly WooF1Context _context;
-
-    public SeasonService(IStaticDataRepository staticDataRepository, WooF1Context context)
-    {
-        _staticDataRepository = staticDataRepository;
-        _context = context;
-    }
-    
     public async Task<SeasonDto> AddSeasonAsync(SeasonDto seasonDto)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            Season existingSeason = await _staticDataRepository.GetSeasonByYearAsync(seasonDto.Year);
+            Season? existingSeason = await staticDataRepository.GetSeasonByYearAsync(seasonDto.Year);
             if (existingSeason != null)
             {
                 return null;
@@ -32,10 +25,10 @@ public class SeasonService : ISeasonService
 
             Season season = StaticDataDtoMapper.MapDtoToSeason(seasonDto);
 
-            Season newSeason = await _staticDataRepository.AddSeasonAsync(season);
+            Season newSeason = await staticDataRepository.AddSeasonAsync(season);
 
             // Additional operations that need atomicity (example: logging the event)
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
@@ -61,20 +54,20 @@ public class SeasonService : ISeasonService
 
     public async Task<SeasonDto> GetSeasonByIdAsync(int id)
     {
-        Season season = await _staticDataRepository.GetSeasonByIdAsync(id);
+        Season? season = await staticDataRepository.GetSeasonByIdAsync(id);
         if (season == null)
         {
-            return null;
+            throw new NotFoundException($"Season with id {id} not found");
         }
         return StaticDataDtoMapper.MapSeasonToDto(season);
     }
 
     public async Task<SeasonDto> GetSeasonByYearAsync(int year)
     {
-        Season season = await _staticDataRepository.GetSeasonByYearAsync(year);
+        Season? season = await staticDataRepository.GetSeasonByYearAsync(year);
         if (season == null)
         {
-            return null;
+            throw new NotFoundException($"Season with year {year} not found");
         }
         return StaticDataDtoMapper.MapSeasonToDto(season);
     }

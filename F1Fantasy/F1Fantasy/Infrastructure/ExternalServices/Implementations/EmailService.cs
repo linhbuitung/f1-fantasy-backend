@@ -7,16 +7,11 @@ using Microsoft.Extensions.Options;
 
 namespace F1Fantasy.Infrastructure.ExternalServices.Implementations
 {
-    public class EmailService : IEmailSender<ApplicationUser>
+    public class EmailService(ILogger<EmailService> logger, IOptions<MailSettings> mailSettings)
+        : IEmailSender<ApplicationUser>
     {
-        private readonly ILogger<EmailService> _logger;
-        private readonly MailSettings _emailSettings;
-
-        public EmailService(ILogger<EmailService> logger, IOptions<MailSettings> mailSettings)
-        {
-            _logger = logger;
-            _emailSettings = mailSettings.Value;
-        }
+        private readonly ILogger<EmailService> _logger = logger;
+        private readonly MailSettings _emailSettings = mailSettings.Value;
 
         private async Task SendEmailAsync(string to, string subject, string body)
         {

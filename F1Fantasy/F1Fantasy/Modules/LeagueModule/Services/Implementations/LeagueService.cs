@@ -8,57 +8,33 @@ using F1Fantasy.Modules.UserModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.LeagueModule.Services.Implementations;
 
-public class LeagueService : ILeagueService
+public class LeagueService(
+    IConfiguration configuration,
+    ILeagueRepository leagueRepository,
+    IUserService userService,
+    WooF1Context context)
+    : ILeagueService
 {
-    /*  "CoreGameplaySettings": {
-    "LeagueSettings": {
-      "MaxAllowedPlayer": 100,
-      "MaxLeaguePerOwner": 3,
-      "MaxLeaguePerPlayer": 5
-    }
-  }*/
-    private readonly IConfiguration _configuration;
-    private readonly ILeagueRepository _leagueRepository;
-    private readonly IUserService _userService;
-    private readonly WooF1Context _context;
+    private int _maxLeaguePerOwner = int.Parse(configuration["CoreGameplaySettings:LeagueSettings:MaxLeaguePerOwner"]);
+    private int _maxLeaguePerPlayer = int.Parse(configuration["CoreGameplaySettings:LeagueSettings:MaxLeaguePerPlayer"]);
 
-    public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository, IUserService userService, WooF1Context context)
-    {
-        _configuration = configuration;
-        _leagueRepository = leagueRepository;
-        _userService = userService;
-        _context = context;
-    }
 
-    
     public async Task<Dtos.Get.LeagueDto> AddLeagueAsync(Dtos.Create.LeagueDto leagueCreateDto, LeagueType leagueType)
     {
-        var maxLeaguePerOwner = int.Parse(_configuration["CoreGameplaySettings:LeagueSettings:MaxLeaguePerOwner"]);
-        var maxLeaguePerPlayer = int.Parse(_configuration["CoreGameplaySettings:LeagueSettings:MaxLeaguePerPlayer"]);
-        
-        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
             // Check if owner exists
-            _ = _userService.GetUserByIdAsync(leagueCreateDto.OwnerId);
+            _ = userService.GetUserByIdAsync(leagueCreateDto.OwnerId);
         
-            var ownedLeagues = await _leagueRepository.GetAllLeaguesByOwnerIdAsync(leagueCreateDto.OwnerId);
-            if (ownedLeagues.Count >= maxLeaguePerOwner)
-            {
-                throw new InvalidOperationException($"Owner with id {leagueCreateDto.OwnerId} has reached the maximum number of leagues ({maxLeaguePerOwner}).");
-            }
-        
-            var joinedLeagues = await _leagueRepository.GetAllLeaguesByJoinedPlayerIdAsync(leagueCreateDto.OwnerId);
-            if (joinedLeagues.Count >= maxLeaguePerPlayer)
-            {
-                throw new InvalidOperationException($"Player with id {leagueCreateDto.OwnerId} has reached the maximum number of joined leagues ({maxLeaguePerPlayer}).");
-            }
+            await VerifyOwnedLeagueLimitAsync(ownerId: leagueCreateDto.OwnerId);
             
             var league = LeagueDtoMapper.MapCreateDtoToLeague(leagueCreateDto, leagueType);
-            var newLeague = await _leagueRepository.AddLeagueAsync(league);
+            var newLeague = await leagueRepository.AddLeagueAsync(league);
             
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             await transaction.CommitAsync();
             
             return LeagueDtoMapper.MapLeagueToDto(newLeague, 1, 10);
@@ -75,7 +51,7 @@ public class LeagueService : ILeagueService
 
     public async Task<Dtos.Get.LeagueDto> GetLeagueByIdAsync(int leagueId, int pageNum = 1, int pageSize = 10)
     {
-        var league = await _leagueRepository.GetLeagueByIdIncludesOwnerAndPlayersAsync(leagueId);
+        var league = await leagueRepository.GetLeagueByIdIncludesOwnerAndPlayersAsync(leagueId);
 
         if (league == null)
         {
@@ -88,38 +64,155 @@ public class LeagueService : ILeagueService
 
     public async Task DeleteLeagueByIdAsync(int leagueId)
     {
-        await _leagueRepository.DeleteLeagueByIdAsync(leagueId);
+        await leagueRepository.DeleteLeagueByIdAsync(leagueId);
     }
 
     public async Task JoinLeagueAsync(int leagueId, int playerId)
     {
-        var league = await GetLeagueByIdAsync(leagueId);
-        // Check if player exists
-        _ = _userService.GetUserByIdAsync(playerId);
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var league = await GetLeagueByIdAsync(leagueId);
+            // Check if player exists
+            _ = userService.GetUserByIdAsync(playerId);
 
-        if (league.Type == LeagueType.Private)
-        {
-            UserLeague userLeague = new UserLeague
+            var ownedLeagues = await leagueRepository.GetAllLeaguesByOwnerIdAsync(playerId);
+            if (ownedLeagues.Select(l => l.Id).Contains(leagueId))
             {
-                LeagueId = leagueId,
-                UserId = playerId,
-               IsAccepted = false
-            };
-            await _leagueRepository.AddUserLeagueAsync(userLeague);
-        } 
-        else if (league.Type == LeagueType.Public)
-        {
-            UserLeague userLeague = new UserLeague
+                throw new InvalidOperationException("Owner cannot join their own league.");
+            }
+            
+            await VerifyJoinedLeagueLimitAsync(playerId);
+            
+            if (league.Type == LeagueType.Private)
             {
-                LeagueId = leagueId,
-                UserId = playerId,
-                IsAccepted = true
-            };
-            await _leagueRepository.AddUserLeagueAsync(userLeague);
+                UserLeague userLeague = new UserLeague
+                {
+                    LeagueId = leagueId,
+                    UserId = playerId,
+                    IsAccepted = false
+                };
+                await leagueRepository.AddUserLeagueAsync(userLeague);
+            } 
+            else if (league.Type == LeagueType.Public)
+            {
+                UserLeague userLeague = new UserLeague
+                {
+                    LeagueId = leagueId,
+                    UserId = playerId,
+                    IsAccepted = true
+                };
+                await leagueRepository.AddUserLeagueAsync(userLeague);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unknown league type.");
+            }
+            
+            await transaction.CommitAsync();
         }
-        else
+        catch (Exception ex)
         {
-            throw new InvalidOperationException("Unknown league type.");
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error joining league: {ex.Message}");
+            throw;
         }
+    }
+    public async Task<List<Dtos.Get.UserLeagueDto>> GetAllWaitingJoinRequestsAsync(int leagueId)
+    {
+        var userLeagues = await leagueRepository.GetAllWaitingJoinRequestsByLeagueIdAsync(leagueId);
+        return userLeagues.Select(LeagueDtoMapper.MapUserLeagueToDto).ToList();
+    }
+    public async Task<Dtos.Get.UserLeagueDto> HandleJoinRequestAsync(Dtos.Update.UserLeagueDto userLeagueDto)
+    {
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var league = await GetLeagueByIdAsync(userLeagueDto.LeagueId);
+            // Check if player exists
+            _ = userService.GetUserByIdAsync(userLeagueDto.UserId);
+            
+            await VerifyJoinedLeagueLimitAsync(userLeagueDto.UserId);
+            
+             if (league.Type == LeagueType.Public)
+             {
+                 throw new InvalidOperationException("Public leagues do not have join requests.");
+             }
+            var userLeagueReturnDto = await GetUserLeagueByIdAsync(userLeagueDto.LeagueId, userLeagueDto.UserId);
+            
+            // Do nothing if the request is already accepted
+            if (userLeagueReturnDto.IsAccepted)
+            {
+                return userLeagueReturnDto;
+            }
+            
+            var updatedUserLeagueReturnDto = await leagueRepository.UpdateUserLeagueAsync(LeagueDtoMapper.MapUpdateDtoToUserLeague(userLeagueDto));
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return LeagueDtoMapper.MapUserLeagueToDto(updatedUserLeagueReturnDto);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error modifying join request: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<Dtos.Get.UserLeagueDto> GetUserLeagueByIdAsync(int leagueId, int playerId)
+    {
+        var userLeague = await leagueRepository.GetUserLeagueByIdAsync(leagueId, playerId);
+        if (userLeague == null)
+        {
+            throw new NotFoundException("UserLeague not found.");
+        }
+        return LeagueDtoMapper.MapUserLeagueToDto(userLeague);
+    }
+
+    public async Task LeaveLeagueAsync(int leagueId, int playerId)
+    {
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var userLeagueDto = await GetUserLeagueByIdAsync(leagueId, playerId);
+            
+            var league = await GetLeagueByIdAsync(leagueId);
+            if (league.Owner.Id == playerId)
+            {
+                throw new InvalidOperationException("You cannot leave your own league, you can only delete it.");
+            }
+            await leagueRepository.DeleteUserLeagueByIdAsync(leagueId, playerId);
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error leaving league: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task<List<League>> VerifyOwnedLeagueLimitAsync(int ownerId)
+    {
+        var ownedLeagues = await leagueRepository.GetAllLeaguesByOwnerIdAsync(ownerId);
+        if (ownedLeagues.Count >= _maxLeaguePerOwner)
+        {
+            throw new InvalidOperationException($"Owner with id {ownerId} has reached the maximum number of leagues ({_maxLeaguePerOwner}).");
+        }
+        return ownedLeagues;
+    }
+    
+    private async Task<List<League>> VerifyJoinedLeagueLimitAsync(int playerId)
+    {
+        var joinedLeagues = await leagueRepository.GetAllLeaguesByJoinedPlayerIdAsync(playerId);
+        if (joinedLeagues.Count >= _maxLeaguePerPlayer)
+        {
+            throw new InvalidOperationException($"Player with id {playerId} has reached the maximum number of joined leagues ({_maxLeaguePerPlayer}).");
+        }
+        return joinedLeagues;
     }
 }

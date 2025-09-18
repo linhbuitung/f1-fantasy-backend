@@ -8,234 +8,239 @@ using F1FantasyWorker.Modules.StaticDataModule.Dtos;
 
 namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
 {
-    public class DataSyncRepository : IDataSyncRepository
+    public class DataSyncRepository(WooF1Context context) : IDataSyncRepository
     {
-        private readonly WooF1Context _context;
-
-        public DataSyncRepository(WooF1Context context)
-        {
-            _context = context;
-        }
-
         public async Task<Driver> AddDriverAsync(Driver driver)
         {
-            _context.Drivers.Add(driver);
-            await _context.SaveChangesAsync();
+            context.Drivers.Add(driver);
+            await context.SaveChangesAsync();
             return driver;
         }
 
         public async Task<Driver?> GetDriverByIdAsync(int id)
         {
-            return await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
+            return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task<Driver?> GetDriverByCodeAsync(string code)
         {
-            return await _context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
+            return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
         {
-            _context.Constructors.Add(constructor);
-            await _context.SaveChangesAsync();
+            context.Constructors.Add(constructor);
+            await context.SaveChangesAsync();
             return constructor;
         }
 
         public async Task<Constructor?> GetConstructorByIdAsync(int id)
         {
-            return await _context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+            return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Constructor?> GetConstructorByCodeAsync(string code)
         {
-            return await _context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
         {
-            _context.Circuits.Add(circuit);
+            context.Circuits.Add(circuit);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return circuit;
         }
 
         public async Task<Circuit?> GetCircuitByIdAsync(int id)
         {
-            return await _context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+            return await context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Circuit?> GetCircuitByCodeAsync(string code)
         {
-            return await _context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
+            return await context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
         public async Task<Country> AddCountryAsync(Country country)
         {
-            _context.Countries.Add(country);
+            context.Countries.Add(country);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return country;
         }
 
         // Country has string Id, so we use Equal method
         public async Task<Country?> GetCountryByIdAsync(string id)
         {
-            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
+            return await context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Id.Equals(id));
         }
 
         public async Task<Country?> GetCountryByNationalitityAsync(string nationality)
         {
-            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Nationalities.Contains(nationality));
+            return await context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.Nationalities.Contains(nationality));
         }
 
         public async Task<Country?> GetCountryByShortNameAsync(string shortName)
         {
-            return await _context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.ShortName.Equals(shortName));
+            return await context.Countries.AsNoTracking().FirstOrDefaultAsync(n => n.ShortName.Equals(shortName));
         }
 
         public async Task<Race> AddRaceAsync(Race race)
         {
-            _context.Races.Add(race);
+            context.Races.Add(race);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return race;
         }
 
         public async Task<Race?> GetRaceByIdAsync(int id)
         {
-            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
+            return await context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
         }
 
         public async Task<Race?> GetRaceByRaceDateAsync(DateOnly date)
         {
-            return await _context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
+            return await context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
         }
 
         public async Task<List<int>> GetAllRaceIdsByYearAsync(int year)
         {
-            return await _context.Races.AsNoTracking().Where(r => r.Season.Year == year).Select(r => r.Id).ToListAsync();
+            return await context.Races.AsNoTracking().Where(r => r.Season.Year == year).Select(r => r.Id).ToListAsync();
         }
         public async Task<Powerup> AddPowerupAsync(Powerup powerup)
         {
-            _context.Powerups.Add(powerup);
+            context.Powerups.Add(powerup);
             
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return powerup;
         }
         
         public async Task<Powerup?> GetPowerupByIdAsync(int id)
         {
-            return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+            return await context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
         }
         
         public async Task<Powerup?> GetPowerupByTypeAsync(string type)
         {
-            return await _context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Type.Equals(type));
+            return await context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Type.Equals(type));
         }
         
         public async Task<List<Powerup>> GetAllPowerupsAsync()
         {
-            return await _context.Powerups.AsNoTracking().ToListAsync();
+            return await context.Powerups.AsNoTracking().ToListAsync();
         }
 
         public async Task<Season> AddSeasonAsync(Season season)
         {
-            _context.Seasons.Add(season);
+            context.Seasons.Add(season);
             
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return season;
         }
 
         public async Task<Season?> GetSeasonByIdAsync(int id)
         {
-            return await _context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
+            return await context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
         }
 
         public async Task<Season?> GetSeasonByYearAsync(int year)
         {
-            return await _context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Year == year);
+            return await context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Year == year);
         }
 
         public async Task<RaceEntry> AddRaceEntryAsync(RaceEntry raceEntry)
         {
-            _context.RaceEntries.Add(raceEntry);
-            await _context.SaveChangesAsync();
+            context.RaceEntries.Add(raceEntry);
+            await context.SaveChangesAsync();
             return raceEntry;
         }
 
         public async Task<RaceEntry?> GetRaceEntryByIdAsync(int id)
         {
-            return await _context.RaceEntries.AsNoTracking().FirstOrDefaultAsync(re => re.Id == id);
+            return await context.RaceEntries.AsNoTracking().FirstOrDefaultAsync(re => re.Id == id);
         }
 
         public async Task<RaceEntry?> GetRaceEntryByDriverCodeAndCircuitCodeInYearAsync(string driverCode, string circuitCode, int year)
         {
-            return await _context.RaceEntries.AsNoTracking()
+            return await context.RaceEntries.AsNoTracking()
                 .FirstOrDefaultAsync(re => re.Race.Season.Year == year && re.Driver.Code.Equals(driverCode) && re.Race.Circuit.Code.Equals(circuitCode));
         }
         
         public async Task<RaceEntry?> GetRaceEntryByDriverIdAndRaceDate(int driverId, DateOnly date)
         {
-            return await _context.RaceEntries.AsNoTracking().FirstOrDefaultAsync(re => re.Race.RaceDate == date  && re.DriverId == driverId);
+            return await context.RaceEntries.AsNoTracking().FirstOrDefaultAsync(re => re.Race.RaceDate == date  && re.DriverId == driverId);
         }
 
         public async Task<List<RaceEntry>> GetRaceEntriesByRaceIdAsync(int raceId)
         {
-            return await _context.RaceEntries.AsNoTracking().Where(re => re.RaceId == raceId).ToListAsync();
+            return await context.RaceEntries.AsNoTracking().Where(re => re.RaceId == raceId).ToListAsync();
         }
         
         public async Task<FantasyLineup> AddFantasyLineupAsync(FantasyLineup fantasyLineup)
         {
-            _context.FantasyLineups.Add(fantasyLineup);
-            await _context.SaveChangesAsync();
+            context.FantasyLineups.Add(fantasyLineup);
+            await context.SaveChangesAsync();
             return fantasyLineup;
         }
 
         public async Task<FantasyLineup?> GetFantasyLineupByUserIdAndRaceId(int userId, int raceId)
         {
-            return await _context.FantasyLineups.AsNoTracking().FirstOrDefaultAsync(f => f.UserId.Equals(userId) && f.RaceId.Equals(raceId));
+            return await context.FantasyLineups.AsNoTracking().FirstOrDefaultAsync(f => f.UserId.Equals(userId) && f.RaceId.Equals(raceId));
         }
         
         public async Task<AspNetUser> GetUserByIdAsync(int id)
         {
-            return await _context.AspNetUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+            return await context.AspNetUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<List<int>> GetAllUserIdsAsync()
         {
-            return await _context.AspNetUsers.Select(u => u.Id).ToListAsync();
+            return await context.AspNetUsers.Select(u => u.Id).ToListAsync();
         }
-        
+
+        public async Task<PickableItem?> GetPickableItemAsync()
+        {
+            return await context.PickableItems.FirstOrDefaultAsync(p => p.Id == 1);
+        }
+
+        public async Task<PickableItem> AddPickableItemAsync()
+        {
+            var item = new PickableItem{Id = 1};
+            context.PickableItems.Add(item);
+            await context.SaveChangesAsync();
+            return item;
+        }
         #region GetCounts
 
         public async Task<int> GetDriversCountAsync()
         {
-            return await _context.Drivers.CountAsync();
+            return await context.Drivers.CountAsync();
         }
 
         public async Task<int> GetConstructorsCountAsync()
         {
-            return await _context.Constructors.CountAsync();
+            return await context.Constructors.CountAsync();
         }
 
         public async Task<int> GetCircuitsCountAsync()
         {
-            return await _context.Circuits.CountAsync();
+            return await context.Circuits.CountAsync();
         }
 
         public async Task<int> GetRacesCountAsync()
         {
-            return await _context.Races.CountAsync();
+            return await context.Races.CountAsync();
         }
 
         public async Task<int> GetSeasonsCountAsync()
         {
-            return await _context.Seasons.CountAsync();
+            return await context.Seasons.CountAsync();
         }
 
         public async Task<int> GetRaceEntriesCountAsync()
         {
-            return await _context.RaceEntries.CountAsync();
+            return await context.RaceEntries.CountAsync();
         }
         #endregion
     }

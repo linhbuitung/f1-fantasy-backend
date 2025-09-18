@@ -19,7 +19,7 @@ public class ApplicationUserDtoMapper
             ConstructorName = user.Constructor?.Name ?? null,
             DriverId = user.DriverId,
             DriverName = user.Driver == null ? null : string.Concat(user.Driver.GivenName, " ", user.Driver.FamilyName),            CountryId = user.CountryId,
-            CountryName = user.Country?.Nationalities[0]  ?? null
+            CountryName = user.Country?.ShortName  ?? null
         };
     }
 

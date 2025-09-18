@@ -15,7 +15,7 @@ namespace F1Fantasy.Core.Common
         public int TotalAmount { get; set; }
 
         [Required]
-        public int TransferPointsDeducted { get; set; }
+        public int TransfersMade { get; set; }
 
         [Required]
         public int PointsGained { get; set; }
@@ -36,6 +36,10 @@ namespace F1Fantasy.Core.Common
         public virtual ICollection<Driver> Drivers { get; set; }
         
         public virtual ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
+        
+        public virtual ICollection<Constructor> Constructors { get; set; }
+        
+        public virtual ICollection<FantasyLineupConstructor> FantasyLineupConstructors { get; set; }
         
         public virtual ICollection<Powerup> Powerups { get; set; }
 

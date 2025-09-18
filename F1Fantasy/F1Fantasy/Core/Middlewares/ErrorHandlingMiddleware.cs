@@ -2,26 +2,17 @@
 
 namespace F1Fantasy.Core.Middlewares;
 
-public class ErrorHandlingMiddleware
+public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
-    public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task Invoke(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (NotFoundException ex)
         {
-            _logger.LogError(ex, "Not found exception");
+            logger.LogError(ex, "Not found exception");
             context.Response.StatusCode = 400;
             context.Response.ContentType = "application/json";
             var errorResponse = new
@@ -33,7 +24,7 @@ public class ErrorHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception");
+            logger.LogError(ex, "Exception");
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
             var errorResponse = new

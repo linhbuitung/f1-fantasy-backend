@@ -16,36 +16,22 @@ namespace F1Fantasy.Modules.AdminModule.Controllers;
 
 [ApiController]
 [Route("api/admin")]
-public class AdminController : ControllerBase
+public class AdminController(
+    IUserService userService,
+    IAuthorizationService authorizationService,
+    IAdminService adminService,
+    ISeasonService seasonService)
+    : ControllerBase
 {
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IUserService _userService;
-    private readonly IAdminService _adminService;
-    private readonly ISeasonService _seasonService;
-
-    public AdminController(
-        IUserService userService,
-        IAuthorizationService authorizationService,
-        IAdminService adminService,
-        ISeasonService seasonService)
-    {
-        _userService = userService;
-        _authorizationService = authorizationService;
-        _adminService = adminService;
-        _seasonService = seasonService;
-    }
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     [HttpPut("user/{userId}/update-roles")]
     [Authorize(Roles = AppRoles.SuperAdmin)]
-    public async Task<IActionResult> UpdateUserRoles(int userId, [FromBody] ApplicationUserForAdminUpdateDto dto)
+    public async Task<IActionResult> UpdateUserRoles(int userId, [FromBody] Dtos.Update.ApplicationUserForAdminDto dto)
     {
-        var user = await _userService.GetUserByIdAsync(userId);
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var user = await userService.GetUserByIdAsync(userId);
         
-        ApplicationUserForAdminGetDto updatedUser = await _adminService.UpdateUserRoleAsync(userId, dto.Roles);
+        Dtos.Get.ApplicationUserForAdminDto updatedUser = await adminService.UpdateUserRoleAsync(userId, dto.Roles);
         return Ok(updatedUser);
     }
 
@@ -53,24 +39,16 @@ public class AdminController : ControllerBase
     [Authorize(Roles = AppRoles.SuperAdmin)]
     public async Task<IActionResult> StartSeason(int year)
     {
-        StaticDataModule.Dtos.SeasonDto seasonDto = await _seasonService.GetSeasonByYearAsync(year);
-        if (seasonDto == null)
-        {
-            return NotFound($"Season with year {year} does not exist.");
-        }
+        StaticDataModule.Dtos.SeasonDto seasonDto = await seasonService.GetSeasonByYearAsync(year);
         
-        SeasonDto startSeason = await _adminService.StartSeasonAsync(year);
+        SeasonDto startSeason = await adminService.StartSeasonAsync(year);
         return Ok(startSeason);
     }
     
     [HttpGet("season/active")]
     public async Task<IActionResult> GetActiveSeasonAsync()
     {
-        SeasonDto? seasonDto = await _adminService.GetActiveSeasonAsync();
-        if (seasonDto == null)
-        {
-            return NotFound($"There is no active season currently");
-        }
+        SeasonDto? seasonDto = await adminService.GetActiveSeasonAsync();
         
         return Ok(seasonDto);
     }
@@ -79,14 +57,89 @@ public class AdminController : ControllerBase
     [Authorize(Roles = AppRoles.SuperAdmin)]
     public async Task<IActionResult> DeactivateActiveSeasonAsync()
     {
-        SeasonDto seasonDto = await _adminService.GetActiveSeasonAsync();
-        if (seasonDto == null)
-        {
-            return NotFound($"There is no active season currently");
-        }
+        SeasonDto seasonDto = await adminService.GetActiveSeasonAsync();
 
-        await _adminService.DeactivateActiveSeasonAsync();
+        await adminService.DeactivateActiveSeasonAsync();
         
         return Ok();
+    }
+
+    [HttpGet("pickable-items")] public async Task<IActionResult> GetPickableItemsAsync()
+    {
+        var pickableItemDto = await adminService.GetPickableItemAsync();        
+        return Ok(pickableItemDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPut("pickable-items")] 
+    public async Task<IActionResult> UpdatePickableItemsAsync([FromBody] Dtos.Update.PickableItemDto dto)
+    {
+        _ = await adminService.GetPickableItemAsync();        
+        var pickableItemDto = await adminService.UpdatePickableItemAsync(dto);
+        return Ok(pickableItemDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPut("pickable-items/{seasonYear:int}")] 
+    public async Task<IActionResult> UpdatePickableItemsAsync(int seasonYear)
+    {
+        _ = await adminService.GetPickableItemAsync();        
+        var pickableItemDto = await adminService.UpdatePickableItemFromAllDriversInASeasonYearAsync(seasonYear);
+        return Ok(pickableItemDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("driver/{driverId:int}")] 
+    public async Task<IActionResult> UpdateDriverInfoAsync(int driverId, [FromBody] Dtos.Update.DriverDto dto)
+    {
+        if(!ModelState.IsValid || driverId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdateDriverInfoAsync(dto);
+        return Ok(resultDto);
+    }
+
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("constructor/{constructorId:int}")]
+    public async Task<IActionResult> UpdateConstructorInfoAsync(int constructorId,
+        [FromBody] Dtos.Update.ConstructorDto dto)
+    {
+        if (!ModelState.IsValid || constructorId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdateConstructorInfoAsync(dto);
+        return Ok(resultDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("circuit/{circuitId:int}")]
+    public async Task<IActionResult> UpdateCircuitInfoAsync(int circuitId,
+        [FromBody] Dtos.Update.CircuitDto dto)
+    {
+        if (!ModelState.IsValid || circuitId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdateCircuitInfosync(dto);
+        return Ok(resultDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("powerup/{powerupId:int}")]
+    public async Task<IActionResult> UpdateCircuitInfoAsync(int powerupId,
+        [FromBody] Dtos.Update.PowerupDto dto)
+    {
+        if (!ModelState.IsValid || powerupId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdatePowerupInfoAsync(dto);
+        return Ok(resultDto);
     }
 }

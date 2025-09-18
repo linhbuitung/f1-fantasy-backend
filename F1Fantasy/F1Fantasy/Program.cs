@@ -20,6 +20,10 @@ using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Implementations;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.AuthModule.ApiMapper;
+using F1Fantasy.Modules.CoreGameplayModule.Repositories.Implementations;
+using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
+using F1Fantasy.Modules.CoreGameplayModule.Services.Implementations;
+using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
 using F1Fantasy.Modules.LeagueModule.Repositories.Implementations;
 using F1Fantasy.Modules.LeagueModule.Repositories.Interfaces;
 using F1Fantasy.Modules.LeagueModule.Services.Implementations;
@@ -68,20 +72,21 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),  
+              o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
           .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
           .UseSnakeCaseNamingConvention());
 
 #region Auth
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddRoles<ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
-builder.Services.AddAuthorization(Policies.AddCustomPolicies);
+builder.Services.AddAuthorization(AuthPolicies.AddCustomPolicies);
 
 builder.Services.AddAuthentication()
     .AddBearerToken(IdentityConstants.BearerScheme);
 
 #endregion Auth
-
+    
 builder.Services.AddHttpClient();
 
 builder.Services.Configure<HostOptions>(options =>
@@ -117,6 +122,26 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
+    });
+    // Allow all cors for development
+    app.UseCors(policy =>
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+}
+
+if (app.Environment.IsProduction())
+{
+    builder.Services.AddCors(options =>
+    {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+        options.AddPolicy("AllowAngularApp", policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
     });
 }
 
@@ -155,6 +180,10 @@ public static class ServiceExtensions
         services.AddScoped<ILeagueService, LeagueService>();
         services.AddScoped<ILeagueRepository, LeagueRepository>();
 
+        services.AddScoped<ICoreGameplayService, CoreGameplayService>();
+        services.AddScoped<IFantasyLineupRepository, FantasyLineupRepository>();
+        services.AddScoped<ICoreGameplayRepository, CoreGameplayRepository>();
+        
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
 
 

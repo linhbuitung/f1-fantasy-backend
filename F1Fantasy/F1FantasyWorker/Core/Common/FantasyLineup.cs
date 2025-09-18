@@ -9,7 +9,7 @@ public partial class FantasyLineup
 
     public int TotalAmount { get; set; }
 
-    public int TransferPointsDeducted { get; set; }
+    public int TransfersMade { get; set; }
 
     public int PointsGained { get; set; }
 
@@ -22,6 +22,10 @@ public partial class FantasyLineup
     public virtual Race Race { get; set; } = null!;
 
     public virtual AspNetUser User { get; set; } = null!;
+
+    public virtual ICollection<Constructor> Constructors { get; set; } = new List<Constructor>();
+
+    public virtual ICollection<Constructor> ConstructorsNavigation { get; set; } = new List<Constructor>();
 
     public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
 
