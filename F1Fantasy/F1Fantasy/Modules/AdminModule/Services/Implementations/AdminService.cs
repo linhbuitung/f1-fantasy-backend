@@ -203,5 +203,61 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race with id {latestRace.Id}." );
         }
     }
+
+    public async Task<Dtos.Get.DriverDto> UpdateDriverInfoAsync(Dtos.Update.DriverDto dto)
+    {
+        var existingDriver = await staticDataRepository.GetDriverByIdAsync(dto.Id);
+        if (existingDriver == null)
+        {
+            throw new NotFoundException($"Driver with ID {dto.Id} not found.");
+        }
+        
+        var updatedDriver = AdminDtoMapper.MapUpdateDtoToDriver(dto);
+        var resultDriver = await adminRepository.UpdateDriverInfoAsync(updatedDriver);
+        
+        return AdminDtoMapper.MapDriverToGetDto(resultDriver);
+    }
+
+    public async Task<Dtos.Get.ConstructorDto> UpdateConstructorInfoAsync(Dtos.Update.ConstructorDto dto)
+    {
+        var existingConstructor = await staticDataRepository.GetConstructorByIdAsync(dto.Id);
+        if (existingConstructor == null)
+        {
+            throw new NotFoundException($"Constructor with ID {dto.Id} not found.");
+        }
+        
+        var updatedConstructor = AdminDtoMapper.MapUpdateDtoToConstructor(dto);
+        var resultConstructor = await adminRepository.UpdateConstructorInfoAsync(updatedConstructor);
+        
+        return AdminDtoMapper.MapConstructorToGetDto(resultConstructor);
+    }
+
+    public async Task<Dtos.Get.CircuitDto> UpdateCircuitInfosync(Dtos.Update.CircuitDto dto)
+    {
+        var existingCircuit = await staticDataRepository.GetCircuitByIdAsync(dto.Id);
+        if (existingCircuit == null)
+        {
+            throw new NotFoundException($"Circuit with ID {dto.Id} not found.");
+        }
+        
+        var updatedCircuit = AdminDtoMapper.MapUpdateDtoToCircuit(dto);
+        var resultCircuit = await adminRepository.UpdateCircuitInfoAsync(updatedCircuit);
+        
+        return AdminDtoMapper.MapCircuitToGetDto(resultCircuit);
+    }
+
+    public async Task<Dtos.Get.PowerupDto> UpdatePowerupInfoAsync(Dtos.Update.PowerupDto dto)
+    {
+        var existingPowerup = await staticDataRepository.GetPowerupByIdAsync(dto.Id);
+        if (existingPowerup == null)
+        {
+            throw new NotFoundException($"Powerup with ID {dto.Id} not found.");
+        }
+        
+        var updatedPowerup = AdminDtoMapper.MapUpdateDtoToPowerup(dto);
+        var resultPowerup = await adminRepository.UpdatePowerupInfoAsync(updatedPowerup);
+        
+        return AdminDtoMapper.MapPowerupToGetDto(resultPowerup);
+    }
     
 }

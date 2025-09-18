@@ -1,5 +1,4 @@
 ﻿using F1Fantasy.Modules.AdminModule.Dtos;
-using F1Fantasy.Modules.AdminModule.Dtos.Get;
 
 namespace F1Fantasy.Modules.AdminModule.Services.Interfaces;
 
@@ -19,4 +18,11 @@ public interface IAdminService
     
     Task<Dtos.Get.PickableItemDto> UpdatePickableItemFromAllDriversInASeasonYearAsync(int seasonYear);
 
+    Task<Dtos.Get.DriverDto> UpdateDriverInfoAsync(Dtos.Update.DriverDto dto);
+    
+    Task<Dtos.Get.ConstructorDto> UpdateConstructorInfoAsync(Dtos.Update.ConstructorDto dto);
+    
+    Task<Dtos.Get.CircuitDto> UpdateCircuitInfosync(Dtos.Update.CircuitDto dto);
+    
+    Task<Dtos.Get.PowerupDto> UpdatePowerupInfoAsync(Dtos.Update.PowerupDto dto);
 }

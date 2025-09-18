@@ -16,11 +16,18 @@ public interface IAdminRepository
     
     Task<PickableItem?> GetPickableItemAsync();
     
+    Task<Driver?> GetDriverByIdAsync(int driverId);
     Task <Driver> UpdateDriverInfoAsync(Driver driver);
+    
+    Task<Constructor?> GetConstructorByIdAsync(int constructorId);
     
     Task<Constructor> UpdateConstructorInfoAsync(Constructor constructor);
     
+    Task<Circuit?> GetCircuitByIdAsync(int circuitId);
+    
     Task<Circuit> UpdateCircuitInfoAsync(Circuit circuit);
+    
+    Task<Powerup?> GetPowerupByIdAsync(int powerupId);
     
     Task<Powerup> UpdatePowerupInfoAsync(Powerup powerup);
 }

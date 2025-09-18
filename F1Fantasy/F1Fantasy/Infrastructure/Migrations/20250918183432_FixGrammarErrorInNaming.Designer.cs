@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace F1Fantasy.Infrastructure.Migrations
 {
     [DbContext(typeof(WooF1Context))]
-    [Migration("20250918182228_FixGrammarErrorInNaming")]
+    [Migration("20250918183432_FixGrammarErrorInNaming")]
     partial class FixGrammarErrorInNaming
     {
         /// <inheritdoc />

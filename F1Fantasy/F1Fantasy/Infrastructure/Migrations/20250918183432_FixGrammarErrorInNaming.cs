@@ -19,7 +19,10 @@ namespace F1Fantasy.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.RenameColumn(
+                name: "longitude",
+                table: "circuit",
+                newName: "longtitude");
         }
     }
 }

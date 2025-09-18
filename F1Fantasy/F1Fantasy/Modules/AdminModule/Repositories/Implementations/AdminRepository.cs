@@ -4,6 +4,7 @@ using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.AdminModule.Dtos;
 using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AuthModule.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Modules.AdminModule.Repositories.Implementations;
@@ -72,6 +73,11 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
             .AsTracking().FirstOrDefaultAsync(p => p.Id == 1);
     }
 
+    public async Task<Driver?> GetDriverByIdAsync(int driverId)
+    {
+        return await context.Drivers.FirstOrDefaultAsync(d => d.Id == driverId);
+    }
+
     public async Task<Driver> UpdateDriverInfoAsync(Driver driver)
     {
         Driver existingDriver = await context.Drivers.AsTracking().FirstOrDefaultAsync(d => d.Id == driver.Id);
@@ -91,6 +97,11 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
         }
 
         throw new InvalidOperationException();
+    }
+
+    public async Task<Constructor?> GetConstructorByIdAsync(int constructorId)
+    {
+        return await context.Constructors.FirstOrDefaultAsync(c => c.Id == constructorId);
     }
 
     public async Task<Constructor> UpdateConstructorInfoAsync(Constructor constructor)
@@ -114,6 +125,10 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
         throw new InvalidOperationException();
     }
 
+    public async Task<Circuit?> GetCircuitByIdAsync(int circuitId)
+    {
+        return await context.Circuits.FirstOrDefaultAsync(c => c.Id == circuitId);
+    }
     public async Task<Circuit> UpdateCircuitInfoAsync(Circuit circuit)
     {
         Circuit existingCircuit = await context.Circuits.AsTracking().FirstOrDefaultAsync(c => c.Id == circuit.Id);
@@ -134,6 +149,10 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
         throw new InvalidOperationException();
     }
 
+    public async Task<Powerup?> GetPowerupByIdAsync(int powerupId)
+    {
+        return await context.Powerups.FirstOrDefaultAsync(p => p.Id == powerupId);
+    }
     public async Task<Powerup> UpdatePowerupInfoAsync(Powerup powerup)
     {
         Powerup existingPowerup = await context.Powerups.AsTracking().FirstOrDefaultAsync(p => p.Id == powerup.Id);

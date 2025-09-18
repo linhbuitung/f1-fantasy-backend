@@ -87,4 +87,59 @@ public class AdminController(
         var pickableItemDto = await adminService.UpdatePickableItemFromAllDriversInASeasonYearAsync(seasonYear);
         return Ok(pickableItemDto);
     }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("driver/{driverId:int}")] 
+    public async Task<IActionResult> UpdateDriverInfoAsync(int driverId, [FromBody] Dtos.Update.DriverDto dto)
+    {
+        if(!ModelState.IsValid || driverId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdateDriverInfoAsync(dto);
+        return Ok(resultDto);
+    }
+
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("constructor/{constructorId:int}")]
+    public async Task<IActionResult> UpdateConstructorInfoAsync(int constructorId,
+        [FromBody] Dtos.Update.ConstructorDto dto)
+    {
+        if (!ModelState.IsValid || constructorId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdateConstructorInfoAsync(dto);
+        return Ok(resultDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("circuit/{circuitId:int}")]
+    public async Task<IActionResult> UpdateCircuitInfoAsync(int circuitId,
+        [FromBody] Dtos.Update.CircuitDto dto)
+    {
+        if (!ModelState.IsValid || circuitId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdateCircuitInfosync(dto);
+        return Ok(resultDto);
+    }
+    
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    [HttpPatch("powerup/{powerupId:int}")]
+    public async Task<IActionResult> UpdateCircuitInfoAsync(int powerupId,
+        [FromBody] Dtos.Update.PowerupDto dto)
+    {
+        if (!ModelState.IsValid || powerupId != dto.Id)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var resultDto = await adminService.UpdatePowerupInfoAsync(dto);
+        return Ok(resultDto);
+    }
 }

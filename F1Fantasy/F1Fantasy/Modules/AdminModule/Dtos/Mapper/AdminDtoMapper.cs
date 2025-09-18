@@ -142,4 +142,15 @@ public class AdminDtoMapper
             ImgUrl = powerup.ImgUrl
         };
     }
+    
+    public static Get.PowerupDto MapPowerupToGetDto(Powerup powerup)
+    {
+        return new Get.PowerupDto
+        {
+            Id = powerup.Id,
+            Type = powerup.Type,
+            Description = powerup.Description,
+            ImgUrl = powerup.ImgUrl
+        };
+    }
 }
