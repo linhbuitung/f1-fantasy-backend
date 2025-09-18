@@ -396,9 +396,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("locality");
 
-                    b.Property<decimal>("Longtitude")
+                    b.Property<decimal>("Longitude")
                         .HasColumnType("decimal(10,7)")
-                        .HasColumnName("longtitude");
+                        .HasColumnName("longitude");
 
                     b.HasKey("Id")
                         .HasName("pk_circuit");

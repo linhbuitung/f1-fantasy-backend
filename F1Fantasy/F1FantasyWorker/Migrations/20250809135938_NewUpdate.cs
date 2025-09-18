@@ -34,7 +34,7 @@ namespace F1FantasyWorker.Migrations
                     circuit_name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     latitude = table.Column<decimal>(type: "numeric(9,7)", precision: 9, scale: 7, nullable: false),
-                    longtitude = table.Column<decimal>(type: "numeric(10,7)", precision: 10, scale: 7, nullable: false),
+                    longitude = table.Column<decimal>(type: "numeric(10,7)", precision: 10, scale: 7, nullable: false),
                     locality = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     country = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     img_url = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true)

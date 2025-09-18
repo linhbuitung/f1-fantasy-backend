@@ -1,6 +1,7 @@
 ﻿using F1Fantasy.Core.Common;
 using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
+using F1Fantasy.Modules.CoreGameplayModule.Dtos.Get;
 using F1Fantasy.Modules.CoreGameplayModule.Dtos.Mapper;
 using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
@@ -183,4 +184,13 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
     }
 
+    public async Task<RaceDto> GetLatestFinishedRaceAsync()
+    {
+        Race? latestFinishedRace = await coreGameplayRepository.GetLatestFinishedRaceAsync();
+        if (latestFinishedRace == null)
+        {
+            throw new NotFoundException("There is no finished race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceToDto(latestFinishedRace);
+    }
 }

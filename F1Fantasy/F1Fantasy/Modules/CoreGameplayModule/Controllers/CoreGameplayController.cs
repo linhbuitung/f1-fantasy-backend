@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.CoreGameplayModule.Controllers;
 
 [ApiController]
-[Route("api/fantasy-lineup")]
+[Route("api/core")]
 public class CoreGameplayController(
     IAuthorizationService authorizationService,
     ICoreGameplayService coreGameplayService)
     : ControllerBase
 {
-    [HttpGet("{fantasyLineupId:int}")]
+    [HttpGet("fantasy-lineup/{fantasyLineupId:int}")]
     public async Task<IActionResult> GetFantasyLineupById(int fantasyLineupId)
     {
         var fantasyLineupDto = await coreGameplayService.GetFantasyLineupByIdAsync(fantasyLineupId);
@@ -20,7 +20,7 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
-    [HttpGet("{raceId:int}/user{userId:int}")]
+    [HttpGet("fantasy-lineup/race/{raceId:int}/user/{userId:int}")]
     public async Task<IActionResult> GetFantasyLineupByUserIdAndRaceId(int userId, int raceId)
     {
         var fantasyLineupDto = await coreGameplayService.GetFantasyLineupByUserIdAndRaceIdAsync(userId, raceId);
@@ -28,7 +28,7 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
-    [HttpGet("{userId:int}/current")]
+    [HttpGet("fantasy-lineup/{userId:int}/current")]
     public async Task<IActionResult> GetCurrentFantasyLineupByUserId(int userId)
     {
         var fantasyLineupDto = await coreGameplayService.GetCurrentFantasyLineupByUserIdAsync(userId);
@@ -36,10 +36,10 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
-    [HttpPut("{userId:int}/current")]
+    [HttpPut("fantasy-lineup/{userId:int}/current")]
     public async Task<IActionResult> UpdateCurrentFantasyLineupByUserId(int userId, [FromBody] Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
@@ -59,5 +59,14 @@ public class CoreGameplayController(
         fantasyLineupDto.Id = fantasyLineupGetDto.Id;
         var updatedFantasyLineupDto = await coreGameplayService.UpdateFantasyLineupAsync(fantasyLineupDto);
         return Ok(updatedFantasyLineupDto);
+    }
+    
+        
+    [HttpGet("race/latest-finished")]
+    public async Task<IActionResult> GetLatestFinishedRace()
+    {
+        var raceDto = await coreGameplayService.GetLatestFinishedRaceAsync();
+
+        return Ok(raceDto);
     }
 }

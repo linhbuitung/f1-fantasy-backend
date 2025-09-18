@@ -13,7 +13,7 @@ public partial class Circuit
 
     public decimal Latitude { get; set; }
 
-    public decimal Longtitude { get; set; }
+    public decimal Longitude { get; set; }
 
     public string Locality { get; set; } = null!;
 

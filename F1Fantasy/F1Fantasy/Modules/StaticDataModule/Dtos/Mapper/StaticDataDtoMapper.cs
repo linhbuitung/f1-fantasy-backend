@@ -43,7 +43,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static CircuitDto MapCircuitToDto(Circuit circuit)
         {
-            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longtitude, circuit.Locality, circuit.CountryId, circuit.ImgUrl);
+            return new CircuitDto(circuit.Id, circuit.CircuitName, circuit.Code, circuit.Latitude, circuit.Longitude, circuit.Locality, circuit.CountryId, circuit.ImgUrl);
         }
 
         public static Circuit MapDtoToCircuit(CircuitDto circuitDto)
@@ -53,7 +53,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
                 CircuitName = circuitDto.CircuitName,
                 Code = circuitDto.Code,
                 Latitude = circuitDto.Latitude,
-                Longtitude = circuitDto.Longtitude,
+                Longitude = circuitDto.Longitude,
                 Locality = circuitDto.Locality,
                 CountryId = circuitDto.CountryId,
                 ImgUrl = circuitDto.ImgUrl

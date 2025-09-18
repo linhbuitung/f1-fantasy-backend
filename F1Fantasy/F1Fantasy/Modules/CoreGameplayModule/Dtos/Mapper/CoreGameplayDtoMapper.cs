@@ -48,4 +48,20 @@ public class CoreGameplayDtoMapper
                 }).ToList()
         };
     }
+    
+    public static Get.RaceDto MapRaceToDto(Race race)
+    {
+        return new Get.RaceDto
+        {
+            Id = race.Id,
+            Round = race.Round,
+            RaceDate = race.RaceDate,
+            DeadlineDate = race.DeadlineDate,
+            Calculated = race.Calculated,
+            SeasonYear = race.Season.Year,
+            CircuitId = race.CircuitId,
+            CircuitCode = race.Circuit.Code,
+            CircuitName = race.Circuit.CircuitName
+        };
+    }
 }

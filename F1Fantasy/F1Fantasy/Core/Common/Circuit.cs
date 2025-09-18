@@ -24,7 +24,7 @@ namespace F1Fantasy.Core.Common
 
         [Required]
         [Column(TypeName = "decimal(10,7)")]
-        public decimal Longtitude { get; set; }
+        public decimal Longitude { get; set; }
 
         [Required, MaxLength(200)]
         public string Locality { get; set; }

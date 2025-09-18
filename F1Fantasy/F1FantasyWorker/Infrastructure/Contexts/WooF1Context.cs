@@ -260,9 +260,9 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Locality)
                 .HasMaxLength(200)
                 .HasColumnName("locality");
-            entity.Property(e => e.Longtitude)
+            entity.Property(e => e.Longitude)
                 .HasPrecision(10, 7)
-                .HasColumnName("longtitude");
+                .HasColumnName("longitude");
 
             entity.HasOne(d => d.Country).WithMany(p => p.Circuits)
                 .HasForeignKey(d => d.CountryId)

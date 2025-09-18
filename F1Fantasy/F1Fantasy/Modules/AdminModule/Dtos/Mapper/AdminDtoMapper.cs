@@ -62,4 +62,84 @@ public class AdminDtoMapper
                 }).ToList(),
         };
     }
+
+    public static Driver MapUpdateDtoToDriver(Update.DriverDto driver)
+    {
+        return new Driver
+        {
+            Id = driver.Id,
+            Price = driver.Price ?? 0,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    public static Get.DriverDto MapDriverToGetDto(Driver driver)
+    {
+        return new Get.DriverDto
+        {
+            Id = driver.Id,
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            DateOfBirth = driver.DateOfBirth,
+            CountryId = driver.CountryId,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Constructor MapUpdateDtoToConstructor(Update.ConstructorDto constructor)
+    {
+        return new Constructor
+        {
+            Id = constructor.Id,
+            Price = constructor.Price ?? 0,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    public static Get.ConstructorDto MapConstructorToGetDto(Constructor constructor)
+    {
+        return new Get.ConstructorDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            Code = constructor.Code,
+            CountryId = constructor.CountryId,
+            Price = constructor.Price,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    public static Circuit MapUpdateDtoToCircuit(Update.CircuitDto circuit)
+    {
+        return new Circuit
+        {
+            Id = circuit.Id,
+            ImgUrl = circuit.ImgUrl
+        };
+    }
+    
+    public static Get.CircuitDto MapCircuitToGetDto(Circuit circuit)
+    {
+        return new Get.CircuitDto
+        {
+            Id = circuit.Id,
+            CircuitName = circuit.CircuitName,
+            Code = circuit.Code,
+            Latitude = circuit.Latitude,
+            Longitude = circuit.Longitude,
+            Locality = circuit.Locality,
+            CountryId = circuit.CountryId,
+            ImgUrl = circuit.ImgUrl
+        };
+    }
+
+    public static Powerup MapUpdateDtoToPowerup(Update.PowerupDto powerup)
+    {
+        return new Powerup
+        {
+            Id = powerup.Id,
+            ImgUrl = powerup.ImgUrl
+        };
+    }
 }

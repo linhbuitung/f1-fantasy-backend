@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace F1Fantasy.Infrastructure.Migrations
 {
     [DbContext(typeof(WooF1Context))]
-    [Migration("20250916130116_AddConnectionLineupConstructorAndPickableItems")]
-    partial class AddConnectionLineupConstructorAndPickableItems
+    [Migration("20250918182228_FixGrammarErrorInNaming")]
+    partial class FixGrammarErrorInNaming
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -447,6 +447,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("pickable_item_id");
 
+                    b.Property<int>("Price")
+                        .HasColumnType("integer")
+                        .HasColumnName("price");
+
                     b.HasKey("Id")
                         .HasName("pk_constructor");
 
@@ -619,9 +623,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("total_amount");
 
-                    b.Property<int>("TransferPointsDeducted")
+                    b.Property<int>("TransfersMade")
                         .HasColumnType("integer")
-                        .HasColumnName("transfer_points_deducted");
+                        .HasColumnName("transfers_made");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")

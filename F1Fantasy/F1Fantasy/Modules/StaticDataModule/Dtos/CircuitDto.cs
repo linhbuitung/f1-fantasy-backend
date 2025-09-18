@@ -5,7 +5,7 @@
         string circuitName,
         string code,
         decimal latitude,
-        decimal longtitude,
+        decimal longitude,
         string locality,
         string countryId,
         string? imgUrl)
@@ -18,7 +18,7 @@
 
         public decimal Latitude { get; set; } = latitude;
 
-        public decimal Longtitude { get; set; } = longtitude;
+        public decimal Longitude { get; set; } = longitude;
 
         public string Locality { get; set; } = locality;
 

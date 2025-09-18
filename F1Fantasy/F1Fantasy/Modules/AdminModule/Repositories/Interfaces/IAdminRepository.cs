@@ -15,4 +15,12 @@ public interface IAdminRepository
     Task<ApplicationUser> UpdateUserRoleAsync(int userId, List<string> roleNames);
     
     Task<PickableItem?> GetPickableItemAsync();
+    
+    Task <Driver> UpdateDriverInfoAsync(Driver driver);
+    
+    Task<Constructor> UpdateConstructorInfoAsync(Constructor constructor);
+    
+    Task<Circuit> UpdateCircuitInfoAsync(Circuit circuit);
+    
+    Task<Powerup> UpdatePowerupInfoAsync(Powerup powerup);
 }

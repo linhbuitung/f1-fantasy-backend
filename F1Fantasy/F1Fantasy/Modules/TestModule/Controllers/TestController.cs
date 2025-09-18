@@ -66,7 +66,7 @@ public class TestController(IAuthorizationService authorizationService) : Contro
     [HttpGet("get-own-resource/{userId}")]
     public async Task<IActionResult> GetOwnResource(int userId)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();

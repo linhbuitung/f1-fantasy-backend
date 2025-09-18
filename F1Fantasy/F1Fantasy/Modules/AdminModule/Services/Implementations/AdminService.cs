@@ -3,6 +3,7 @@ using F1Fantasy.Core.Common;
 using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.AdminModule.Dtos;
+using F1Fantasy.Modules.AdminModule.Dtos.Get;
 using F1Fantasy.Modules.AdminModule.Dtos.Mapper;
 using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
@@ -38,10 +39,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException("There is no active season.");
         }
-        SeasonDto returnDto = AdminDtoMapper.MapSeasonToDto(currentlyActiveSeason);
-        return returnDto;
+        return AdminDtoMapper.MapSeasonToDto(currentlyActiveSeason);
     }
-
+    
     public async Task DeactivateActiveSeasonAsync()
     {
         Season? currentlyActiveSeason = await adminRepository.GetActiveSeasonAsync();
@@ -101,6 +101,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
 
     public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemAsync(Dtos.Update.PickableItemDto dto)
     {
+        await PreValidationForActionsAfterLatestRace("Pickable items");
         using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
@@ -171,6 +172,8 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Season with year {seasonYear} not found.");
         }
+
+        await PreValidationForActionsAfterLatestRace("Pickable items");
         
         var allDriverIdsInSeason = (await staticDataRepository.GetAllDriversBySeasonIdAsync(season.Id)).Select(d => d.Id).ToList();
         var allConstructorIdsInSeason = (await staticDataRepository.GetAllConstructorsBySeasonIdAsync(season.Id)).Select(c => c.Id).ToList();
@@ -183,4 +186,22 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         
         return await UpdatePickableItemAsync(pickableItemDto);
     }
+
+    private async Task PreValidationForActionsAfterLatestRace(string objectNameForMessage)
+    {
+        // Ensure that admin can only doc action if current date is between a race date and 1 day after it
+        var activeSeason = await adminRepository.GetActiveSeasonAsync();
+        if (activeSeason == null)
+        {
+            throw new InvalidOperationException("There is no active season.");
+        }
+        var latestRace = await coreGameplayService.GetLatestFinishedRaceAsync();
+        
+        var currentDate = DateOnly.FromDateTime(DateTime.Now);
+        if (!(latestRace.RaceDate < currentDate && currentDate < latestRace.RaceDate.AddDays(2)))
+        {
+            throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race with id {latestRace.Id}." );
+        }
+    }
+    
 }

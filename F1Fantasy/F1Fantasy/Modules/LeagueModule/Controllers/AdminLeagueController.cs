@@ -18,7 +18,7 @@ public class AdminLeagueController(
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]    
     public async Task<IActionResult> CreatePublicLeague(int userId, [FromBody]Dtos.Create.LeagueDto leagueCreateDto)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();

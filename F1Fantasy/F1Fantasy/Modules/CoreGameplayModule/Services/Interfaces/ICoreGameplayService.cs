@@ -1,4 +1,6 @@
-﻿namespace F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
+﻿using F1Fantasy.Modules.CoreGameplayModule.Dtos.Get;
+
+namespace F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
 
 public interface ICoreGameplayService
 {
@@ -7,4 +9,6 @@ public interface ICoreGameplayService
     Task<Dtos.Get.FantasyLineupDto> GetCurrentFantasyLineupByUserIdAsync(int userId);
     Task<Dtos.Get.FantasyLineupDto> UpdateFantasyLineupAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto);
     Task ResetFantasyLineupsBySeasonYearAsync(int year);
+    
+    Task<RaceDto> GetLatestFinishedRaceAsync();
 }

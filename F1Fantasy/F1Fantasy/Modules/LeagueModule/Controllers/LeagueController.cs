@@ -18,7 +18,7 @@ public class LeagueController(
     [Authorize(Roles = AppRoles.Player)]
     public async Task<IActionResult> CreatePrivateLeague(int userId, [FromBody]Dtos.Create.LeagueDto leagueCreateDto)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded || userId != leagueCreateDto.OwnerId)
         {
             return Forbid();
@@ -37,7 +37,7 @@ public class LeagueController(
     [HttpPost("league/join/{leagueId:int}")]
     public async Task<IActionResult> JoinLeagueById(int userId, int leagueId)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
@@ -56,7 +56,7 @@ public class LeagueController(
     [HttpGet("league/{leagueId:int}/join-requests")]
     public async Task<IActionResult> GetJoinRequestById( int userId, int leagueId)
     {        
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
@@ -75,7 +75,7 @@ public class LeagueController(
     [HttpPut("league/{leagueId:int}/handle-join-request")]
     public async Task<IActionResult> JoinLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.UserLeagueDto userLeagueDto)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
@@ -98,7 +98,7 @@ public class LeagueController(
     [HttpDelete("league/{leagueId:int}")]
     public async Task<IActionResult> DeleteLeagueById(int userId, int leagueId)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         { 
             return Forbid();
@@ -110,7 +110,7 @@ public class LeagueController(
     [HttpDelete("league/{leagueId:int}/leave")]
     public async Task<IActionResult> LeaveLeagueById(int userId, int leagueId)
     {
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, Policies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         { 
             return Forbid();

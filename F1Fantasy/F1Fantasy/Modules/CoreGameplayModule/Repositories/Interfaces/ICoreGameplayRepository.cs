@@ -18,4 +18,5 @@ public interface ICoreGameplayRepository
     Task<List<int>> GetNonExistentConstructorIdsAsync(List<int> constructorIds);
     
     Task<List<int>> GetNonExistentPowerupIdsAsync(List<int> powerupIds);
+    Task<Race?> GetLatestFinishedRaceAsync();
 }

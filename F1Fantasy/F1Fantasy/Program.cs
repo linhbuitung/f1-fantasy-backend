@@ -80,13 +80,13 @@ builder.Services.AddDbContext<WooF1Context>(options =>
 #region Auth
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddRoles<ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
-builder.Services.AddAuthorization(Policies.AddCustomPolicies);
+builder.Services.AddAuthorization(AuthPolicies.AddCustomPolicies);
 
 builder.Services.AddAuthentication()
     .AddBearerToken(IdentityConstants.BearerScheme);
 
 #endregion Auth
-
+    
 builder.Services.AddHttpClient();
 
 builder.Services.Configure<HostOptions>(options =>
@@ -122,6 +122,26 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
+    });
+    // Allow all cors for development
+    app.UseCors(policy =>
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+}
+
+if (app.Environment.IsProduction())
+{
+    builder.Services.AddCors(options =>
+    {
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+        options.AddPolicy("AllowAngularApp", policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
     });
 }
 

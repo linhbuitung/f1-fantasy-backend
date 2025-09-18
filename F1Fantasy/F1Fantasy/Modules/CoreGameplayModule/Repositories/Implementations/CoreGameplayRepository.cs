@@ -78,4 +78,15 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
         
         return powerupIds.Except(existentPowerupIds).ToList();
     }
+    
+    public async Task<Race?> GetLatestFinishedRaceAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.Now))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .AsNoTracking()
+            .OrderByDescending(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
 }
