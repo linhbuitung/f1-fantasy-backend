@@ -154,7 +154,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 
                 logger.LogInformation("Database synced with new seasons.");
                 
-                // Sync races and add fantasy lineups for all users for new races
+                // Sync races 
                 logger.LogInformation("Start syncing races");
                 
                 List<RaceApiDto> newTempRaces = await raceSyncService.GetRacesFromApiAsync();

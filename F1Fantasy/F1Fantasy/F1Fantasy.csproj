@@ -33,11 +33,16 @@
     <Folder Include="API\" />
     <Folder Include="Infrastructure\ExternalServices\Interfaces\" />
     <Folder Include="Modules\AdminModule\Dtos\Create\" />
-    <Folder Include="Modules\AuthModule\Services\Implementation\" />
-    <Folder Include="Modules\AuthModule\Services\Interfaces\" />
     <Folder Include="Modules\CoreGameplayModule\Dtos\Create\" />
     <Folder Include="Modules\CoreGameplayModule\Dtos\Delete\" />
     <Folder Include="Modules\LeagueModule\Dtos\Delete\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Infrastructure\ExternalServices\Implementations\EmailTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>EmailFiles\EmailTemplate.html</TargetPath>
+    </None>
   </ItemGroup>
 
 </Project>

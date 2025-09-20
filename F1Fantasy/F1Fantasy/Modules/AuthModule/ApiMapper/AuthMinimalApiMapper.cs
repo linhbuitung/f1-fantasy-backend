@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using F1Fantasy.Core.Auth;
 using F1Fantasy.Core.Common;
 using F1Fantasy.Modules.AuthModule.Extensions;
+using F1Fantasy.Modules.AuthModule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -73,28 +74,35 @@ public static class AuthMinimalApiMapper
             if (!await roleManager.RoleExistsAsync(AppRoles.Player))
                 await roleManager.CreateAsync(new ApplicationRole { Name = AppRoles.Player });
             await userManager.AddToRoleAsync(user, AppRoles.Player);
-            await userManager.AddToRoleAsync(user, AppRoles.SuperAdmin);
 
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            if (env.IsDevelopment())
+            {
+                await userManager.AddToRoleAsync(user, AppRoles.SuperAdmin);
+            }
+
+            var fantasyLineupService = sp.GetRequiredService<IAuthExtensionService>();
+            int currentYear = DateTime.UtcNow.Year;
+            await fantasyLineupService.AddFantasyLineupForUserInSeasonAsync(user.Id, currentYear);
+            
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();
         });
 
+        
         routeGroup.MapPost("/login", async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
-            ([FromBody] LoginRequest login, [FromQuery] bool? useCookies, [FromQuery] bool? useSessionCookies, [FromServices] IServiceProvider sp) =>
+            ([FromBody] LoginRequest login, [FromServices] IServiceProvider sp) =>
         {
             var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
+            signInManager.AuthenticationScheme = IdentityConstants.ApplicationScheme;
 
-            var useCookieScheme = (useCookies == true) || (useSessionCookies == true);
-            var isPersistent = (useCookies == true) && (useSessionCookies != true);
-            signInManager.AuthenticationScheme = useCookieScheme ? IdentityConstants.ApplicationScheme : IdentityConstants.BearerScheme;
-
-            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent, lockoutOnFailure: true);
+            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent:true, lockoutOnFailure: true);
 
             if (result.RequiresTwoFactor)
             {
                 if (!string.IsNullOrEmpty(login.TwoFactorCode))
                 {
-                    result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, isPersistent, rememberClient: isPersistent);
+                    result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, isPersistent: true, rememberClient: true);
                 }
                 else if (!string.IsNullOrEmpty(login.TwoFactorRecoveryCode))
                 {
@@ -173,7 +181,7 @@ public static class AuthMinimalApiMapper
                 return TypedResults.Unauthorized();
             }
 
-            return TypedResults.Text("Thank you for confirming your email.");
+            return TypedResults.Text("Thank you for confirming your email. You can close this page and return to the application.");
         })
         .Add(endpointBuilder =>
         {
