@@ -17,9 +17,11 @@ public class ApplicationUserDto
 
     public bool? AcceptNotification { get; set; }
 
-    public int? LoginStreak { get; set; }
+    public int? ConsecutiveActiveDays { get; set; }
 
-    public DateTime? LastLogin { get; set; }
+    public DateTime? LastActiveAt { get; set; }
+    
+    public int AskAiCredits { get; set; }
 
     public int? ConstructorId { get; set; }
 

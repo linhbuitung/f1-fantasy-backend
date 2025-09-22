@@ -115,7 +115,13 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AcceptNotification).HasColumnName("accept_notification");
             entity.Property(e => e.AccessFailedCount).HasColumnName("access_failed_count");
+            entity.Property(e => e.AskAiCredits)
+                .HasDefaultValue(0)
+                .HasColumnName("ask_ai_credits");
             entity.Property(e => e.ConcurrencyStamp).HasColumnName("concurrency_stamp");
+            entity.Property(e => e.ConsecutiveActiveDays)
+                .HasDefaultValue(0)
+                .HasColumnName("consecutive_active_days");
             entity.Property(e => e.ConstructorId).HasColumnName("constructor_id");
             entity.Property(e => e.CountryId)
                 .HasMaxLength(100)
@@ -129,10 +135,9 @@ public partial class WooF1Context : DbContext
                 .HasMaxLength(128)
                 .HasColumnName("email");
             entity.Property(e => e.EmailConfirmed).HasColumnName("email_confirmed");
-            entity.Property(e => e.LastLogin).HasColumnName("last_login");
+            entity.Property(e => e.LastActiveAt).HasColumnName("last_active_at");
             entity.Property(e => e.LockoutEnabled).HasColumnName("lockout_enabled");
             entity.Property(e => e.LockoutEnd).HasColumnName("lockout_end");
-            entity.Property(e => e.LoginStreak).HasColumnName("login_streak");
             entity.Property(e => e.NormalizedEmail)
                 .HasMaxLength(128)
                 .HasColumnName("normalized_email");
