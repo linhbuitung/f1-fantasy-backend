@@ -1,5 +1,6 @@
 using F1FantasyWorker;
 using F1FantasyWorker.Infrastructure.Contexts;
+using F1FantasyWorker.Infrastructure.Extensions;
 using F1FantasyWorker.Modules.CoreGameplayModule.Repositories.Implementations;
 using F1FantasyWorker.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1FantasyWorker.Modules.CoreGameplayModule.Services.Implementations;
@@ -16,19 +17,23 @@ using F1FantasyWorker.Modules.StaticDataModule.Workers.Services;
 using F1FantasyWorker.Modules.StaticDataModule.Workers.Services.Implementations;
 using F1FantasyWorker.Modules.StaticDataModule.Workers.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddHttpClient();
 builder.Services.AddDbContext<WooF1Context>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),  
-        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+    options.UseNpgsql(WooF1ContextFactory.GetConnectionString(),
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+        .ReplaceService<IHistoryRepository, WooF1HistoryRepository>());
 
 builder.Services.AddApplicationBackground();
 builder.Services.AddApplicationScoped();
 
 var host = builder.Build();
-host.Run();
+using var scope = host.Services.CreateScope();
+var worker = scope.ServiceProvider.GetRequiredService<GeneralSyncWorker>();
+await worker.RunOnceAsync();
 /*
 dotnet ef dbcontext scaffold "Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true" Npgsql.EntityFrameworkCore.PostgreSQL --force --context-dir "Infrastructure/Contexts" --output-dir "Core/Common" --context "WooF1Context"
  */
@@ -63,6 +68,7 @@ public static class ServiceExtensions
         services.AddScoped<ICoreGameplayService, CoreGameplayService>();
         
         services.AddSingleton<WorkerConfigurationService>();
+        services.AddScoped<GeneralSyncWorker>();
         
         return services;
     }

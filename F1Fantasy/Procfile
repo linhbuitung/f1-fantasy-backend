@@ -1,0 +1,2 @@
+web: dotnet F1Fantasy/F1Fantasy.dll
+worker: dotnet F1FantasyWorker/F1FantasyWorker.dll
