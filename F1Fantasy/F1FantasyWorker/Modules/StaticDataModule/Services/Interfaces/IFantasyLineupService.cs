@@ -7,4 +7,6 @@ public interface IFantasyLineupService
     Task<FantasyLineupDto> AddFantasyLineupAsyncWithNoTransaction(FantasyLineupDto fantasyLineupDto);
     
     Task AddFantasyLineupForAllUsersInASeasonAsync(int year);
+
+    Task AddFantasyLineupForUserInSeasonAsync(int userId, int year);
 }

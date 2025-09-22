@@ -66,7 +66,7 @@ public class FantasyLineupSerivce(IDataSyncRepository dataSyncRepository, WooF1C
             {
                 foreach (var raceId in racesInSeason)
                 {
-                    FantasyLineup existingFantasyLineup = await dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(userId, raceId);
+                    FantasyLineup? existingFantasyLineup = await dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(userId, raceId);
                     if (existingFantasyLineup != null)
                     {
                         continue;
@@ -92,6 +92,19 @@ public class FantasyLineupSerivce(IDataSyncRepository dataSyncRepository, WooF1C
 
             throw;
         }
-
+    }
+    
+    public async Task AddFantasyLineupForUserInSeasonAsync(int userId, int year)
+    {
+        var racesInSeason = await dataSyncRepository.GetAllRaceIdsByYearAsync(year);
+        foreach (var raceId in racesInSeason)
+        {
+            FantasyLineup? existing = await dataSyncRepository.GetFantasyLineupByUserIdAndRaceId(userId, raceId);
+            if (existing != null) continue;
+            FantasyLineupDto dto = new(userId, raceId);
+            FantasyLineup lineup = StaticDataDtoMapper.MapDtoToFantasyLineup(dto);
+            await dataSyncRepository.AddFantasyLineupAsync(lineup);
+        }
+        await context.SaveChangesAsync();
     }
 }

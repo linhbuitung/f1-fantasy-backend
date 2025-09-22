@@ -19,7 +19,15 @@ using F1Fantasy.Modules.AdminModule.Repositories.Implementations;
 using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Implementations;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
+using F1Fantasy.Modules.AskAiModule.Repositories.Implementations;
+using F1Fantasy.Modules.AskAiModule.Repositories.Interfaces;
+using F1Fantasy.Modules.AskAiModule.Services.Implementations;
+using F1Fantasy.Modules.AskAiModule.Services.Interfaces;
 using F1Fantasy.Modules.AuthModule.ApiMapper;
+using F1Fantasy.Modules.AuthModule.Repositories.Implementations;
+using F1Fantasy.Modules.AuthModule.Repositories.Interfaces;
+using F1Fantasy.Modules.AuthModule.Services.Implementation;
+using F1Fantasy.Modules.AuthModule.Services.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Repositories.Implementations;
 using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Implementations;
@@ -33,6 +41,7 @@ using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Implementations;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
+using F1Fantasy.Infrastructure.Extensions;
 
 var root = Directory.GetCurrentDirectory();
 var dotenv = Path.Combine(root, ".env");
@@ -60,7 +69,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
     // User settings.
     options.User.AllowedUserNameCharacters =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*?.";
     options.User.RequireUniqueEmail = true;
 });
 
@@ -69,21 +78,35 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = ".F1Fantasy.Identity";
 });
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    });
+}
+
+
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),  
-              o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
-          .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
-          .UseSnakeCaseNamingConvention());
+    options.UseNpgsql(WooF1ContextFactory.GetConnectionString(),
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+        .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
+        .UseSnakeCaseNamingConvention());
 
 #region Auth
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddRoles<ApplicationRole>().AddEntityFrameworkStores<WooF1Context>().AddDefaultTokenProviders();
 builder.Services.AddAuthorization(AuthPolicies.AddCustomPolicies);
 
-builder.Services.AddAuthentication()
-    .AddBearerToken(IdentityConstants.BearerScheme);
+builder.Services.AddAuthentication().AddCookie(options =>
+{
+    options.LoginPath = "/login"; 
+    options.AccessDeniedPath = "/access-denied";
+});
 
 #endregion Auth
     
@@ -106,9 +129,48 @@ builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailS
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+var corsName = "AllowAngularApp";
+if (builder.Environment.IsProduction())
+{
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<List<string>>() ?? [];
+    var originsArray = allowedOrigins?.ToArray();
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(corsName, policy =>
+        {
+            policy.WithOrigins(originsArray)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+    });
+} 
+else if (builder.Environment.IsDevelopment())
+{
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<List<string>>() ?? [];
+    // Convert List<string> to string[]
+    var originsArray = allowedOrigins?.ToArray();
+    // Allow all cors for development
+    // Get allowed origins from appsettings.Development.json
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(corsName, policy =>
+        {
+            policy.WithOrigins(originsArray)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+    });
+}
+
 var app = builder.Build();
-//app.MapIdentityApi<ApplicationUser>();
-//seed roles
+Console.WriteLine($"Current environment: {app.Environment.EnvironmentName}");
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.MapIdentityApi();
 
 await ServiceExtensions.SeedRoles(app.Services);
 // Configure the HTTP request pipeline.
@@ -123,31 +185,11 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
     });
-    // Allow all cors for development
-    app.UseCors(policy =>
-        policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
 }
 
-if (app.Environment.IsProduction())
-{
-    builder.Services.AddCors(options =>
-    {
-        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
-        options.AddPolicy("AllowAngularApp", policy =>
-        {
-            policy.WithOrigins(allowedOrigins)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
-        });
-    });
-}
+app.UseCors(corsName);
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
-app.MapIdentityApi();
+app.AddMiddlewares();
 
 app.UseHttpsRedirection();
 
@@ -155,11 +197,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Migrate any database changes on startup 
+app.MigrateDatabase<WooF1Context>();
+
 app.Run();
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddApplicationScoped(this IServiceCollection services)
+    public static void AddApplicationScoped(this IServiceCollection services)
     {
         // Register application-specific services
         services.AddScoped<IDriverService, DriverService>();
@@ -176,6 +221,8 @@ public static class ServiceExtensions
         
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IAdminRepository, AdminRepository>();
+        services.AddScoped<IAuthExtensionService, AuthExtensionService>();
+        services.AddScoped<IAuthExtensionRepository, AuthExtensionRepository>();
 
         services.AddScoped<ILeagueService, LeagueService>();
         services.AddScoped<ILeagueRepository, LeagueRepository>();
@@ -184,10 +231,10 @@ public static class ServiceExtensions
         services.AddScoped<IFantasyLineupRepository, FantasyLineupRepository>();
         services.AddScoped<ICoreGameplayRepository, CoreGameplayRepository>();
         
+        services.AddScoped<IAskAIService, AskAiService>();
+        services.AddScoped<IAskAiRepository, AskAiRepository>();
+        
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
-
-
-        return services;
     }
 
     public static async Task SeedRoles(IServiceProvider services)
@@ -208,5 +255,11 @@ public static class ServiceExtensions
                 await roleManager.CreateAsync(role);
             }
         }
+    }
+    
+    public static void AddMiddlewares(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<ErrorHandlingMiddleware>();
+        app.UseMiddleware<UserInteractionTrackMiddleware>();
     }
 }

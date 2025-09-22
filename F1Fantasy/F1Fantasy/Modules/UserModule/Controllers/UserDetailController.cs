@@ -15,15 +15,11 @@ public class UserDetailController(IUserService userService, IAuthorizationServic
     public async Task<IActionResult> GetUserById(int userId)
     {
         var user = await userService.GetUserByIdAsync(userId);
-        if (user == null)
-        {
-            return NotFound();
-        }
         return Ok(user);
     }
 
-    [HttpPut("{userId}/update")]
     [Authorize]
+    [HttpPut("{userId}/update")]
     public async Task<IActionResult> UpdateUser(int userId, [FromBody] Dtos.Update.ApplicationUserDto userUpdateDto)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
@@ -46,5 +42,19 @@ public class UserDetailController(IUserService userService, IAuthorizationServic
     {
         var users = await userService.FindUserByDisplayNameAsync(name);
         return Ok(users);
+    }
+    
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUserProfile()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var user = await userService.GetUserByIdAsync(userId);
+        return Ok(user);
     }
 }

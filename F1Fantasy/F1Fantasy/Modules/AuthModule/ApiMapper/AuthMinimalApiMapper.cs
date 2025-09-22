@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using F1Fantasy.Core.Auth;
 using F1Fantasy.Core.Common;
 using F1Fantasy.Modules.AuthModule.Extensions;
+using F1Fantasy.Modules.AuthModule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -29,14 +30,13 @@ public static class AuthMinimalApiMapper
         ArgumentNullException.ThrowIfNull(endpoints);
 
         var timeProvider = endpoints.ServiceProvider.GetRequiredService<TimeProvider>();
-        var bearerTokenOptions = endpoints.ServiceProvider.GetRequiredService<IOptionsMonitor<BearerTokenOptions>>();
         var emailSender = endpoints.ServiceProvider.GetRequiredService<IEmailSender<ApplicationUser>>();
         var linkGenerator = endpoints.ServiceProvider.GetRequiredService<LinkGenerator>();
         
         // We'll figure out a unique endpoint name based on the final route pattern during endpoint generation.
         string? confirmEmailEndpointName = null;
 
-        var routeGroup = endpoints.MapGroup("");
+        var routeGroup = endpoints.MapGroup("/api");
 
         // NOTE: We cannot inject UserManager<ApplicationUser> directly because the ApplicationUser generic parameter is currently unsupported by RDG.
         routeGroup.MapPost("/register", async Task<Results<Ok, ValidationProblem>>
@@ -73,28 +73,35 @@ public static class AuthMinimalApiMapper
             if (!await roleManager.RoleExistsAsync(AppRoles.Player))
                 await roleManager.CreateAsync(new ApplicationRole { Name = AppRoles.Player });
             await userManager.AddToRoleAsync(user, AppRoles.Player);
-            await userManager.AddToRoleAsync(user, AppRoles.SuperAdmin);
 
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            if (env.IsDevelopment())
+            {
+                await userManager.AddToRoleAsync(user, AppRoles.SuperAdmin);
+            }
+
+            var fantasyLineupService = sp.GetRequiredService<IAuthExtensionService>();
+            int currentYear = DateTime.UtcNow.Year;
+            await fantasyLineupService.AddFantasyLineupForUserInSeasonAsync(user.Id, currentYear);
+            
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();
         });
 
+        
         routeGroup.MapPost("/login", async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
-            ([FromBody] LoginRequest login, [FromQuery] bool? useCookies, [FromQuery] bool? useSessionCookies, [FromServices] IServiceProvider sp) =>
+            ([FromBody] LoginRequest login, [FromServices] IServiceProvider sp) =>
         {
             var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
+            signInManager.AuthenticationScheme = IdentityConstants.ApplicationScheme;
 
-            var useCookieScheme = (useCookies == true) || (useSessionCookies == true);
-            var isPersistent = (useCookies == true) && (useSessionCookies != true);
-            signInManager.AuthenticationScheme = useCookieScheme ? IdentityConstants.ApplicationScheme : IdentityConstants.BearerScheme;
-
-            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent, lockoutOnFailure: true);
+            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent:true, lockoutOnFailure: true);
 
             if (result.RequiresTwoFactor)
             {
                 if (!string.IsNullOrEmpty(login.TwoFactorCode))
                 {
-                    result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, isPersistent, rememberClient: isPersistent);
+                    result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, isPersistent: true, rememberClient: true);
                 }
                 else if (!string.IsNullOrEmpty(login.TwoFactorRecoveryCode))
                 {
@@ -109,26 +116,6 @@ public static class AuthMinimalApiMapper
 
             // The signInManager already produced the needed response in the form of a cookie or bearer token.
             return TypedResults.Empty;
-        });
-
-        routeGroup.MapPost("/refresh", async Task<Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult>>
-            ([FromBody] RefreshRequest refreshRequest, [FromServices] IServiceProvider sp) =>
-        {
-            var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
-            var refreshTokenProtector = bearerTokenOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector;
-            var refreshTicket = refreshTokenProtector.Unprotect(refreshRequest.RefreshToken);
-
-            // Reject the /refresh attempt with a 401 if the token expired or the security stamp validation fails
-            if (refreshTicket?.Properties?.ExpiresUtc is not { } expiresUtc ||
-                timeProvider.GetUtcNow() >= expiresUtc ||
-                await signInManager.ValidateSecurityStampAsync(refreshTicket.Principal) is not ApplicationUser user)
-
-            {
-                return TypedResults.Challenge();
-            }
-
-            var newPrincipal = await signInManager.CreateUserPrincipalAsync(user);
-            return TypedResults.SignIn(newPrincipal, authenticationScheme: IdentityConstants.BearerScheme);
         });
 
         routeGroup.MapGet("/confirmEmail", async Task<Results<ContentHttpResult, UnauthorizedHttpResult>>
@@ -173,7 +160,7 @@ public static class AuthMinimalApiMapper
                 return TypedResults.Unauthorized();
             }
 
-            return TypedResults.Text("Thank you for confirming your email.");
+            return TypedResults.Text("Thank you for confirming your email. You can close this page and return to the application.");
         })
         .Add(endpointBuilder =>
         {
@@ -182,6 +169,13 @@ public static class AuthMinimalApiMapper
             endpointBuilder.Metadata.Add(new EndpointNameMetadata(confirmEmailEndpointName));
         });
 
+        routeGroup.MapPost("/logout", async Task<Ok> ([FromServices] IServiceProvider sp) =>
+        {
+            var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
+            await signInManager.SignOutAsync();
+            return TypedResults.Ok();        
+        });
+        
         routeGroup.MapPost("/resendConfirmationEmail", async Task<Ok>
             ([FromBody] ResendConfirmationEmailRequest resendRequest, HttpContext context, [FromServices] IServiceProvider sp) =>
         {
@@ -248,80 +242,6 @@ public static class AuthMinimalApiMapper
         });
 
         var accountGroup = routeGroup.MapGroup("/manage").RequireAuthorization();
-
-        accountGroup.MapPost("/2fa", async Task<Results<Ok<TwoFactorResponse>, ValidationProblem, NotFound>>
-            (ClaimsPrincipal claimsPrincipal, [FromBody] TwoFactorRequest tfaRequest, [FromServices] IServiceProvider sp) =>
-        {
-            var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
-            var userManager = signInManager.UserManager;
-            if (await userManager.GetUserAsync(claimsPrincipal) is not { } user)
-            {
-                return TypedResults.NotFound();
-            }
-
-            if (tfaRequest.Enable == true)
-            {
-                if (tfaRequest.ResetSharedKey)
-                {
-                    return CreateValidationProblem("CannotResetSharedKeyAndEnable",
-                        "Resetting the 2fa shared key must disable 2fa until a 2fa token based on the new shared key is validated.");
-                }
-                else if (string.IsNullOrEmpty(tfaRequest.TwoFactorCode))
-                {
-                    return CreateValidationProblem("RequiresTwoFactor",
-                        "No 2fa token was provided by the request. A valid 2fa token is required to enable 2fa.");
-                }
-                else if (!await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, tfaRequest.TwoFactorCode))
-                {
-                    return CreateValidationProblem("InvalidTwoFactorCode",
-                        "The 2fa token provided by the request was invalid. A valid 2fa token is required to enable 2fa.");
-                }
-
-                await userManager.SetTwoFactorEnabledAsync(user, true);
-            }
-            else if (tfaRequest.Enable == false || tfaRequest.ResetSharedKey)
-            {
-                await userManager.SetTwoFactorEnabledAsync(user, false);
-            }
-
-            if (tfaRequest.ResetSharedKey)
-            {
-                await userManager.ResetAuthenticatorKeyAsync(user);
-            }
-
-            string[]? recoveryCodes = null;
-            if (tfaRequest.ResetRecoveryCodes || (tfaRequest.Enable == true && await userManager.CountRecoveryCodesAsync(user) == 0))
-            {
-                var recoveryCodesEnumerable = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-                recoveryCodes = recoveryCodesEnumerable?.ToArray();
-            }
-
-            if (tfaRequest.ForgetMachine)
-            {
-                await signInManager.ForgetTwoFactorClientAsync();
-            }
-
-            var key = await userManager.GetAuthenticatorKeyAsync(user);
-            if (string.IsNullOrEmpty(key))
-            {
-                await userManager.ResetAuthenticatorKeyAsync(user);
-                key = await userManager.GetAuthenticatorKeyAsync(user);
-
-                if (string.IsNullOrEmpty(key))
-                {
-                    throw new NotSupportedException("The user manager must produce an authenticator key after reset.");
-                }
-            }
-
-            return TypedResults.Ok(new TwoFactorResponse
-            {
-                SharedKey = key,
-                RecoveryCodes = recoveryCodes,
-                RecoveryCodesLeft = recoveryCodes?.Length ?? await userManager.CountRecoveryCodesAsync(user),
-                IsTwoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user),
-                IsMachineRemembered = await signInManager.IsTwoFactorClientRememberedAsync(user),
-            });
-        });
 
         accountGroup.MapGet("/info", async Task<Results<Ok<InfoResponse>, ValidationProblem, NotFound>>
             (ClaimsPrincipal claimsPrincipal, [FromServices] IServiceProvider sp) =>

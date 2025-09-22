@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using F1Fantasy.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace F1Fantasy.Infrastructure.Migrations
 {
     [DbContext(typeof(WooF1Context))]
-    partial class WooF1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250921072626_ChangeLastLoginToLastInteraction")]
+    partial class ChangeLastLoginToLastInteraction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -244,18 +247,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
-                    b.Property<int>("AskAiCredits")
-                        .HasColumnType("integer")
-                        .HasColumnName("ask_ai_credits");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
                         .HasColumnName("concurrency_stamp");
-
-                    b.Property<int>("ConsecutiveActiveDays")
-                        .HasColumnType("integer")
-                        .HasColumnName("consecutive_active_days");
 
                     b.Property<int?>("ConstructorId")
                         .HasColumnType("integer")
@@ -287,9 +282,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
-                    b.Property<DateTime?>("LastActiveAt")
+                    b.Property<DateTime?>("LastInteraction")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_active_at");
+                        .HasColumnName("last_interaction");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean")
@@ -298,6 +293,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("lockout_end");
+
+                    b.Property<int?>("LoginStreak")
+                        .HasColumnType("integer")
+                        .HasColumnName("login_streak");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(128)

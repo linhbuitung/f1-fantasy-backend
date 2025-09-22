@@ -4,18 +4,25 @@ using System.Runtime.CompilerServices;
 
 namespace F1Fantasy.Infrastructure.Extensions
 {
-    public class MigrationExtension
+    public static class MigrationExtension
     {
-        public static void ApplyMigration(IApplicationBuilder app)
+        public static IHost MigrateDatabase<T>(this IHost host) where T : DbContext
         {
-            using (var scope = app.ApplicationServices.CreateScope())
+            using(var scope = host.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<WooF1Context>();
-                if (context.Database.IsRelational())
+                var services = scope.ServiceProvider;
+                try
                 {
-                    context.Database.Migrate();
+                    var db = services.GetRequiredService<T>();
+                    db.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating the database.");
                 }
             }
+            return host;
         }
     }
 }

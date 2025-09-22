@@ -24,7 +24,7 @@ namespace F1Fantasy.Infrastructure.ExternalServices.Implementations
                 {
                     From = new MailAddress(_emailSettings.SenderEmail, _emailSettings.SenderName),
                     Subject = subject,
-                    Body = body,
+                    Body = GetEmailTemplate(body),
                     IsBodyHtml = true // Enable HTML
                 };
                 mailMessage.To.Add(to);
@@ -51,6 +51,20 @@ namespace F1Fantasy.Infrastructure.ExternalServices.Implementations
             var subject = "Your password reset code";
             var body = $"Your password reset code is: <b>{resetCode}</b>";
             await SendEmailAsync(email, subject, body);
+        }
+        
+        private string GetEmailTemplate(string bodyContent)
+        {
+            var assemblyLocation = typeof(EmailService).Assembly.Location;
+            var serviceDir = Path.GetDirectoryName(assemblyLocation);
+            if(serviceDir == null)
+            {
+                _logger.LogError("Could not determine the service directory for email templates. Using plain body content.");
+                return bodyContent;
+            }
+            var templatePath = Path.Combine(serviceDir,"EmailFiles", "EmailTemplate.html");
+            var template = File.ReadAllText(templatePath);
+            return template.Replace("{{BodyContent}}", bodyContent);
         }
     }
 }
