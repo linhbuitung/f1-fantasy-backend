@@ -34,7 +34,7 @@ public class CoreGameplayService(
                
                // Ensure its at least a day currently after the race date
                var raceCalculationDeadline = lastestFinishedRace.RaceDate.AddDays(1);
-               if(raceCalculationDeadline <= DateOnly.FromDateTime(DateTime.Now)) return null;
+               if(raceCalculationDeadline >= DateOnly.FromDateTime(DateTime.Now)) return null;
                     
                foreach (var raceEntry in lastestFinishedRace.RaceEntries)
                {
