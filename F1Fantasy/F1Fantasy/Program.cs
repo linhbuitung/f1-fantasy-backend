@@ -41,6 +41,7 @@ using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Implementations;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
+using F1Fantasy.Infrastructure.Extensions;
 
 var root = Directory.GetCurrentDirectory();
 var dotenv = Path.Combine(root, ".env");
@@ -91,10 +92,10 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WooF1Context>(options =>
-      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),  
-              o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
-          .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
-          .UseSnakeCaseNamingConvention());
+    options.UseNpgsql(WooF1ContextFactory.GetConnectionString(),
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+        .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
+        .UseSnakeCaseNamingConvention());
 
 #region Auth
 
@@ -145,7 +146,7 @@ if (builder.Environment.IsProduction())
         });
     });
 } 
-else
+else if (builder.Environment.IsDevelopment())
 {
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<List<string>>() ?? [];
     // Convert List<string> to string[]
@@ -195,6 +196,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Migrate any database changes on startup 
+app.MigrateDatabase<WooF1Context>();
 
 app.Run();
 

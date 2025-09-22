@@ -169,6 +169,13 @@ public static class AuthMinimalApiMapper
             endpointBuilder.Metadata.Add(new EndpointNameMetadata(confirmEmailEndpointName));
         });
 
+        routeGroup.MapPost("/logout", async Task<Ok> ([FromServices] IServiceProvider sp) =>
+        {
+            var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
+            await signInManager.SignOutAsync();
+            return TypedResults.Ok();        
+        });
+        
         routeGroup.MapPost("/resendConfirmationEmail", async Task<Ok>
             ([FromBody] ResendConfirmationEmailRequest resendRequest, HttpContext context, [FromServices] IServiceProvider sp) =>
         {
