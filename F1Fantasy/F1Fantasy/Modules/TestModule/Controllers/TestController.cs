@@ -11,7 +11,7 @@ public class TestController(IAuthorizationService authorizationService) : Contro
     [HttpGet("health")]
     public IActionResult GeatHealthCheck()
     {
-        return Ok("App is alive and running!");
+        return Ok("App is alive and running well!");
     }
     
     //check role based access
