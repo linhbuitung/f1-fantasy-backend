@@ -59,11 +59,7 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Season> Seasons { get; set; }
 
     public virtual DbSet<UserLeague> UserLeagues { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=c38j9kbm97l2pa.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com\n;Port=5432;Database=d8irg3cis1tsjh;TrustServerCertificate=True;Username=uedsah8nmqpkv9;Password=p52438f56b94671eb1701f2d671503ec044f4e922b4c4924a13c3d9e0d13fef71;Include Error Detail=true;SslMode=Require;");
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("pg_stat_statements");
