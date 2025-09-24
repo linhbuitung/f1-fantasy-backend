@@ -24,7 +24,7 @@ public class RaceService(
 
         try
         {
-            Race existingRace = await dataSyncRepository.GetRaceByRaceDateAsync(raceDto.RaceDate);
+            var existingRace = await dataSyncRepository.GetRaceByRaceDateAsync(raceDto.RaceDate);
             if (existingRace != null)
             {
                 return null;
@@ -39,7 +39,7 @@ public class RaceService(
             raceDto.CircuitId = circuit.Id;
             
             // Race API returns season, so we need check for season.
-            Season season = await dataSyncRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
+            var season = await dataSyncRepository.GetSeasonByYearAsync(raceDto.RaceDate.Year);
             if (season == null)
             {
                 throw new Exception($"Season with year {raceDto.RaceDate.Year} not found");
@@ -66,18 +66,64 @@ public class RaceService(
         }
     }
     
-    public async void AddListRacesAsync(List<RaceDto> raceDtos)
+    public async Task AddListRacesAsync(List<RaceDto> raceDtos)
     {
-        foreach (var race in raceDtos)
+        using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
         {
-            Console.WriteLine($"Adding race: {race.RaceDate} with circuit code: {race.CircuitCode}");
-            await AddRaceAsync(race);
+            var existingCircuits = await dataSyncRepository.GetAllCircuitsAsync();
+            var existingSeasons = await dataSyncRepository.GetAllSeasonsAsync();
+            var existingRaceDates = await dataSyncRepository.GetAllRaceDatesAsync();
+            var newRaces = new List<Race>();
+            foreach (var raceDto in raceDtos)
+            {
+                if (existingRaceDates.Contains(raceDto.RaceDate))
+                {
+                    continue; // Skip existing
+                }
+
+                // Race API returns circuit, so we need check for circuit.
+                if (!existingCircuits.Exists(c => c.Code == raceDto.CircuitCode))
+                {
+                    throw new Exception($"Circuit with code {raceDto.CircuitCode} not found");
+                }
+
+                raceDto.CircuitId = existingCircuits.First(c => c.Code == raceDto.CircuitCode).Id;
+
+                // Race API returns season, so we need check for season.
+                if (!existingSeasons.Exists(s => s.Year == raceDto.RaceDate.Year))
+                {
+                    throw new Exception($"Season with year {raceDto.RaceDate.Year} not found");
+                }
+
+                raceDto.SeasonId = existingSeasons.First(s => s.Year == raceDto.RaceDate.Year).Id;
+
+                Race race = StaticDataDtoMapper.MapDtoToRace(raceDto);
+                newRaces.Add(race);
+            }
+
+            var newRacesReturned = await dataSyncRepository.AddListRacesAsync(newRaces);
+
+            // Additional operations that need atomicity (example: logging the event)
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error creating race: {ex.Message}");
+
+            throw;
         }
     }
     
     public async Task<RaceDto> GetRaceByIdAsync(int id)
     {
-        Race race = await dataSyncRepository.GetRaceByIdAsync(id);
+        var race = await dataSyncRepository.GetRaceByIdAsync(id);
         if (race == null)
         {
             return null;
@@ -87,7 +133,7 @@ public class RaceService(
 
     public async Task<RaceDto> GetRaceByRaceDateAsync(DateOnly date)
     {
-        Race race = await dataSyncRepository.GetRaceByRaceDateAsync(date);
+        var race = await dataSyncRepository.GetRaceByRaceDateAsync(date);
         if (race == null)
         {
             return null;

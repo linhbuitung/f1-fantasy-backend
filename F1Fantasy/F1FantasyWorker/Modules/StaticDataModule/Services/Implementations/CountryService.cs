@@ -22,7 +22,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
             try
             {
-                Country existingCountry = await dataSyncRepository.GetCountryByIdAsync(countryDto.CountryId);
+                var existingCountry = await dataSyncRepository.GetCountryByIdAsync(countryDto.CountryId);
                 if (existingCountry != null)
                 {
                     return null;
@@ -50,12 +50,42 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             }
         }
 
-        public async void AddListCountriesAsync(List<CountryDto> countryDtos)
+        public async Task AddListCountriesAsync(List<CountryDto> countryDtos)
         {
-            foreach (var countryDto in countryDtos)
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
             {
-                Console.WriteLine($"Adding country: {countryDto.CountryId}");
-                await AddCountryAsync(countryDto);
+                var existingCountries = await dataSyncRepository.GetAllCountriesAsync();
+                var newCountries = new List<Country>();
+                foreach (var countryDto in countryDtos)
+                {
+                    if (existingCountries.Any(c => c.Id == countryDto.CountryId))
+                    {
+                        continue;
+                    }
+
+                    // Replace special case for United States
+                    var updatedCountryDto = ReplaceSpecialCountryCase(countryDto);
+
+                    Country country = StaticDataDtoMapper.MapDtoToCountry(updatedCountryDto);
+                    newCountries.Add(country);
+                }
+                var newCountriesReturned = await dataSyncRepository.AddListCountriesAsync(newCountries);
+
+                // Additional operations that need atomicity (example: logging the event)
+                await context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine($"Error creating country: {ex.Message}");
+
+                throw;
             }
         }
 

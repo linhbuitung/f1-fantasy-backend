@@ -6,7 +6,7 @@ public interface ISeasonService
 {
     Task<SeasonDto> AddSeasonAsync(SeasonDto seasonDto);
 
-    void AddListSeasonsAsync(List<SeasonDto> seasonDtos);
+    Task AddListSeasonsAsync(List<SeasonDto> seasonDtos);
 
     Task<SeasonDto> GetSeasonByIdAsync(int id);
 

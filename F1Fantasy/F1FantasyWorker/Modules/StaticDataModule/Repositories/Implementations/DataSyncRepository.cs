@@ -17,6 +17,16 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return driver;
         }
 
+        public async Task<List<Driver>> AddListDriversAsync(List<Driver> drivers)
+        {
+            context.Drivers.AddRange(drivers);
+            await context.SaveChangesAsync();
+            return drivers;
+        }
+        public async Task<List<string>> GetAllDriverCodesAsync()
+        {
+            return await context.Drivers.AsNoTracking().Select(d => d.Code).ToListAsync();
+        }
         public async Task<Driver?> GetDriverByIdAsync(int id)
         {
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
@@ -27,6 +37,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
+        public async Task<List<Driver>> GetAllDriversAsync()
+        {
+            return await context.Drivers.AsNoTracking().ToListAsync();
+        }
+
         public async Task<Constructor> AddConstructorAsync(Constructor constructor)
         {
             context.Constructors.Add(constructor);
@@ -34,6 +49,17 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return constructor;
         }
 
+        public async Task<List<Constructor>> AddListConstructorsAsync(List<Constructor> constructors)
+        {
+            context.Constructors.AddRange(constructors);
+            await context.SaveChangesAsync();
+            return constructors;
+        }
+        public async Task<List<string>> GetAllConstructorCodesAsync()
+        {
+            return await context.Constructors.AsNoTracking().Select(c => c.Code).ToListAsync();
+
+        }
         public async Task<Constructor?> GetConstructorByIdAsync(int id)
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
@@ -44,6 +70,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
+        public async Task<List<Constructor>> GetAllConstructorsAsync()
+        {
+            return await context.Constructors.AsNoTracking().ToListAsync();
+        }
+
         public async Task<Circuit> AddCircuitAsync(Circuit circuit)
         {
             context.Circuits.Add(circuit);
@@ -52,6 +83,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return circuit;
         }
 
+        public async Task<List<Circuit>> AddListCircuitsAsync(List<Circuit> circuits)
+        {
+            context.Circuits.AddRange(circuits);
+            await context.SaveChangesAsync();
+            return circuits;
+        }
+
+        public async Task<List<string>> GetAllCircuitCodesAsync()
+        {
+            return await context.Circuits.AsNoTracking().Select(c => c.Code).ToListAsync();
+        }
+        
         public async Task<Circuit?> GetCircuitByIdAsync(int id)
         {
             return await context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
@@ -62,6 +105,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return await context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
 
+        public async Task<List<Circuit>> GetAllCircuitsAsync()
+        {
+            return await context.Circuits.AsNoTracking().ToListAsync();
+        }
         public async Task<Country> AddCountryAsync(Country country)
         {
             context.Countries.Add(country);
@@ -70,6 +117,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return country;
         }
 
+        public async Task<List<Country>> AddListCountriesAsync(List<Country> countries)
+        {
+            context.Countries.AddRange(countries);
+
+            await context.SaveChangesAsync();
+            return countries;
+        }
+
+        public async  Task<List<Country>> GetAllCountriesAsync()
+        {
+            return await context.Countries.AsNoTracking().ToListAsync();
+        }
         // Country has string Id, so we use Equal method
         public async Task<Country?> GetCountryByIdAsync(string id)
         {
@@ -94,6 +153,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return race;
         }
 
+        public async Task<List<Race>> AddListRacesAsync(List<Race> races)
+        {
+            context.Races.AddRange(races);
+            
+            await context.SaveChangesAsync();
+            return races;
+        }
+
+        public async Task<List<DateOnly>> GetAllRaceDatesAsync()
+        {
+            return await context.Races.AsNoTracking().Select(r => r.RaceDate).ToListAsync();
+        }
         public async Task<Race?> GetRaceByIdAsync(int id)
         {
             return await context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
@@ -108,12 +179,25 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Races.AsNoTracking().Where(r => r.Season.Year == year).Select(r => r.Id).ToListAsync();
         }
+        
+        public async Task<List<Race>> GetAllRacesAsync()
+        {
+            return await context.Races.AsNoTracking().ToListAsync();
+        }
         public async Task<Powerup> AddPowerupAsync(Powerup powerup)
         {
             context.Powerups.Add(powerup);
             
             await context.SaveChangesAsync();
             return powerup;
+        }
+
+        public async Task<List<Powerup>> AddListPowerupAsync(List<Powerup> powerups)
+        {
+            context.Powerups.AddRange(powerups);
+            
+            await context.SaveChangesAsync();
+            return powerups;
         }
         
         public async Task<Powerup?> GetPowerupByIdAsync(int id)
@@ -139,6 +223,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return season;
         }
 
+        public async Task<List<Season>> AddListSeasonsAsync(List<Season> seasons)
+        {
+            context.Seasons.AddRange(seasons);
+            
+            await context.SaveChangesAsync();
+            return seasons;
+        }
+
+        public async Task<List<int>> GetAllSeasonYearsAsync()
+        {
+            return await context.Seasons.AsNoTracking().Select(s => s.Year).ToListAsync();
+        }
         public async Task<Season?> GetSeasonByIdAsync(int id)
         {
             return await context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
@@ -148,7 +244,12 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Seasons.AsNoTracking().FirstOrDefaultAsync(s => s.Year == year);
         }
-
+        
+        public async Task<List<Season>> GetAllSeasonsAsync()
+        {
+            return await context.Seasons.AsNoTracking().ToListAsync();
+        }
+        
         public async Task<RaceEntry> AddRaceEntryAsync(RaceEntry raceEntry)
         {
             context.RaceEntries.Add(raceEntry);
@@ -156,6 +257,20 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return raceEntry;
         }
 
+        public async Task<List<RaceEntry>> AddListRaceEntriesAsync(List<RaceEntry> raceEntries)
+        {
+            context.RaceEntries.AddRange(raceEntries);
+            await context.SaveChangesAsync();
+            return raceEntries;
+        }
+
+        public async Task<List<RaceEntry>> GetAllRaceEntriesBySeasonYearAsync(int year)
+        {
+            return await context.RaceEntries
+                .AsNoTracking()
+                .Where(re => re.Race.Season.Year == year)
+                .ToListAsync();
+        }
         public async Task<RaceEntry?> GetRaceEntryByIdAsync(int id)
         {
             return await context.RaceEntries.AsNoTracking().FirstOrDefaultAsync(re => re.Id == id);
@@ -184,11 +299,22 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
             return fantasyLineup;
         }
 
+        public async Task<List<FantasyLineup>> AddListFantasyLineupsAsync(List<FantasyLineup> fantasyLineups)
+        {
+            context.FantasyLineups.AddRange(fantasyLineups);
+            await context.SaveChangesAsync();
+            return fantasyLineups;
+        }
+
         public async Task<FantasyLineup?> GetFantasyLineupByUserIdAndRaceId(int userId, int raceId)
         {
             return await context.FantasyLineups.AsNoTracking().FirstOrDefaultAsync(f => f.UserId.Equals(userId) && f.RaceId.Equals(raceId));
         }
-        
+
+        public async Task<List<FantasyLineup>> GetAllFantasyLineupsInSeasonYearAsync(int year)
+        {
+            return await context.FantasyLineups.AsNoTracking().Where(fl => fl.Race.Season.Year == year).ToListAsync();
+        }
         public async Task<AspNetUser> GetUserByIdAsync(int id)
         {
             return await context.AspNetUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);

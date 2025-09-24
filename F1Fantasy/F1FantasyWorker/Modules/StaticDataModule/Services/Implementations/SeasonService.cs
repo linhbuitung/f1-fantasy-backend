@@ -43,12 +43,40 @@ public class SeasonService(IDataSyncRepository dataSyncRepository, WooF1Context 
         }
     }
 
-    public async void AddListSeasonsAsync(List<SeasonDto> seasonDtos)
+    public async Task AddListSeasonsAsync(List<SeasonDto> seasonDtos)
     {
-        foreach (var season in seasonDtos)
+        using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
         {
-            Console.WriteLine($"Adding season: {season.Year}");
-            await AddSeasonAsync(season);
+            var existingSeasonYears = await dataSyncRepository.GetAllSeasonYearsAsync();
+            var newSeasons = new List<Season>();
+            foreach (var seasonDto in seasonDtos)
+            {
+                if (existingSeasonYears.Contains(seasonDto.Year))
+                {
+                    continue;
+                }
+                
+                Season season = StaticDataDtoMapper.MapDtoToSeason(seasonDto);
+                newSeasons.Add(season);
+            }
+
+            var newSeasonsReturned = await dataSyncRepository.AddListSeasonsAsync(newSeasons);
+
+            // Additional operations that need atomicity (example: logging the event)
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error creating season: {ex.Message}");
+
+            throw;
         }
     }
 

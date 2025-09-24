@@ -6,7 +6,7 @@ public interface IRaceService
 {
     Task<RaceDto> AddRaceAsync(RaceDto raceDto);
 
-    void AddListRacesAsync(List<RaceDto> raceDtos);
+    Task AddListRacesAsync(List<RaceDto> raceDtos);
 
     Task<RaceDto> GetRaceByIdAsync(int id);
 
