@@ -25,11 +25,5 @@ public partial class FantasyLineup
 
     public virtual ICollection<Constructor> Constructors { get; set; } = new List<Constructor>();
 
-    public virtual ICollection<Constructor> ConstructorsNavigation { get; set; } = new List<Constructor>();
-
     public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
-
-    public virtual ICollection<Driver> DriversNavigation { get; set; } = new List<Driver>();
-
-    public virtual ICollection<Powerup> Powerups { get; set; } = new List<Powerup>();
 }

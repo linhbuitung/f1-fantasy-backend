@@ -17,6 +17,8 @@ public partial class AspNetUser
 
     public DateTime? LastActiveAt { get; set; }
 
+    public int AskAiCredits { get; set; }
+
     public int? ConstructorId { get; set; }
 
     public int? DriverId { get; set; }
@@ -50,8 +52,6 @@ public partial class AspNetUser
     public bool LockoutEnabled { get; set; }
 
     public int AccessFailedCount { get; set; }
-
-    public int AskAiCredits { get; set; }
 
     public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; } = new List<AspNetUserClaim>();
 

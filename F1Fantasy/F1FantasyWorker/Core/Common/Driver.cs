@@ -15,13 +15,13 @@ public partial class Driver
 
     public string Code { get; set; } = null!;
 
+    public int Price { get; set; }
+
     public string? ImgUrl { get; set; }
 
     public string CountryId { get; set; } = null!;
 
     public int? PickableItemId { get; set; }
-
-    public int Price { get; set; }
 
     public virtual ICollection<AspNetUser> AspNetUsers { get; set; } = new List<AspNetUser>();
 
@@ -36,6 +36,4 @@ public partial class Driver
     public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
 
     public virtual ICollection<FantasyLineup> FantasyLineups { get; set; } = new List<FantasyLineup>();
-
-    public virtual ICollection<FantasyLineup> FantasyLineupsNavigation { get; set; } = new List<FantasyLineup>();
 }

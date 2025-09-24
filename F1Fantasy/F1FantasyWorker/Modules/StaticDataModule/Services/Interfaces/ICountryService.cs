@@ -11,7 +11,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
     {
         Task<CountryDto> AddCountryAsync(CountryDto countryDto);
 
-        void AddListCountriesAsync(List<CountryDto> countryDtos);
+        Task AddListCountriesAsync(List<CountryDto> countryDtos);
 
         Task<CountryDto> GetCountryByIdAsync(string id);
 

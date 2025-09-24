@@ -52,11 +52,11 @@ public class CoreGameplayService(
 
                foreach (var lineup in lastestFinishedRace.FantasyLineups)
                {
-                    await context.Entry(lineup).Collection(l => l.DriversNavigation).LoadAsync();
+                    await context.Entry(lineup).Collection(l => l.Drivers).LoadAsync();
 
                     // Create dictionary to hold driverId and points
                     var pointFromOwnedDriversInLineUp = new Dictionary<int, int>();
-                    foreach (var driverId in lineup.DriversNavigation.Select(ld => ld.Id))
+                    foreach (var driverId in lineup.Drivers.Select(ld => ld.Id))
                     {
                          if (driverPoints.TryGetValue(driverId, out var points))
                          {
@@ -69,7 +69,7 @@ public class CoreGameplayService(
                     }
                     
                     // Load constructors from fantasy lineup
-                    await context.Entry(lineup).Collection(l => l.ConstructorsNavigation).LoadAsync();
+                    await context.Entry(lineup).Collection(l => l.Constructors).LoadAsync();
 
                     /*
                          Both drivers in top 3: 10 points
@@ -80,7 +80,7 @@ public class CoreGameplayService(
                      */
                     int totalPointsFromConstructor = 0;
 
-                    foreach (var constructor in lineup.ConstructorsNavigation)
+                    foreach (var constructor in lineup.Constructors)
                     {
                          // Get all drivers for this constructor in the race
                          var raceEntriesForConstructorPointCalculation = lastestFinishedRace.RaceEntries
@@ -231,13 +231,13 @@ public class CoreGameplayService(
                          throw new Exception("New FantasyLineup not existed");
                     }
                     
-                    await context.Entry(previousFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
-                    await context.Entry(newFantasyLineup).Collection(f => f.DriversNavigation).LoadAsync();
+                    await context.Entry(previousFantasyLineup).Collection(f => f.Drivers).LoadAsync();
+                    await context.Entry(newFantasyLineup).Collection(f => f.Drivers).LoadAsync();
 
                     // copy all connection to drivers from previous race to new
-                    foreach (var driver in previousFantasyLineup.DriversNavigation)
+                    foreach (var driver in previousFantasyLineup.Drivers)
                     {
-                         if (newFantasyLineup.DriversNavigation.Contains(driver))
+                         if (newFantasyLineup.Drivers.Contains(driver))
                          {
                               continue;
                          }

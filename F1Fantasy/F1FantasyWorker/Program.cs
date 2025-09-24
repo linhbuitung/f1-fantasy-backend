@@ -1,6 +1,7 @@
 using F1FantasyWorker;
 using F1FantasyWorker.Infrastructure.Contexts;
 using F1FantasyWorker.Infrastructure.Extensions;
+using F1FantasyWorker.Infrastructure.Settings;
 using F1FantasyWorker.Modules.CoreGameplayModule.Repositories.Implementations;
 using F1FantasyWorker.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1FantasyWorker.Modules.CoreGameplayModule.Services.Implementations;
@@ -20,6 +21,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 var builder = Host.CreateApplicationBuilder(args);
+Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}");
+
+var root = Directory.GetCurrentDirectory();
+var dotenv = Path.Combine(root, ".env");
+EnvVariableServices.EnvVariableService.Load(dotenv);
 
 builder.Services.AddHttpClient();
 builder.Services.AddDbContext<WooF1Context>(options =>
@@ -35,6 +41,7 @@ using var scope = host.Services.CreateScope();
 var worker = scope.ServiceProvider.GetRequiredService<GeneralSyncWorker>();
 await worker.RunOnceAsync();
 /*
+ For scaffolding the DbContext and entities, use the following command for local development:
 dotnet ef dbcontext scaffold "Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true" Npgsql.EntityFrameworkCore.PostgreSQL --force --context-dir "Infrastructure/Contexts" --output-dir "Core/Common" --context "WooF1Context"
  */
 public static class ServiceExtensions
