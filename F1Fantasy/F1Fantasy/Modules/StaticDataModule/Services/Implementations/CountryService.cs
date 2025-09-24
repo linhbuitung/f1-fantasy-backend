@@ -18,7 +18,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 
             try
             {
-                Country existingCountry = await staticDataRepository.GetCountryByIdAsync(countryDto.CountryId);
+                Country existingCountry = await staticDataRepository.GetCountryByIdAsync(countryDto.Id);
                 if (existingCountry != null)
                 {
                     return null;
@@ -50,7 +50,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
         {
             foreach (var countryDto in countryDtos)
             {
-                Console.WriteLine($"Adding country: {countryDto.CountryId}");
+                Console.WriteLine($"Adding country: {countryDto.Id}");
                 await AddCountryAsync(countryDto);
             }
         }
@@ -84,12 +84,18 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             }
             return StaticDataDtoMapper.MapCountryToDto(country);
         }
+        
+        public async Task<List<CountryDto>> GetAllCountriesAsync()
+        {
+            List<Country> countries = await staticDataRepository.GetAllCountriesAsync();
+            return countries.Select(StaticDataDtoMapper.MapCountryToDto).ToList();
+        }
 
         private CountryDto ReplaceSpecialCountryCase(CountryDto countryDto)
         {
-            if (countryDto.CountryId.Equals("United States"))
+            if (countryDto.Id.Equals("United States"))
             {
-                countryDto.CountryId = "USA";
+                countryDto.Id = "USA";
             }
 
             return countryDto;

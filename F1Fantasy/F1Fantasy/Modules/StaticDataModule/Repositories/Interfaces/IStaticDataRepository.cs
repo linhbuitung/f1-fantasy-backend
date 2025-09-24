@@ -6,11 +6,14 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
     {
         //IEnumerable<DriverDto> GetAllDrivers();
         //DriverDto GetDriverById(int id);
+        Task<List<Country>> GetAllCountriesAsync();
         Task<Driver> AddDriverAsync(Driver driver);
 
         Task<Driver?> GetDriverByIdAsync(int id);
 
         Task<Driver?> GetDriverByCodeAsync(string code);
+        
+        Task<List<Driver>> GetAllDriversAsync();
         
         Task<List<Driver>> GetAllDriversBySeasonIdAsync(int seasonId);
 
@@ -20,6 +23,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
 
         Task<Constructor?> GetConstructorByCodeAsync(string code);
         
+        Task<List<Constructor>> GetAllConstructorsAsync();
         Task<List<Constructor>> GetAllConstructorsBySeasonIdAsync(int seasonId);
 
         Task<Circuit> AddCircuitAsync(Circuit circuit);

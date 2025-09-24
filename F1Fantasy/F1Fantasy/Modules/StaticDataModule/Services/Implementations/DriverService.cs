@@ -84,6 +84,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             return StaticDataDtoMapper.MapDriverToDto(driver);
         }
 
+        public async Task<List<DriverDto>> GetAllDriversAsync()
+        {
+            List<Driver> drivers = await staticDataRepository.GetAllDriversAsync();
+            return drivers.Select(StaticDataDtoMapper.MapDriverToDto).ToList();
+        }
+
         private DriverDto FixSpecialCountryCase(DriverDto driverDto)
         {
             if (driverDto.CountryId.Equals("East German"))

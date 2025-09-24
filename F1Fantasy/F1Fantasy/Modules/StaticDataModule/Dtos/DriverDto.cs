@@ -21,11 +21,14 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
 
         [Required, MaxLength(50)]
         public string Code { get; set; }
+        
+        [Required, Range(1,100)]
+        public int Price { get; set; }
 
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
 
-        public DriverDto(int id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, string? imgUrl)
+        public DriverDto(int id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, int price, string? imgUrl)
         {
             Id = id;
             GivenName = givenName;
@@ -33,10 +36,11 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
             DateOfBirth = dateOfBirth;
             CountryId = countryId;
             Code = code;
+            Price = price;
             ImgUrl = imgUrl;
         }
 
-        public DriverDto(int? id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, string? imgUrl)
+        public DriverDto(int? id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, int price, string? imgUrl)
         {
             Id = id ?? null;
             GivenName = givenName;
@@ -44,6 +48,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos
             DateOfBirth = dateOfBirth;
             CountryId = countryId;
             Code = code;
+            Price = price;
             ImgUrl = imgUrl;
         }
     }

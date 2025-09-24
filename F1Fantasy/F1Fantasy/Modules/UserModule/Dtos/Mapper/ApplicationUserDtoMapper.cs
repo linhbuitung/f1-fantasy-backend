@@ -10,6 +10,7 @@ public class ApplicationUserDtoMapper
         {
             Id = user.Id,
             Email = user.Email!,
+            EmailConfirmed = user.EmailConfirmed,
             DisplayName = user.DisplayName,
             DateOfBirth = user.DateOfBirth,
             ConsecutiveActiveDays = user.ConsecutiveActiveDays,
