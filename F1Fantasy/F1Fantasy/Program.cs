@@ -172,6 +172,10 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapIdentityApi();
 
+
+// Migrate any database changes on startup 
+app.MigrateDatabase<WooF1Context>();
+
 await ServiceExtensions.SeedRoles(app.Services);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -196,9 +200,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// Migrate any database changes on startup 
-app.MigrateDatabase<WooF1Context>();
 
 app.Run();
 

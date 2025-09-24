@@ -42,6 +42,17 @@ namespace F1Fantasy.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "pickable_item",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_pickable_item", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "powerup",
                 columns: table => new
                 {
@@ -126,8 +137,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    price = table.Column<int>(type: "integer", nullable: false),
                     img_url = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
-                    country_id = table.Column<string>(type: "character varying(100)", nullable: false)
+                    country_id = table.Column<string>(type: "character varying(100)", nullable: false),
+                    pickable_item_id = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -139,6 +152,12 @@ namespace F1Fantasy.Infrastructure.Migrations
                         principalTable: "country",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_constructor_pickable_item_pickable_item_id",
+                        column: x => x.pickable_item_id,
+                        principalTable: "pickable_item",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -151,8 +170,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                     family_name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     date_of_birth = table.Column<DateOnly>(type: "date", nullable: false),
                     code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    price = table.Column<int>(type: "integer", nullable: false),
                     img_url = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
-                    country_id = table.Column<string>(type: "character varying(100)", nullable: false)
+                    country_id = table.Column<string>(type: "character varying(100)", nullable: false),
+                    pickable_item_id = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -164,6 +185,12 @@ namespace F1Fantasy.Infrastructure.Migrations
                         principalTable: "country",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_driver_pickable_item_pickable_item_id",
+                        column: x => x.pickable_item_id,
+                        principalTable: "pickable_item",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -205,8 +232,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                     display_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     date_of_birth = table.Column<DateOnly>(type: "date", nullable: true),
                     accept_notification = table.Column<bool>(type: "boolean", nullable: false),
-                    login_streak = table.Column<int>(type: "integer", nullable: true),
-                    last_login = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    consecutive_active_days = table.Column<int>(type: "integer", nullable: false),
+                    last_active_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ask_ai_credits = table.Column<int>(type: "integer", nullable: false),
                     constructor_id = table.Column<int>(type: "integer", nullable: true),
                     driver_id = table.Column<int>(type: "integer", nullable: true),
                     country_id = table.Column<string>(type: "character varying(100)", nullable: true),
@@ -377,17 +405,17 @@ namespace F1Fantasy.Infrastructure.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     total_amount = table.Column<int>(type: "integer", nullable: false),
-                    transfer_points_deducted = table.Column<int>(type: "integer", nullable: false),
+                    transfers_made = table.Column<int>(type: "integer", nullable: false),
                     points_gained = table.Column<int>(type: "integer", nullable: false),
-                    owner_id = table.Column<int>(type: "integer", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
                     race_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_fantasy_lineup", x => x.id);
                     table.ForeignKey(
-                        name: "fk_fantasy_lineup_application_user_owner_id",
-                        column: x => x.owner_id,
+                        name: "fk_fantasy_lineup_application_user_user_id",
+                        column: x => x.user_id,
                         principalTable: "AspNetUsers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -406,17 +434,17 @@ namespace F1Fantasy.Infrastructure.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     max_players_num = table.Column<int>(type: "integer", nullable: false),
-                    type = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    user_id = table.Column<int>(type: "integer", nullable: false)
+                    owner_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_league", x => x.id);
                     table.ForeignKey(
-                        name: "fk_league_application_user_user_id",
-                        column: x => x.user_id,
+                        name: "fk_league_application_user_owner_id",
+                        column: x => x.owner_id,
                         principalTable: "AspNetUsers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -469,6 +497,78 @@ namespace F1Fantasy.Infrastructure.Migrations
                         name: "fk_prediction_circuit_circuit_id",
                         column: x => x.circuit_id,
                         principalTable: "circuit",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "constructor_fantasy_lineup",
+                columns: table => new
+                {
+                    constructors_id = table.Column<int>(type: "integer", nullable: false),
+                    fantasy_lineups_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_constructor_fantasy_lineup", x => new { x.constructors_id, x.fantasy_lineups_id });
+                    table.ForeignKey(
+                        name: "fk_constructor_fantasy_lineup_constructor_constructors_id",
+                        column: x => x.constructors_id,
+                        principalTable: "constructor",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_constructor_fantasy_lineup_fantasy_lineup_fantasy_lineups_id",
+                        column: x => x.fantasy_lineups_id,
+                        principalTable: "fantasy_lineup",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "driver_fantasy_lineup",
+                columns: table => new
+                {
+                    drivers_id = table.Column<int>(type: "integer", nullable: false),
+                    fantasy_lineups_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_driver_fantasy_lineup", x => new { x.drivers_id, x.fantasy_lineups_id });
+                    table.ForeignKey(
+                        name: "fk_driver_fantasy_lineup_driver_drivers_id",
+                        column: x => x.drivers_id,
+                        principalTable: "driver",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_driver_fantasy_lineup_fantasy_lineup_fantasy_lineups_id",
+                        column: x => x.fantasy_lineups_id,
+                        principalTable: "fantasy_lineup",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "fantasy_lineup_constructor",
+                columns: table => new
+                {
+                    fantasy_lineup_id = table.Column<int>(type: "integer", nullable: false),
+                    constructor_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_fantasy_lineup_constructor", x => new { x.fantasy_lineup_id, x.constructor_id });
+                    table.ForeignKey(
+                        name: "fk_fantasy_lineup_constructor_constructor_constructor_id",
+                        column: x => x.constructor_id,
+                        principalTable: "constructor",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_fantasy_lineup_constructor_fantasy_lineup_fantasy_lineup_id",
+                        column: x => x.fantasy_lineup_id,
+                        principalTable: "fantasy_lineup",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -557,7 +657,8 @@ namespace F1Fantasy.Infrastructure.Migrations
                 columns: table => new
                 {
                     league_id = table.Column<int>(type: "integer", nullable: false),
-                    user_id = table.Column<int>(type: "integer", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false),
+                    is_accepted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -675,9 +776,29 @@ namespace F1Fantasy.Infrastructure.Migrations
                 column: "country_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_constructor_pickable_item_id",
+                table: "constructor",
+                column: "pickable_item_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_constructor_fantasy_lineup_fantasy_lineups_id",
+                table: "constructor_fantasy_lineup",
+                column: "fantasy_lineups_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_driver_country_id",
                 table: "driver",
                 column: "country_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_driver_pickable_item_id",
+                table: "driver",
+                column: "pickable_item_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_driver_fantasy_lineup_fantasy_lineups_id",
+                table: "driver_fantasy_lineup",
+                column: "fantasy_lineups_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_driver_prediction_constructor_id",
@@ -695,14 +816,19 @@ namespace F1Fantasy.Infrastructure.Migrations
                 column: "prediction_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_fantasy_lineup_owner_id",
-                table: "fantasy_lineup",
-                column: "owner_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_fantasy_lineup_race_id",
                 table: "fantasy_lineup",
                 column: "race_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_fantasy_lineup_user_id",
+                table: "fantasy_lineup",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_fantasy_lineup_constructor_constructor_id",
+                table: "fantasy_lineup_constructor",
+                column: "constructor_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_fantasy_lineup_driver_driver_id",
@@ -715,9 +841,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                 column: "powerups_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_league_user_id",
+                name: "ix_league_owner_id",
                 table: "league",
-                column: "user_id");
+                column: "owner_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_notification_user_id",
@@ -794,7 +920,16 @@ namespace F1Fantasy.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "constructor_fantasy_lineup");
+
+            migrationBuilder.DropTable(
+                name: "driver_fantasy_lineup");
+
+            migrationBuilder.DropTable(
                 name: "driver_prediction");
+
+            migrationBuilder.DropTable(
+                name: "fantasy_lineup_constructor");
 
             migrationBuilder.DropTable(
                 name: "fantasy_lineup_driver");
@@ -849,6 +984,9 @@ namespace F1Fantasy.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "country");
+
+            migrationBuilder.DropTable(
+                name: "pickable_item");
         }
     }
 }

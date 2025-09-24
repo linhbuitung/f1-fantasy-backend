@@ -23,44 +23,6 @@ namespace F1Fantasy.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ConstructorFantasyLineup", b =>
-                {
-                    b.Property<int>("ConstructorsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("constructors_id");
-
-                    b.Property<int>("FantasyLineupsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("fantasy_lineups_id");
-
-                    b.HasKey("ConstructorsId", "FantasyLineupsId")
-                        .HasName("pk_constructor_fantasy_lineup");
-
-                    b.HasIndex("FantasyLineupsId")
-                        .HasDatabaseName("ix_constructor_fantasy_lineup_fantasy_lineups_id");
-
-                    b.ToTable("constructor_fantasy_lineup", (string)null);
-                });
-
-            modelBuilder.Entity("DriverFantasyLineup", b =>
-                {
-                    b.Property<int>("DriversId")
-                        .HasColumnType("integer")
-                        .HasColumnName("drivers_id");
-
-                    b.Property<int>("FantasyLineupsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("fantasy_lineups_id");
-
-                    b.HasKey("DriversId", "FantasyLineupsId")
-                        .HasName("pk_driver_fantasy_lineup");
-
-                    b.HasIndex("FantasyLineupsId")
-                        .HasDatabaseName("ix_driver_fantasy_lineup_fantasy_lineups_id");
-
-                    b.ToTable("driver_fantasy_lineup", (string)null);
-                });
-
             modelBuilder.Entity("F1Fantasy.Core.Auth.ApplicationRole", b =>
                 {
                     b.Property<int>("Id")
@@ -1033,59 +995,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.ToTable("user_league", (string)null);
                 });
 
-            modelBuilder.Entity("FantasyLineupPowerup", b =>
-                {
-                    b.Property<int>("FantasyLineupsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("fantasy_lineups_id");
-
-                    b.Property<int>("PowerupsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("powerups_id");
-
-                    b.HasKey("FantasyLineupsId", "PowerupsId")
-                        .HasName("pk_fantasy_lineup_powerup");
-
-                    b.HasIndex("PowerupsId")
-                        .HasDatabaseName("ix_fantasy_lineup_powerup_powerups_id");
-
-                    b.ToTable("fantasy_lineup_powerup", (string)null);
-                });
-
-            modelBuilder.Entity("ConstructorFantasyLineup", b =>
-                {
-                    b.HasOne("F1Fantasy.Core.Common.Constructor", null)
-                        .WithMany()
-                        .HasForeignKey("ConstructorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_constructor_fantasy_lineup_constructor_constructors_id");
-
-                    b.HasOne("F1Fantasy.Core.Common.FantasyLineup", null)
-                        .WithMany()
-                        .HasForeignKey("FantasyLineupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_constructor_fantasy_lineup_fantasy_lineup_fantasy_lineups_id");
-                });
-
-            modelBuilder.Entity("DriverFantasyLineup", b =>
-                {
-                    b.HasOne("F1Fantasy.Core.Common.Driver", null)
-                        .WithMany()
-                        .HasForeignKey("DriversId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_driver_fantasy_lineup_driver_drivers_id");
-
-                    b.HasOne("F1Fantasy.Core.Common.FantasyLineup", null)
-                        .WithMany()
-                        .HasForeignKey("FantasyLineupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_driver_fantasy_lineup_fantasy_lineup_fantasy_lineups_id");
-                });
-
             modelBuilder.Entity("F1Fantasy.Core.Auth.ApplicationRoleClaim", b =>
                 {
                     b.HasOne("F1Fantasy.Core.Auth.ApplicationRole", "Role")
@@ -1470,23 +1379,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Navigation("League");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("FantasyLineupPowerup", b =>
-                {
-                    b.HasOne("F1Fantasy.Core.Common.FantasyLineup", null)
-                        .WithMany()
-                        .HasForeignKey("FantasyLineupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_fantasy_lineup_powerup_fantasy_lineup_fantasy_lineups_id");
-
-                    b.HasOne("F1Fantasy.Core.Common.Powerup", null)
-                        .WithMany()
-                        .HasForeignKey("PowerupsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_fantasy_lineup_powerup_powerup_powerups_id");
                 });
 
             modelBuilder.Entity("F1Fantasy.Core.Auth.ApplicationRole", b =>

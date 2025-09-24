@@ -34,8 +34,6 @@ namespace F1Fantasy.Core.Common
         [ForeignKey(nameof(PickableItemId))]
         public virtual PickableItem? PickableItem { get; set; }
         
-        public virtual ICollection<FantasyLineup> FantasyLineups { get; set; }
-        
         public virtual ICollection<FantasyLineupConstructor> FantasyLineupConstructors { get; set; }
         public virtual ICollection<DriverPrediction> DriverPredictions { get; set; }
         public virtual ICollection<ApplicationUser> Users { get; set; }

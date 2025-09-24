@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace F1Fantasy.Infrastructure.Migrations
 {
     [DbContext(typeof(WooF1Context))]
-    [Migration("20250915213528_AddRangeForPrice")]
-    partial class AddRangeForPrice
+    [Migration("20250924070257_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,25 @@ namespace F1Fantasy.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ConstructorFantasyLineup", b =>
+                {
+                    b.Property<int>("ConstructorsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("constructors_id");
+
+                    b.Property<int>("FantasyLineupsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_lineups_id");
+
+                    b.HasKey("ConstructorsId", "FantasyLineupsId")
+                        .HasName("pk_constructor_fantasy_lineup");
+
+                    b.HasIndex("FantasyLineupsId")
+                        .HasDatabaseName("ix_constructor_fantasy_lineup_fantasy_lineups_id");
+
+                    b.ToTable("constructor_fantasy_lineup", (string)null);
+                });
 
             modelBuilder.Entity("DriverFantasyLineup", b =>
                 {
@@ -228,10 +247,18 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
+                    b.Property<int>("AskAiCredits")
+                        .HasColumnType("integer")
+                        .HasColumnName("ask_ai_credits");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
                         .HasColumnName("concurrency_stamp");
+
+                    b.Property<int>("ConsecutiveActiveDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("consecutive_active_days");
 
                     b.Property<int?>("ConstructorId")
                         .HasColumnType("integer")
@@ -263,9 +290,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
-                    b.Property<DateTime?>("LastLogin")
+                    b.Property<DateTime?>("LastActiveAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_login");
+                        .HasColumnName("last_active_at");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean")
@@ -274,10 +301,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("lockout_end");
-
-                    b.Property<int?>("LoginStreak")
-                        .HasColumnType("integer")
-                        .HasColumnName("login_streak");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(128)
@@ -427,6 +450,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Property<int?>("PickableItemId")
                         .HasColumnType("integer")
                         .HasColumnName("pickable_item_id");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("integer")
+                        .HasColumnName("price");
 
                     b.HasKey("Id")
                         .HasName("pk_constructor");
@@ -600,9 +627,9 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("total_amount");
 
-                    b.Property<int>("TransferPointsDeducted")
+                    b.Property<int>("TransfersMade")
                         .HasColumnType("integer")
-                        .HasColumnName("transfer_points_deducted");
+                        .HasColumnName("transfers_made");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -618,6 +645,27 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasDatabaseName("ix_fantasy_lineup_user_id");
 
                     b.ToTable("fantasy_lineup", (string)null);
+                });
+
+            modelBuilder.Entity("F1Fantasy.Core.Common.FantasyLineupConstructor", b =>
+                {
+                    b.Property<int>("FantasyLineupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_lineup_id")
+                        .HasColumnOrder(1);
+
+                    b.Property<int>("ConstructorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("constructor_id")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("FantasyLineupId", "ConstructorId")
+                        .HasName("pk_fantasy_lineup_constructor");
+
+                    b.HasIndex("ConstructorId")
+                        .HasDatabaseName("ix_fantasy_lineup_constructor_constructor_id");
+
+                    b.ToTable("fantasy_lineup_constructor", (string)null);
                 });
 
             modelBuilder.Entity("F1Fantasy.Core.Common.FantasyLineupDriver", b =>
@@ -1007,6 +1055,23 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.ToTable("fantasy_lineup_powerup", (string)null);
                 });
 
+            modelBuilder.Entity("ConstructorFantasyLineup", b =>
+                {
+                    b.HasOne("F1Fantasy.Core.Common.Constructor", null)
+                        .WithMany()
+                        .HasForeignKey("ConstructorsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_constructor_fantasy_lineup_constructor_constructors_id");
+
+                    b.HasOne("F1Fantasy.Core.Common.FantasyLineup", null)
+                        .WithMany()
+                        .HasForeignKey("FantasyLineupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_constructor_fantasy_lineup_fantasy_lineup_fantasy_lineups_id");
+                });
+
             modelBuilder.Entity("DriverFantasyLineup", b =>
                 {
                     b.HasOne("F1Fantasy.Core.Common.Driver", null)
@@ -1220,6 +1285,27 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Navigation("Race");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("F1Fantasy.Core.Common.FantasyLineupConstructor", b =>
+                {
+                    b.HasOne("F1Fantasy.Core.Common.Constructor", "Constructor")
+                        .WithMany("FantasyLineupConstructors")
+                        .HasForeignKey("ConstructorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_fantasy_lineup_constructor_constructor_constructor_id");
+
+                    b.HasOne("F1Fantasy.Core.Common.FantasyLineup", "FantasyLineup")
+                        .WithMany("FantasyLineupConstructors")
+                        .HasForeignKey("FantasyLineupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_fantasy_lineup_constructor_fantasy_lineup_fantasy_lineup_id");
+
+                    b.Navigation("Constructor");
+
+                    b.Navigation("FantasyLineup");
                 });
 
             modelBuilder.Entity("F1Fantasy.Core.Common.FantasyLineupDriver", b =>
@@ -1445,6 +1531,8 @@ namespace F1Fantasy.Infrastructure.Migrations
                 {
                     b.Navigation("DriverPredictions");
 
+                    b.Navigation("FantasyLineupConstructors");
+
                     b.Navigation("RaceEntries");
 
                     b.Navigation("Users");
@@ -1476,6 +1564,8 @@ namespace F1Fantasy.Infrastructure.Migrations
 
             modelBuilder.Entity("F1Fantasy.Core.Common.FantasyLineup", b =>
                 {
+                    b.Navigation("FantasyLineupConstructors");
+
                     b.Navigation("FantasyLineupDrivers");
 
                     b.Navigation("PowerupFantasyLineups");

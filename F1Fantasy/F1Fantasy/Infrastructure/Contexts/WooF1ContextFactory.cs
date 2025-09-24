@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using F1Fantasy.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
 
 namespace F1Fantasy.Infrastructure.Contexts;
 
@@ -33,12 +34,26 @@ public class WooF1ContextFactory : IDesignTimeDbContextFactory<WooF1Context>
         }
         if (environment != null && environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
         {
-            var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
-            var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
-            var db = Environment.GetEnvironmentVariable("POSTGRES_DB");
-            var port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
-            var host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
-            return $"Host={host};Port={port};Database={db};Username={user};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+            var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+            if(databaseUrl == null)
+            {
+                throw new InvalidOperationException("DATABASE_URL is not set.");
+            }
+            var databaseUri = new Uri(databaseUrl);
+
+            var userInfo = databaseUri.UserInfo.Split(':');
+
+            var builder = new NpgsqlConnectionStringBuilder
+            {
+                Host = databaseUri.Host,
+                Port = databaseUri.Port,
+                Username = userInfo[0],
+                Password = userInfo[1],
+                Database = databaseUri.LocalPath.TrimStart('/'),
+                SslMode = SslMode.Require,
+            };
+
+            return builder.ToString();
         }
         throw new InvalidOperationException("ASPNETCORE_ENVIRONMENT is not set to a valid value.");
     }
