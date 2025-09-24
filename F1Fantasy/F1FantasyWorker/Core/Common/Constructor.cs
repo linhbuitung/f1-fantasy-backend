@@ -30,6 +30,4 @@ public partial class Constructor
     public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
 
     public virtual ICollection<FantasyLineup> FantasyLineups { get; set; } = new List<FantasyLineup>();
-
-    public virtual ICollection<FantasyLineup> FantasyLineupsNavigation { get; set; } = new List<FantasyLineup>();
 }

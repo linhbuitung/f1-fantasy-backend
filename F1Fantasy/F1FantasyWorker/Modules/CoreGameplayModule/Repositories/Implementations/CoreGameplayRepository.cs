@@ -25,7 +25,7 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
 
     public async Task AddFantasyLineupDriverAsync(FantasyLineup fantasyLineup, Driver driver)
     {
-        fantasyLineup.DriversNavigation.Add(driver);
+        fantasyLineup.Drivers.Add(driver);
         await context.SaveChangesAsync();
     }
 }

@@ -67,20 +67,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 logger.LogInformation("Start syncing powerups");
                 
                 List<PowerupDto> newPowerups = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
-                foreach (var powerupDto in newPowerups)
-                {
-                    await powerupService.AddPowerupAsync(powerupDto);
-                }
+
+                await powerupService.AddListPowerupsAsync(newPowerups);
+                
                 logger.LogInformation("Database synced with new powerups.");
                 
                 // Sync countries
                 logger.LogInformation("Start syncing countries");
                 
                 List<CountryDto> newCountryDtos = await countrySyncService.GetCountriesFromStaticResourcesAsync();
-                foreach (var countryDto in newCountryDtos)
-                {
-                    await countryService.AddCountryAsync(countryDto);
-                }
+                
+                await countryService.AddListCountriesAsync(newCountryDtos);
+                
                 logger.LogInformation("Database synced with new countries.");
 
                 // Sync drivers
@@ -90,13 +88,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<DriverDto> newDriverDtos = new List<DriverDto>();
                 foreach (var tempDriver in newTempDrivers)
                 {
-                    newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, 0, null));
+                    newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, price: 1, null));
                 }
 
-                foreach (var driverDto in newDriverDtos)
-                {
-                    await driverService.AddDriverAsync(driverDto);
-                }
+                await driverService.AddListDriversAsync(newDriverDtos);
 
                 logger.LogInformation("Database synced with new drivers.");
 
@@ -108,13 +103,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
                 foreach (var tempConstructor in newTempConstructors)
                 {
-                    newConstructorDtos.Add(new ConstructorDto(id: null,tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, null));
+                    newConstructorDtos.Add(new ConstructorDto(id: null,tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, price: 0, null));
                 }
 
-                foreach (var constructorDto in newConstructorDtos)
-                {
-                    await constructorService.AddConstructorAsync(constructorDto);
-                }
+                await constructorService.AddListConstructorsAsync(newConstructorDtos);
 
                 logger.LogInformation("Database synced with new constructors.");
 
@@ -129,10 +121,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     newCircuitDtos.Add(new CircuitDto(id: null, tempCircuit.CircuitName, tempCircuit.CircuitId, tempCircuit.Location.Lat, tempCircuit.Location.Long, tempCircuit.Location.Locality, tempCircuit.Location.Country, null));
                 }
                 
-                foreach (var circuitDto in newCircuitDtos)
-                {
-                    await circuitService.AddCircuitAsync(circuitDto);
-                }
+                await circuitService.AddListCircuitsAsync(newCircuitDtos);
 
                 logger.LogInformation("Database synced with new circuits.");
                 
@@ -147,10 +136,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     newSeasonDtos.Add(new SeasonDto(id: null, tempSeason.Season, isActive:false));
                 }
                 
-                foreach (var seasonDto in newSeasonDtos)
-                {
-                    await seasonService.AddSeasonAsync(seasonDto);
-                }
+                await seasonService.AddListSeasonsAsync(newSeasonDtos);
                 
                 logger.LogInformation("Database synced with new seasons.");
                 
@@ -164,10 +150,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
                 }
 
-                foreach (var raceDto in newRaceDtos)
-                {
-                    await raceService.AddRaceAsync(raceDto);
-                }
+                await raceService.AddListRacesAsync(newRaceDtos);
 
                 logger.LogInformation("Database synced with new races");
                 
@@ -204,10 +187,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                         ));
                 }
                 
-                foreach (var raceEntry in newRaceEntryDtos)
-                {
-                    await raceEntryService.AddRaceEntryAsync(raceEntry);
-                }
+                await raceEntryService.AddListRaceEntriesAsync(newRaceEntryDtos);
 
                 /*List<RaceEntryDto> newRaceEntryDtos =  await raceEntrySyncService.GetStaticRaceEntriesAsync();
                 
@@ -291,20 +271,18 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             logger.LogInformation("Start syncing powerups");
             
             List<PowerupDto> newPowerups = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
-            foreach (var powerupDto in newPowerups)
-            {
-                await powerupService.AddPowerupAsync(powerupDto);
-            }
+
+            await powerupService.AddListPowerupsAsync(newPowerups);
+            
             logger.LogInformation("Database synced with new powerups.");
             
             // Sync countries
             logger.LogInformation("Start syncing countries");
             
             List<CountryDto> newCountryDtos = await countrySyncService.GetCountriesFromStaticResourcesAsync();
-            foreach (var countryDto in newCountryDtos)
-            {
-                await countryService.AddCountryAsync(countryDto);
-            }
+            
+            await countryService.AddListCountriesAsync(newCountryDtos);
+            
             logger.LogInformation("Database synced with new countries.");
 
             // Sync drivers
@@ -317,10 +295,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, 0, null));
             }
 
-            foreach (var driverDto in newDriverDtos)
-            {
-                await driverService.AddDriverAsync(driverDto);
-            }
+            await driverService.AddListDriversAsync(newDriverDtos);
 
             logger.LogInformation("Database synced with new drivers.");
 
@@ -332,13 +307,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
             foreach (var tempConstructor in newTempConstructors)
             {
-                newConstructorDtos.Add(new ConstructorDto(id: null,tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, null));
+                newConstructorDtos.Add(new ConstructorDto(id: null,tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, price: 0, null));
             }
 
-            foreach (var constructorDto in newConstructorDtos)
-            {
-                await constructorService.AddConstructorAsync(constructorDto);
-            }
+            await constructorService.AddListConstructorsAsync(newConstructorDtos);
 
             logger.LogInformation("Database synced with new constructors.");
 
@@ -353,10 +325,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 newCircuitDtos.Add(new CircuitDto(id: null, tempCircuit.CircuitName, tempCircuit.CircuitId, tempCircuit.Location.Lat, tempCircuit.Location.Long, tempCircuit.Location.Locality, tempCircuit.Location.Country, null));
             }
             
-            foreach (var circuitDto in newCircuitDtos)
-            {
-                await circuitService.AddCircuitAsync(circuitDto);
-            }
+            await circuitService.AddListCircuitsAsync(newCircuitDtos);
 
             logger.LogInformation("Database synced with new circuits.");
             
@@ -371,10 +340,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 newSeasonDtos.Add(new SeasonDto(id: null, tempSeason.Season, isActive:false));
             }
             
-            foreach (var seasonDto in newSeasonDtos)
-            {
-                await seasonService.AddSeasonAsync(seasonDto);
-            }
+            await seasonService.AddListSeasonsAsync(newSeasonDtos);
             
             logger.LogInformation("Database synced with new seasons.");
             
@@ -388,10 +354,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
             }
 
-            foreach (var raceDto in newRaceDtos)
-            {
-                await raceService.AddRaceAsync(raceDto);
-            }
+            await raceService.AddListRacesAsync(newRaceDtos);
 
             logger.LogInformation("Database synced with new races");
             
@@ -428,10 +391,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                     ));
             }
             
-            foreach (var raceEntry in newRaceEntryDtos)
-            {
-                await raceEntryService.AddRaceEntryAsync(raceEntry);
-            }
+            await raceEntryService.AddListRaceEntriesAsync(newRaceEntryDtos);
 
             /*List<RaceEntryDto> newRaceEntryDtos =  await raceEntrySyncService.GetStaticRaceEntriesAsync();
             

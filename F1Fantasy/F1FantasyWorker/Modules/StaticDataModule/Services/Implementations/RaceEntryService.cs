@@ -66,11 +66,59 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
         }
     }
 
-    public async void AddListRaceEntriesAsync(List<RaceEntryDto> raceEntryDtos)
+    public async Task AddListRaceEntriesAsync(List<RaceEntryDto> raceEntryDtos)
     {
-        foreach (var raceEntry in raceEntryDtos)
+        using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
         {
-            await AddRaceEntryAsync(raceEntry);
+            var existingDrivers = await dataSyncRepository.GetAllDriversAsync();
+            var existingConstructors = await dataSyncRepository.GetAllConstructorsAsync();
+            var existingRaces = await dataSyncRepository.GetAllRacesAsync();
+            
+            var existingRaceEntries = await dataSyncRepository.GetAllRaceEntriesBySeasonYearAsync(DateTime.Now.Year);
+            var newRaceEntries = new List<RaceEntry>();
+            foreach (var raceEntryDto in raceEntryDtos)
+            {
+                if(raceEntryDto.DriverCode == null || !existingDrivers.Exists(d => d.Code == raceEntryDto.DriverCode))
+                {
+                    throw new Exception($"Driver with code {raceEntryDto.DriverCode} not found");
+                }
+
+
+                if (raceEntryDto.ConstructorCode == null || !existingConstructors.Exists(c => c.Code == raceEntryDto.ConstructorCode))
+                {
+                    throw new Exception($"Constructor with code {raceEntryDto.ConstructorCode} not found");
+                }
+
+                if (raceEntryDto.RaceDate == null || !existingRaces.Exists(r => r.RaceDate == raceEntryDto.RaceDate.Value))
+                {
+                    throw new Exception($"Race with date {raceEntryDto.RaceDate} not found");
+                }
+                
+                RaceEntry raceEntry = StaticDataDtoMapper.MapDtoToRaceEntry(raceEntryDto);
+                raceEntry.DriverId = existingDrivers.First(d => d.Code == raceEntryDto.DriverCode).Id;
+                raceEntry.ConstructorId = existingConstructors.First(c => c.Code == raceEntryDto.ConstructorCode).Id;
+                raceEntry.RaceId = existingRaces.First(r => r.RaceDate != raceEntryDto.RaceDate.Value).Id;
+    
+                RaceEntry newRaceEntry = await dataSyncRepository.AddRaceEntryAsync(raceEntry);
+                newRaceEntries.Add(newRaceEntry);
+            }
+            await dataSyncRepository.AddListRaceEntriesAsync(newRaceEntries);
+    
+            // Additional operations that need atomicity (example: logging the event)
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error creating driver: {ex.Message}");
+
+            throw;
         }
     }
 

@@ -6,7 +6,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Interfaces
     {
         Task<CircuitDto> AddCircuitAsync(CircuitDto circuitDto);
 
-        void AddListCircuitsAsync(List<CircuitDto> circuitDtos);
+        Task AddListCircuitsAsync(List<CircuitDto> circuitDtos);
 
         Task<CircuitDto> GetCircuitByIdAsync(int id);
 

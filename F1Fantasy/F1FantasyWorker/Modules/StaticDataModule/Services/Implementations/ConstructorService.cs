@@ -52,11 +52,51 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             }
         }
 
-        public async void AddListConstructorsAsync(List<ConstructorDto> constructorDtos)
+        public async Task AddListConstructorsAsync(List<ConstructorDto> constructorDtos)
         {
-            foreach (var constructor in constructorDtos)
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
             {
-                await AddConstructorAsync(constructor);
+                var existingCountries = await dataSyncRepository.GetAllCountriesAsync();
+                var existingConstructorCodes = await dataSyncRepository.GetAllConstructorCodesAsync();
+                var newConstructors = new List<Constructor>();
+                foreach (var constructorDto in constructorDtos)
+                {
+                    if (existingConstructorCodes.Contains(constructorDto.Code))
+                    {
+                        continue; // Skip existing constructors
+                    }
+
+                    var fixedConstructorDto = FixSpecialCountryCase(constructorDto);
+                    
+                    // Constructor API returns nationality, so we need check for nationality.
+                    if (!existingCountries.Exists(c => c.Nationalities.Contains(fixedConstructorDto.CountryId)))
+                    {
+                        throw new Exception($"Country with nationality {fixedConstructorDto.CountryId} not found");
+                    }
+                    fixedConstructorDto.CountryId = existingCountries.First(c => c.Nationalities.Contains(fixedConstructorDto.CountryId)).Id;
+                
+                    Constructor constructor = StaticDataDtoMapper.MapDtoToConstructor(fixedConstructorDto);
+
+                    Constructor newConstructor = await dataSyncRepository.AddConstructorAsync(constructor);
+                    newConstructors.Add(newConstructor);
+                }
+
+                var newConstructorsReturned = await dataSyncRepository.AddListConstructorsAsync(newConstructors);
+                // Additional operations that need atomicity (example: logging the event)
+                await context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine($"Error creating constructor: {ex.Message}");
+
+                throw;
             }
         }
 

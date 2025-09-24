@@ -42,12 +42,39 @@ public class PowerupService(IDataSyncRepository dataSyncRepository, WooF1Context
         }
     }
     
-    public async void AddListPowerupsAsync(List<PowerupDto> powerupDtos)
+    public async Task AddListPowerupsAsync(List<PowerupDto> powerupDtos)
     {
-        foreach (var powerup in powerupDtos)
+        using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
         {
-            Console.WriteLine($"Adding powerup: {powerup.Type}");
-            await AddPowerupAsync(powerup);
+            var existingPowerups = await dataSyncRepository.GetAllPowerupsAsync();
+            var newPowerups = new List<Powerup>();
+            foreach (var powerupDto in powerupDtos)
+            {
+                if (existingPowerups.Any(p => p.Type == powerupDto.Type))
+                {
+                    continue;
+                }
+                
+                Powerup powerup = StaticDataDtoMapper.MapDtoToPowerup(powerupDto);
+                newPowerups.Add(powerup);
+            }
+            
+            var newPowerupReturned = await dataSyncRepository.AddListPowerupAsync(newPowerups);
+
+            // Additional operations that need atomicity (example: logging the event)
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+            return;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error creating powerup: {ex.Message}");
+
+            throw;
         }
     }
     

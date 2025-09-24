@@ -28,7 +28,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 driverDto = FixSpecialCountryCase(driverDto);
                 
                 // Driver API returns nationality, so we need check for nationality.
-                Country country = await dataSyncRepository.GetCountryByNationalitityAsync(driverDto.CountryId);
+                var country = await dataSyncRepository.GetCountryByNationalitityAsync(driverDto.CountryId);
                 if (country == null)
                 {
                     throw new Exception($"Country with nationality {driverDto.CountryId} not found");
@@ -55,12 +55,49 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             }
         }
 
-        public async void AddListDriversAsync(List<DriverDto> driverDtos)
+        public async Task AddListDriversAsync(List<DriverDto> driverDtos)
         {
-            foreach (var driver in driverDtos)
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
             {
-                Console.WriteLine($"Adding driver: {driver.FamilyName} with code: {driver.Code}");
-                await AddDriverAsync(driver);
+                var exisitngCountries = await dataSyncRepository.GetAllCountriesAsync();
+                var existingDrivers = await dataSyncRepository.GetAllDriverCodesAsync();
+                var newDrivers = new List<Driver>();
+                foreach (var driverDto in driverDtos)
+                {
+                    if (existingDrivers.Contains(driverDto.Code))
+                    {
+                        continue;
+                    }
+
+                    DriverDto fixedDriverDto = FixSpecialCountryCase(driverDto);
+                    // Driver API returns nationality, so we need check for nationality.
+                    if (!exisitngCountries.Exists(c => c.Nationalities.Contains(fixedDriverDto.CountryId)))
+                    {
+                        throw new Exception($"Country with nationality {fixedDriverDto.CountryId} not found");
+                    }
+                    fixedDriverDto.CountryId = exisitngCountries.First(c => c.Nationalities.Contains(fixedDriverDto.CountryId)).Id;
+
+                    Driver driver = StaticDataDtoMapper.MapDtoToDriver(fixedDriverDto);
+
+                    newDrivers.Add(driver);
+                }
+
+                var newDriversReturned = await dataSyncRepository.AddListDriversAsync(newDrivers);
+                // Additional operations that need atomicity (example: logging the event)
+                await context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine($"Error creating driver: {ex.Message}");
+
+                throw;
             }
         }
 
@@ -94,8 +131,6 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             {
                 driverDto.CountryId = "Zimbabwean";
             }
-            
-
             return driverDto;
         }
         

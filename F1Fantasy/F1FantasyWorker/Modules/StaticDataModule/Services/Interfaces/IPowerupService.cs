@@ -6,7 +6,7 @@ public interface IPowerupService
 {
     Task<PowerupDto> AddPowerupAsync(PowerupDto powerupDto);
 
-    void AddListPowerupsAsync(List<PowerupDto> powerupDto);
+    Task AddListPowerupsAsync(List<PowerupDto> powerupDto);
 
     Task<PowerupDto> GetPowerupByIdAsync(int id);
 

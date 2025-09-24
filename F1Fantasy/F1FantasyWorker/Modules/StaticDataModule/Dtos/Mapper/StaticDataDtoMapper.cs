@@ -27,7 +27,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
         {
-            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.ImgUrl);
+            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.Price, constructor.ImgUrl);
         }
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)

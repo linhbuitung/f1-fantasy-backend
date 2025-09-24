@@ -51,11 +51,47 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
             }
         }
 
-        public async void AddListCircuitsAsync(List<CircuitDto> circuitDtos)
+        public async Task AddListCircuitsAsync(List<CircuitDto> circuitDtos)
         {
-            foreach (var circuit in circuitDtos)
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
             {
-                await AddCircuitAsync(circuit);
+                var existingCountries = await dataSyncRepository.GetAllCountriesAsync();
+                var existingCircuitCodes = await dataSyncRepository.GetAllCircuitCodesAsync();
+                var newCircuits = new List<Circuit>();
+                foreach (var circuitDto in circuitDtos)
+                {
+                    if (existingCircuitCodes.Contains(circuitDto.Code))
+                    {
+                        continue; // Skip existing circuits
+                    }
+
+                    // Circuit API returns country name, so we need check for short name.
+                    if (!existingCountries.Exists(c => c.ShortName.Contains(circuitDto.CountryId)))
+                    {
+                        throw new Exception($"Country with name {circuitDto.CountryId} not found");
+                    }
+                    circuitDto.CountryId = existingCountries.First(c => c.ShortName.Contains(circuitDto.CountryId)).Id;
+
+                    Circuit circuit = StaticDataDtoMapper.MapDtoToCircuit(circuitDto);
+                    newCircuits.Add(circuit);
+                }
+                
+                var newCircuitsReturned = await dataSyncRepository.AddListCircuitsAsync(newCircuits);
+                // Additional operations that need atomicity (example: logging the event)
+                await context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine($"Error creating circuit: {ex.Message}");
+
+                throw;
             }
         }
 
