@@ -80,6 +80,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             }
             return StaticDataDtoMapper.MapConstructorToDto(constructor);
         }
+
+        public async Task<List<ConstructorDto>> GetAllConstructorsAsync()
+        {
+            List<Constructor> constructors = await staticDataRepository.GetAllConstructorsAsync();
+            return constructors.Select(StaticDataDtoMapper.MapConstructorToDto).ToList();
+        }
         
         private ConstructorDto FixSpecialCountryCase(ConstructorDto constructorDto)
         {
@@ -94,5 +100,6 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             
             return constructorDto;
         }
+        
     }
 }

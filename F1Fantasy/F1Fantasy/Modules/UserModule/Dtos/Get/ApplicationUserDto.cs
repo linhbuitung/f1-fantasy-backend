@@ -11,6 +11,8 @@ public class ApplicationUserDto
     public string? DisplayName { get; set; }
     
     public string Email { get; set; }
+    
+    public bool EmailConfirmed { get; set; }
 
     [Column(TypeName = "date")]
     public DateOnly? DateOfBirth { get; set; }

@@ -13,5 +13,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Interfaces
         Task<CountryDto> GetCountryByNationalityAsync(string nationality);
 
         Task<CountryDto> GetCountryByShortNameAsync(string shortName);
+        
+        Task<List<CountryDto>> GetAllCountriesAsync();
     }
 }

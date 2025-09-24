@@ -118,7 +118,7 @@ public static class AuthMinimalApiMapper
             return TypedResults.Empty;
         });
 
-        routeGroup.MapGet("/confirmEmail", async Task<Results<ContentHttpResult, UnauthorizedHttpResult>>
+        routeGroup.MapGet("/confirm-email", async Task<Results<ContentHttpResult, UnauthorizedHttpResult>>
             ([FromQuery] string userId, [FromQuery] string code, [FromQuery] string? changedEmail, [FromServices] IServiceProvider sp) =>
         {
             var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
@@ -176,7 +176,7 @@ public static class AuthMinimalApiMapper
             return TypedResults.Ok();        
         });
         
-        routeGroup.MapPost("/resendConfirmationEmail", async Task<Ok>
+        routeGroup.MapPost("/resend-confirmation-email", async Task<Ok>
             ([FromBody] ResendConfirmationEmailRequest resendRequest, HttpContext context, [FromServices] IServiceProvider sp) =>
         {
             var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
@@ -189,7 +189,7 @@ public static class AuthMinimalApiMapper
             return TypedResults.Ok();
         });
 
-        routeGroup.MapPost("/forgotPassword", async Task<Results<Ok, ValidationProblem>>
+        routeGroup.MapPost("/forgot-password", async Task<Results<Ok, ValidationProblem>>
             ([FromBody] ForgotPasswordRequest resetRequest, [FromServices] IServiceProvider sp) =>
         {
             var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
@@ -208,7 +208,7 @@ public static class AuthMinimalApiMapper
             return TypedResults.Ok();
         });
 
-        routeGroup.MapPost("/resetPassword", async Task<Results<Ok, ValidationProblem>>
+        routeGroup.MapPost("/reset-password", async Task<Results<Ok, ValidationProblem>>
             ([FromBody] ResetPasswordRequest resetRequest, [FromServices] IServiceProvider sp) =>
         {
             var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();

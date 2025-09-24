@@ -11,5 +11,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Interfaces
         Task<DriverDto> GetDriverByIdAsync(int id);
 
         Task<DriverDto> GetDriverByCodeAsync(string code);
+        
+        Task<List<DriverDto>> GetAllDriversAsync();
     }
 }

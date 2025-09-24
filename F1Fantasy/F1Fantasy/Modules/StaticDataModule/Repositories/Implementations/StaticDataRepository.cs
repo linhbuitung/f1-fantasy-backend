@@ -9,6 +9,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 {
     public class StaticDataRepository(WooF1Context context) : IStaticDataRepository
     {
+        public async Task<List<Country>> GetAllCountriesAsync()
+        {
+            return await context.Countries.AsNoTracking().ToListAsync();
+        }
         public async Task<Driver> AddDriverAsync(Driver driver)
         {
             context.Drivers.Add(driver);
@@ -26,6 +30,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
         }
 
+        public async Task<List<Driver>> GetAllDriversAsync()
+        {
+            return await context.Drivers.AsNoTracking().ToListAsync();
+        }
         public async Task<List<Driver>> GetAllDriversBySeasonIdAsync(int seasonId)
         {
             return await context.Drivers.AsNoTracking()
@@ -39,7 +47,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             await context.SaveChangesAsync();
             return constructor;
         }
-
+        
         public async Task<Constructor?> GetConstructorByIdAsync(int id)
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
@@ -49,7 +57,12 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
         }
-
+        
+        public async Task<List<Constructor>> GetAllConstructorsAsync()
+        {
+            return await context.Constructors.AsNoTracking().ToListAsync();
+        }
+        
         public async Task<List<Constructor>> GetAllConstructorsBySeasonIdAsync(int seasonId)
         {
             return await context.Constructors.AsNoTracking()

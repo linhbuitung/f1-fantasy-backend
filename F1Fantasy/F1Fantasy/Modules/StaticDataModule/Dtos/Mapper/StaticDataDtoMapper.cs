@@ -7,7 +7,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
     {
         public static DriverDto MapDriverToDto(Driver driver)
         {
-            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.ImgUrl);
+            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.Price, driver.ImgUrl);
         }
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
@@ -19,6 +19,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
                 FamilyName = driverDto.FamilyName,
                 DateOfBirth = driverDto.DateOfBirth,
                 CountryId = driverDto.CountryId,
+                Price = driverDto.Price,
                 Code = driverDto.Code,
                 ImgUrl = driverDto.ImgUrl
             };
@@ -26,7 +27,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
         {
-            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.ImgUrl);
+            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.Price, constructor.ImgUrl);
         }
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)
@@ -69,7 +70,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
         {
             return new Country
             {
-                Id = countryDto.CountryId,
+                Id = countryDto.Id,
                 Nationalities = countryDto.Nationalities,
                 ShortName = countryDto.ShortName
             };
