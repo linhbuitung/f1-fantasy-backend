@@ -59,9 +59,15 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Season> Seasons { get; set; }
 
     public virtual DbSet<UserLeague> UserLeagues { get; set; }
-    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=c38j9kbm97l2pa.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com\n;Port=5432;Database=d8irg3cis1tsjh;TrustServerCertificate=True;Username=uedsah8nmqpkv9;Password=p52438f56b94671eb1701f2d671503ec044f4e922b4c4924a13c3d9e0d13fef71;Include Error Detail=true;SslMode=Require;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("pg_stat_statements");
+
         modelBuilder.Entity<AspNetRole>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("pk_asp_net_roles");
@@ -111,13 +117,9 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AcceptNotification).HasColumnName("accept_notification");
             entity.Property(e => e.AccessFailedCount).HasColumnName("access_failed_count");
-            entity.Property(e => e.AskAiCredits)
-                .HasDefaultValue(0)
-                .HasColumnName("ask_ai_credits");
+            entity.Property(e => e.AskAiCredits).HasColumnName("ask_ai_credits");
             entity.Property(e => e.ConcurrencyStamp).HasColumnName("concurrency_stamp");
-            entity.Property(e => e.ConsecutiveActiveDays)
-                .HasDefaultValue(0)
-                .HasColumnName("consecutive_active_days");
+            entity.Property(e => e.ConsecutiveActiveDays).HasColumnName("consecutive_active_days");
             entity.Property(e => e.ConstructorId).HasColumnName("constructor_id");
             entity.Property(e => e.CountryId)
                 .HasMaxLength(100)
@@ -296,9 +298,7 @@ public partial class WooF1Context : DbContext
                 .HasMaxLength(300)
                 .HasColumnName("name");
             entity.Property(e => e.PickableItemId).HasColumnName("pickable_item_id");
-            entity.Property(e => e.Price)
-                .HasDefaultValue(0)
-                .HasColumnName("price");
+            entity.Property(e => e.Price).HasColumnName("price");
 
             entity.HasOne(d => d.Country).WithMany(p => p.Constructors)
                 .HasForeignKey(d => d.CountryId)
@@ -355,9 +355,7 @@ public partial class WooF1Context : DbContext
                 .HasMaxLength(300)
                 .HasColumnName("img_url");
             entity.Property(e => e.PickableItemId).HasColumnName("pickable_item_id");
-            entity.Property(e => e.Price)
-                .HasDefaultValue(0)
-                .HasColumnName("price");
+            entity.Property(e => e.Price).HasColumnName("price");
 
             entity.HasOne(d => d.Country).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.CountryId)
@@ -703,9 +701,7 @@ public partial class WooF1Context : DbContext
 
             entity.Property(e => e.LeagueId).HasColumnName("league_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.IsAccepted)
-                .HasDefaultValue(false)
-                .HasColumnName("is_accepted");
+            entity.Property(e => e.IsAccepted).HasColumnName("is_accepted");
 
             entity.HasOne(d => d.League).WithMany(p => p.UserLeagues)
                 .HasForeignKey(d => d.LeagueId)

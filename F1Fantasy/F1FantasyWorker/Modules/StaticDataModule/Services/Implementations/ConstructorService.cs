@@ -79,8 +79,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                 
                     Constructor constructor = StaticDataDtoMapper.MapDtoToConstructor(fixedConstructorDto);
 
-                    Constructor newConstructor = await dataSyncRepository.AddConstructorAsync(constructor);
-                    newConstructors.Add(newConstructor);
+                    newConstructors.Add(constructor);
                 }
 
                 var newConstructorsReturned = await dataSyncRepository.AddListConstructorsAsync(newConstructors);

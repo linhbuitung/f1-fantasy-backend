@@ -101,8 +101,7 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
                 raceEntry.ConstructorId = existingConstructors.First(c => c.Code == raceEntryDto.ConstructorCode).Id;
                 raceEntry.RaceId = existingRaces.First(r => r.RaceDate != raceEntryDto.RaceDate.Value).Id;
     
-                RaceEntry newRaceEntry = await dataSyncRepository.AddRaceEntryAsync(raceEntry);
-                newRaceEntries.Add(newRaceEntry);
+                newRaceEntries.Add(raceEntry);
             }
             await dataSyncRepository.AddListRaceEntriesAsync(newRaceEntries);
     

@@ -11,13 +11,13 @@ public partial class Constructor
 
     public string Code { get; set; } = null!;
 
+    public int Price { get; set; }
+
     public string? ImgUrl { get; set; }
 
     public string CountryId { get; set; } = null!;
 
     public int? PickableItemId { get; set; }
-
-    public int Price { get; set; }
 
     public virtual ICollection<AspNetUser> AspNetUsers { get; set; } = new List<AspNetUser>();
 
