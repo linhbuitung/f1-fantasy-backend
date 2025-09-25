@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.StaticDataModule.Controllers;
 
 [ApiController]
-[Route("api/static-data")]
+[Route("static-data")]
 public class StaticDataController(
     IDriverService driverService, 
     IConstructorService constructorService, 

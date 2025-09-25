@@ -36,7 +36,7 @@ public static class AuthMinimalApiMapper
         // We'll figure out a unique endpoint name based on the final route pattern during endpoint generation.
         string? confirmEmailEndpointName = null;
 
-        var routeGroup = endpoints.MapGroup("/api");
+        var routeGroup = endpoints.MapGroup("");
 
         // NOTE: We cannot inject UserManager<ApplicationUser> directly because the ApplicationUser generic parameter is currently unsupported by RDG.
         routeGroup.MapPost("/register", async Task<Results<Ok, ValidationProblem>>
