@@ -13,7 +13,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         catch (NotFoundException ex)
         {
             logger.LogError(ex, "Not found exception");
-            context.Response.StatusCode = 400;
+            context.Response.StatusCode = 404;
             context.Response.ContentType = "application/json";
             var errorResponse = new
             {

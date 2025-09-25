@@ -78,16 +78,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = ".F1Fantasy.Identity";
 });
 
-if (builder.Environment.IsDevelopment())
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    builder.Services.ConfigureApplicationCookie(options =>
-    {
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    });
-}
-
-
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddControllers();
 
