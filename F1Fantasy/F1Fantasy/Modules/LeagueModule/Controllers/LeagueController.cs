@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace F1Fantasy.Modules.LeagueModule.Controllers;
 
 [ApiController]
-[Route("api/user/{userId:int}")]
+[Route("user/{userId:int}")]
 public class LeagueController(
     IAuthorizationService authorizationService,
     ILeagueService leagueService)
@@ -46,7 +46,7 @@ public class LeagueController(
         return Ok();
     }
     
-    [HttpGet("/api/league/{leagueId:int}/")]
+    [HttpGet("/league/{leagueId:int}/")]
     public async Task<IActionResult> GetLeagueById(int leagueId, int pageNum = 1, int pageSize = 10)
     {
         var league = await leagueService.GetLeagueByIdAsync(leagueId, pageNum, pageSize);
@@ -65,7 +65,7 @@ public class LeagueController(
         return Ok(userLeague);
     }
     
-    [HttpGet("/api/league/{leagueId:int}/waiting-requests")]
+    [HttpGet("/league/{leagueId:int}/waiting-requests")]
     public async Task<IActionResult> GetJoinRequestsInLeagueById(int leagueId)
     {
         var userLeagues = await leagueService.GetAllWaitingJoinRequestsAsync(leagueId);

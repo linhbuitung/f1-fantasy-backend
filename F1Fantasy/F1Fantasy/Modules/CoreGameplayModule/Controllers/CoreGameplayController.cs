@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.CoreGameplayModule.Controllers;
 
 [ApiController]
-[Route("api/core")]
+[Route("core")]
 public class CoreGameplayController(
     IAuthorizationService authorizationService,
     ICoreGameplayService coreGameplayService)

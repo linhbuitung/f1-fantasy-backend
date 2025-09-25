@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.LeagueModule.Controllers;
 
 [ApiController]
-[Route("api/admin/{userId:int}")]
+[Route("admin/{userId:int}")]
 public class AdminLeagueController(
     IAuthorizationService authorizationService,
     ILeagueService leagueService)

@@ -3,7 +3,7 @@
 namespace F1Fantasy.Modules.CoreGameplayModule.Controllers;
 
 [ApiController]
-[Route("api/admin")]
+[Route("admin")]
 public class AdminCoreGameplayController
 {
     

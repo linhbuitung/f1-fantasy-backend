@@ -15,7 +15,7 @@ namespace F1Fantasy.Core.Common
     [Table("application_user")]
     public class ApplicationUser : IdentityUser<int>
     {
-        [MaxLength(100)]
+        [MaxLength(20)]
         public string? DisplayName { get; set; }
 
         [Column(TypeName = "date")]

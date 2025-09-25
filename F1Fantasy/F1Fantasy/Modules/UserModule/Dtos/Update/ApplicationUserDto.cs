@@ -8,7 +8,7 @@ public class ApplicationUserDto
 {
     [Required]
     public int Id { get; set; }
-    [MaxLength(100)]
+    [MaxLength(20)]
     public string? DisplayName { get; set; }
 
     [Column(TypeName = "date")]

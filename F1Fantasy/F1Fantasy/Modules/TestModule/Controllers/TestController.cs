@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.TestModule.Controllers;
 
 [ApiController]
-[Route("api/test")]
+[Route("test")]
 public class TestController(IAuthorizationService authorizationService) : ControllerBase
 {
     [HttpGet("health")]

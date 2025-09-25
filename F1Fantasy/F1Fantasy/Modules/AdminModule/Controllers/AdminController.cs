@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.AdminModule.Controllers;
 
 [ApiController]
-[Route("api/admin")]
+[Route("admin")]
 public class AdminController(
     IUserService userService,
     IAuthorizationService authorizationService,

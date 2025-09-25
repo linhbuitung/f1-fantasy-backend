@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace F1Fantasy.Modules.UserModule.Controllers;
 
 [ApiController]
-[Route("api/user")]
+[Route("user")]
 public class UserDetailController(IUserService userService, IAuthorizationService authorizationService)
     : ControllerBase
 {
