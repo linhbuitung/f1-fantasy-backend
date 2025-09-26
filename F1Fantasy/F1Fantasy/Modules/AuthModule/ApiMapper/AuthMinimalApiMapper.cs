@@ -83,6 +83,7 @@ public static class AuthMinimalApiMapper
             var fantasyLineupService = sp.GetRequiredService<IAuthExtensionService>();
             int currentYear = DateTime.UtcNow.Year;
             await fantasyLineupService.AddFantasyLineupForUserInSeasonAsync(user.Id, currentYear);
+            await fantasyLineupService.SetUserJoinDateAsync(user, DateOnly.FromDateTime(DateTime.UtcNow));
             
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();

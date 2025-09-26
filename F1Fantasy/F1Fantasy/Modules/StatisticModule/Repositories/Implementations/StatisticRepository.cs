@@ -1,0 +1,57 @@
+﻿using System.Text;
+using F1Fantasy.Infrastructure.Contexts;
+using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace F1Fantasy.Modules.StatisticModule.Repositories.Implementations;
+
+public class StatisticRepository(WooF1Context context) : IStatisticRepository
+{
+    public async Task<int> GetHighestScoreBySeasonIdAsync(int seasonId)
+    {
+        // Score from each user from the whole season
+        return await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId)
+            .GroupBy(fl => fl.UserId)
+            .Select(g => g.Sum(fl => fl.PointsGained))
+            .MaxAsync();    
+    }
+
+    public async Task<double> GetAverageScoreBySeasonIdAsync(int seasonId)
+    {
+        // Average core from all user from the whole season
+        return await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId 
+                         && fl.Race.DeadlineDate > fl.User.JoinDate)
+            .GroupBy(fl => fl.UserId)
+            .Select(g => g.Sum(fl => fl.PointsGained))
+            .AverageAsync();
+    }
+    
+
+    public async Task<string> GetMostPickedDriverAsync(int seasonId)
+    {
+        var mostPickedDriverId = await context.FantasyLineupDrivers
+            .Where(fld => fld.FantasyLineup.Race.SeasonId == seasonId)
+            .GroupBy(fld => fld.DriverId)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .FirstOrDefaultAsync();
+        
+        var mostPickedDriver =await context.Drivers.FirstOrDefaultAsync(d => d.Id == mostPickedDriverId);
+
+        if (mostPickedDriver == null)
+        {
+            return "N/A";
+        }
+        return String.Concat(mostPickedDriver.GivenName, " ", mostPickedDriver.FamilyName);
+    }
+
+    public async Task<int> GetTotalTransfersBySeasonIdAsync(int seasonId)
+    {
+        return await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId)
+            .SumAsync(fl => fl.TransfersMade);
+    }
+
+}

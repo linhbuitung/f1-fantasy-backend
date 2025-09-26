@@ -65,7 +65,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             .AsSplitQuery()
             .Where(fl => fl.UserId == userId 
                          && fl.Race.SeasonId == activeSeason.Id 
-                         && fl.Race.RaceDate > DateOnly.FromDateTime(DateTime.Now))
+                         && fl.Race.RaceDate > DateOnly.FromDateTime(DateTime.UtcNow))
             .OrderBy(fl => fl.Race.RaceDate)
             .FirstOrDefaultAsync();
         
@@ -76,11 +76,12 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         List<int> constructorIds, 
         List<int> powerupIds, 
         FantasyLineup trackedFantasyLineup,
+        int captainDriverId,
         int maxDrivers,
         int maxConstructors)
     {
         RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds, powerupIds);
-        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, maxDrivers, maxConstructors);
+        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, captainDriverId, maxDrivers, maxConstructors);
         await context.SaveChangesAsync();
         return trackedFantasyLineup;
     }
@@ -110,6 +111,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         List<int> newDriverIds,
         List<int> newConstructorIds,
         List<int> newPowerupIds,
+        int captainDriverId,
         int maxDrivers,
         int maxConstructors)
     {
@@ -157,7 +159,8 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             trackedFantasyLineup.FantasyLineupDrivers.Add(new FantasyLineupDriver
             {
                 FantasyLineupId = trackedFantasyLineup.Id,
-                DriverId = driverId
+                DriverId = driverId,
+                IsCaptain = false
             });
         }
         
@@ -181,6 +184,12 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
 
         #endregion
 
+        #region Add captain
+            foreach (var fantasyLineupDriver in trackedFantasyLineup.FantasyLineupDrivers)
+            {
+                fantasyLineupDriver.IsCaptain = fantasyLineupDriver.DriverId == captainDriverId;
+            }
+        #endregion
     }
 
     public async Task ResetFantasyLineupsBySeasonAsync(Season season)

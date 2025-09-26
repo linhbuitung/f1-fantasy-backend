@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using F1Fantasy.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace F1Fantasy.Infrastructure.Migrations
 {
     [DbContext(typeof(WooF1Context))]
-    partial class WooF1ContextModelSnapshot : ModelSnapshot
+    [Migration("20250926085001_AddCaptainToDriverInLineup")]
+    partial class AddCaptainToDriverInLineup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -248,10 +251,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
-
-                    b.Property<DateOnly>("JoinDate")
-                        .HasColumnType("date")
-                        .HasColumnName("join_date");
 
                     b.Property<DateTime?>("LastActiveAt")
                         .HasColumnType("timestamp with time zone")

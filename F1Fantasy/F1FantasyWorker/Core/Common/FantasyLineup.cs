@@ -17,6 +17,8 @@ public partial class FantasyLineup
 
     public int RaceId { get; set; }
 
+    public virtual ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; } = new List<FantasyLineupDriver>();
+
     public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; } = new List<PowerupFantasyLineup>();
 
     public virtual Race Race { get; set; } = null!;
@@ -24,6 +26,4 @@ public partial class FantasyLineup
     public virtual AspNetUser User { get; set; } = null!;
 
     public virtual ICollection<Constructor> Constructors { get; set; } = new List<Constructor>();
-
-    public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
 }

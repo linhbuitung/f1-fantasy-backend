@@ -12,6 +12,9 @@ namespace F1Fantasy.Core.Common
         [Key, Column(Order = 2)]
         public int DriverId { get; set; }
         
+        [Required]
+        public bool IsCaptain { get; set; }
+        
         [ForeignKey(nameof(FantasyLineupId))]
         public virtual FantasyLineup FantasyLineup { get; set; }
         

@@ -42,6 +42,10 @@ using F1Fantasy.Modules.UserModule.Services.Implementations;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
 using F1Fantasy.Infrastructure.Extensions;
+using F1Fantasy.Modules.StatisticModule.Repositories.Implementations;
+using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
+using F1Fantasy.Modules.StatisticModule.Services.Implementations;
+using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
 
 var root = Directory.GetCurrentDirectory();
 var dotenv = Path.Combine(root, ".env");
@@ -229,6 +233,9 @@ public static class ServiceExtensions
         
         services.AddScoped<IAskAIService, AskAiService>();
         services.AddScoped<IAskAiRepository, AskAiRepository>();
+        
+        services.AddScoped<IStatisticService, StatisticService>();
+        services.AddScoped<IStatisticRepository, StatisticRepository>();
         
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
     }

@@ -2,7 +2,7 @@
 
 public class SeasonDto
 {
-    public int? Id { get; set; }
+    public int Id { get; set; }
     
     public int Year { get; set; }
     

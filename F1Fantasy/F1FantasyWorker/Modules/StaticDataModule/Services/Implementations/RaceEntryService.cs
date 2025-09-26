@@ -76,7 +76,7 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
             var existingConstructors = await dataSyncRepository.GetAllConstructorsAsync();
             var existingRaces = await dataSyncRepository.GetAllRacesAsync();
             
-            var existingRaceEntries = await dataSyncRepository.GetAllRaceEntriesBySeasonYearAsync(DateTime.Now.Year);
+            var existingRaceEntries = await dataSyncRepository.GetAllRaceEntriesBySeasonYearAsync(DateTime.UtcNow.Year);
             var newRaceEntries = new List<RaceEntry>();
             foreach (var raceEntryDto in raceEntryDtos)
             {

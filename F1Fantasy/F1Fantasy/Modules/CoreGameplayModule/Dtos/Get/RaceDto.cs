@@ -3,7 +3,8 @@
 namespace F1Fantasy.Modules.CoreGameplayModule.Dtos.Get;
 
 public class RaceDto
-{
+{    
+    [Required]
     public int Id { get; set; }
 
     [Required]

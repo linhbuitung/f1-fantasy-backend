@@ -9,6 +9,8 @@ public partial class FantasyLineupDriver
 
     public int DriverId { get; set; }
 
+    public bool IsCaptain { get; set; }
+
     public virtual Driver Driver { get; set; } = null!;
 
     public virtual FantasyLineup FantasyLineup { get; set; } = null!;

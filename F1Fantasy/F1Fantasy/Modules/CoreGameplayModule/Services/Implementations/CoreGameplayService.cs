@@ -51,6 +51,8 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             throw new NotFoundException("Fantasy lineup not found");
         }
         
+        
+        
         using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
@@ -70,6 +72,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
                 fantasyLineupDto.ConstructorIds, 
                 fantasyLineupDto.PowerupIds, 
                 trackedFantasyLineup,
+                fantasyLineupDto.CaptainDriverId,
                 maxDrivers,
                 maxConstructors);
             
@@ -131,6 +134,10 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
     
     private void PreValidateFantasyLineupConnections(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
+        if (!fantasyLineupDto.DriverIds.Contains(fantasyLineupDto.CaptainDriverId))
+        {
+            throw new Exception("Captain driver must be one of the selected drivers");
+        }
         // Maximum 5 drivers, 2 constructors
         if (fantasyLineupDto.DriverIds.Count > 5)
         {
@@ -156,6 +163,14 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         if (nonExistingPowerups.Result.Any())
         {
             throw new NotFoundException($"The following powerup ids do not exist: {string.Join(", ", nonExistingPowerups.Result)}");
+        }
+    }
+
+    private void PreValidateFantasyLineupDeadlie(FantasyLineup fantasyLineup)
+    {
+        if (fantasyLineup.Race.DeadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            throw new Exception("The deadline for this fantasy lineup has passed");
         }
     }
 
@@ -192,5 +207,15 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             throw new NotFoundException("There is no finished race yet.");
         }
         return CoreGameplayDtoMapper.MapRaceToDto(latestFinishedRace);
+    }
+
+    public async Task<RaceResultDto> GetLatestFinishedRaceResultAsync()
+    {
+        Race ? latestFinishedRaceWithResult = await coreGameplayRepository.GetLatestFinishedRaceResultAsync();
+        if (latestFinishedRaceWithResult == null)
+        {
+            throw new NotFoundException("There is no finished race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceResultToDto(latestFinishedRaceWithResult);
     }
 }

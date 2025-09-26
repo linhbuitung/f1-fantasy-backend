@@ -64,4 +64,40 @@ public class CoreGameplayDtoMapper
             CircuitName = race.Circuit.CircuitName
         };
     }
+
+    public static Get.RaceResultDto MapRaceResultToDto(Race race)
+    {
+        return new Get.RaceResultDto
+        { 
+            Race = {
+            Id = race.Id,
+            Round = race.Round,
+            RaceDate = race.RaceDate,
+            DeadlineDate = race.DeadlineDate,
+            Calculated = race.Calculated,
+            SeasonYear = race.Season.Year,
+            CircuitId = race.CircuitId,
+            CircuitCode = race.Circuit.Code,
+            CircuitName = race.Circuit.CircuitName
+            },
+            DriverResults = race.RaceEntries.Select(re => new Get.DriverRaceResultDto
+            {
+                Id = re.Driver.Id,
+                GivenName = re.Driver.GivenName,
+                FamilyName = re.Driver.FamilyName,
+                Code = re.Driver.Code,
+                PointGained = re.PointsGained,
+                ImgUrl = re.Driver.ImgUrl
+            }).ToList(),
+            ConstructorResults = race.RaceEntries.Select(re=> new Get.ConstructorRaceResultDto
+            {
+                Id = re.Constructor.Id,
+                Name = re.Constructor.Name,
+                Code = re.Constructor.Code,
+                PointGained = re.PointsGained,
+                ImgUrl = re.Constructor.ImgUrl
+            }).ToList()
+        };
+        
+    }
 }

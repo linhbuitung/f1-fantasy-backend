@@ -11,4 +11,6 @@ public interface ICoreGameplayService
     Task ResetFantasyLineupsBySeasonYearAsync(int year);
     
     Task<RaceDto> GetLatestFinishedRaceAsync();
+    
+    Task<RaceResultDto> GetLatestFinishedRaceResultAsync();
 }

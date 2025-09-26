@@ -40,4 +40,23 @@ public class AuthExtensionService(WooF1Context context, IAuthExtensionRepository
             throw;
         }
     }
+
+    public async Task SetUserJoinDateAsync(ApplicationUser user, DateOnly date)
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            user.JoinDate = date;
+            await context.SaveChangesAsync();
+            
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error setting join date: {ex.Message}");
+            throw;
+        }
+    }
+
 }

@@ -16,6 +16,7 @@ public interface IFantasyLineupRepository
         List<int> constructorIds, 
         List<int> powerupIds, 
         FantasyLineup trackedFantasyLineup,
+        int captainDriverId,
         int maxDrivers,
         int maxConstructors);
 

@@ -69,4 +69,13 @@ public class CoreGameplayController(
 
         return Ok(raceDto);
     }
+    
+            
+    [HttpGet("race/latest-finished/result")]
+    public async Task<IActionResult> GetLatestFinishedRaceResult()
+    {
+        var raceDto = await coreGameplayService.GetLatestFinishedRaceResultAsync();
+
+        return Ok(raceDto);
+    }
 }

@@ -156,7 +156,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 
                 // Add fantasy lineups for all users for current season
                 logger.LogInformation("Start adding fantasy lineups for all users in current season");
-                await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.Now.Year);
+                await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.UtcNow.Year);
                 logger.LogInformation("Database synced with new fantasy lineups");
                 
                 // Sync race entries
@@ -200,8 +200,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 // Calculate points for all users in latest race
                 logger.LogInformation("Start calculating point gained for all users in latest");
                 var calculatedRace = await coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
-                logger.LogInformation("Database calculated point gained for all users in latest race.");
-                
+                if (calculatedRace == null)
+                {
+                    logger.LogInformation("No points were calculated as there is no newly finished race"); 
+                }
+                else
+                {
+                    logger.LogInformation("Database calculated point gained for all users in latest race.");
+                }
+
                 // Migrate fantasy lineups to next race
                 if (calculatedRace != null)
                 {
@@ -360,7 +367,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             
             // Add fantasy lineups for all users for current season
             logger.LogInformation("Start adding fantasy lineups for all users in current season");
-            await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.Now.Year);
+            await fantasyLineupService.AddFantasyLineupForAllUsersInASeasonAsync(DateTime.UtcNow.Year);
             logger.LogInformation("Database synced with new fantasy lineups");
             
             // Sync race entries

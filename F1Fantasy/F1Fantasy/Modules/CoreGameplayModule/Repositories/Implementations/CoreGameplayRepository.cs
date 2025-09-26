@@ -82,9 +82,24 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
     public async Task<Race?> GetLatestFinishedRaceAsync()
     {
         return await context.Races
-            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.Now))
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
             .Include(r => r.Circuit)
             .Include(r => r.Season)
+            .AsNoTracking()
+            .OrderByDescending(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
+    
+    public async Task<Race?> GetLatestFinishedRaceResultAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .Include(r => r.RaceEntries)
+            .ThenInclude(re => re.Driver)
+            .Include(r => r.RaceEntries)
+            .ThenInclude(re => re.Constructor)
             .AsNoTracking()
             .OrderByDescending(r => r.RaceDate)
             .FirstOrDefaultAsync();
