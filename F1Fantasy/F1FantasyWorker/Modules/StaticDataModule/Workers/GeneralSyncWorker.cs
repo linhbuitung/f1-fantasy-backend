@@ -147,7 +147,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<RaceDto> newRaceDtos = new List<RaceDto>();
                 foreach (var tempRace in newTempRaces)
                 {
-                    newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
+                    newRaceDtos.Add(new RaceDto(id: null,tempRace.RaceName, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
                 }
 
                 await raceService.AddListRacesAsync(newRaceDtos);
@@ -358,7 +358,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             List<RaceDto> newRaceDtos = new List<RaceDto>();
             foreach (var tempRace in newTempRaces)
             {
-                newRaceDtos.Add(new RaceDto(id: null, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
+                newRaceDtos.Add(new RaceDto(id: null,tempRace.RaceName, tempRace.Date, tempRace.Round, tempRace.Date.AddDays(-2), false, seasonId: null, circuitId: null, tempRace.Circuit.CircuitId));
             }
 
             await raceService.AddListRacesAsync(newRaceDtos);

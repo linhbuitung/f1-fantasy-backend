@@ -84,9 +84,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Dtos.Mapper
 
         public static Race MapDtoToRace(RaceDto raceDto)
         {
-            return new Race()
+            return new Race
             {
                 RaceDate = raceDto.RaceDate,
+                RaceName = raceDto.RaceName,
                 Round = raceDto.Round,
                 Calculated = raceDto.Calculated,
                 SeasonId = raceDto.SeasonId ?? 0, // Default to 0 if SeasonId is null

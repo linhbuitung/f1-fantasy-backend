@@ -6,6 +6,9 @@ public class RaceDto
 {    
     [Required]
     public int Id { get; set; }
+    
+    [Required]
+    public string RaceName { get; set; }
 
     [Required]
     public int Round { get; set; }

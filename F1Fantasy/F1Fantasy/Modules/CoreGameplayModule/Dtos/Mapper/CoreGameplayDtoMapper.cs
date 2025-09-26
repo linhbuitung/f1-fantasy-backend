@@ -54,6 +54,7 @@ public class CoreGameplayDtoMapper
         return new Get.RaceDto
         {
             Id = race.Id,
+            RaceName = race.RaceName,
             Round = race.Round,
             RaceDate = race.RaceDate,
             DeadlineDate = race.DeadlineDate,
@@ -71,6 +72,7 @@ public class CoreGameplayDtoMapper
         { 
             Race = {
             Id = race.Id,
+            RaceName = race.RaceName,
             Round = race.Round,
             RaceDate = race.RaceDate,
             DeadlineDate = race.DeadlineDate,

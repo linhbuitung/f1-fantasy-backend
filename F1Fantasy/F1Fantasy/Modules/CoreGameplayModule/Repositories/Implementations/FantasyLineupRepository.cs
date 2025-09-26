@@ -76,7 +76,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         List<int> constructorIds, 
         List<int> powerupIds, 
         FantasyLineup trackedFantasyLineup,
-        int captainDriverId,
+        int? captainDriverId,
         int maxDrivers,
         int maxConstructors)
     {
@@ -111,7 +111,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         List<int> newDriverIds,
         List<int> newConstructorIds,
         List<int> newPowerupIds,
-        int captainDriverId,
+        int? captainDriverId,
         int maxDrivers,
         int maxConstructors)
     {
@@ -185,10 +185,14 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         #endregion
 
         #region Add captain
+
+        if (captainDriverId != null)
+        {
             foreach (var fantasyLineupDriver in trackedFantasyLineup.FantasyLineupDrivers)
             {
                 fantasyLineupDriver.IsCaptain = fantasyLineupDriver.DriverId == captainDriverId;
             }
+        }
         #endregion
     }
 

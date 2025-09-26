@@ -7,7 +7,7 @@ public class UserGeneralSeasonStatisticDto
 
 public class BestRaceWeekDto
 {
-    public int Id { get; set; }
+    public int FantasyLineupId { get; set; }
     
     public int Round { get; set; }
     

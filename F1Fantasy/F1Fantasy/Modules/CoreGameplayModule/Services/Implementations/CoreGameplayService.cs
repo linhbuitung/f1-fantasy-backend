@@ -50,8 +50,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException("Fantasy lineup not found");
         }
-        
-        
+        PreValidateFantasyLineupDeadline(trackedFantasyLineup);
         
         using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -72,7 +71,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
                 fantasyLineupDto.ConstructorIds, 
                 fantasyLineupDto.PowerupIds, 
                 trackedFantasyLineup,
-                fantasyLineupDto.CaptainDriverId,
+                fantasyLineupDto.CaptainDriverId ?? null,
                 maxDrivers,
                 maxConstructors);
             
@@ -134,7 +133,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
     
     private void PreValidateFantasyLineupConnections(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
-        if (!fantasyLineupDto.DriverIds.Contains(fantasyLineupDto.CaptainDriverId))
+        if (fantasyLineupDto.CaptainDriverId != null && !fantasyLineupDto.DriverIds.Contains((int)fantasyLineupDto.CaptainDriverId))
         {
             throw new Exception("Captain driver must be one of the selected drivers");
         }
@@ -166,7 +165,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
     }
 
-    private void PreValidateFantasyLineupDeadlie(FantasyLineup fantasyLineup)
+    private void PreValidateFantasyLineupDeadline(FantasyLineup fantasyLineup)
     {
         if (fantasyLineup.Race.DeadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
         {

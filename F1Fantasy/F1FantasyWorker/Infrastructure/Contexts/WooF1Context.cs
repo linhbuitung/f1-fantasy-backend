@@ -634,6 +634,10 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DeadlineDate).HasColumnName("deadline_date");
             entity.Property(e => e.RaceDate).HasColumnName("race_date");
+            entity.Property(e => e.RaceName)
+                .HasMaxLength(300)
+                .HasDefaultValueSql("''::character varying")
+                .HasColumnName("race_name");
             entity.Property(e => e.Round).HasColumnName("round");
             entity.Property(e => e.SeasonId).HasColumnName("season_id");
 
