@@ -104,4 +104,24 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
             .OrderByDescending(r => r.RaceDate)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<Race?> GetLatestRaceAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .OrderByDescending(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<Race?> GetCurrentRaceAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .OrderBy(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
 }

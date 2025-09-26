@@ -13,4 +13,7 @@ public interface ICoreGameplayService
     Task<RaceDto> GetLatestFinishedRaceAsync();
     
     Task<RaceResultDto> GetLatestFinishedRaceResultAsync();
+    
+    Task<RaceDto> GetLatestRaceAsync();
+    Task<RaceDto> GetCurrentRaceAsync();
 }

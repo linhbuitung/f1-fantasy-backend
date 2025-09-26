@@ -21,4 +21,8 @@ public interface ICoreGameplayRepository
     Task<Race?> GetLatestFinishedRaceAsync();
     
     Task<Race?> GetLatestFinishedRaceResultAsync();
+    
+    Task<Race?> GetLatestRaceAsync();
+    
+    Task<Race?> GetCurrentRaceAsync();
 }

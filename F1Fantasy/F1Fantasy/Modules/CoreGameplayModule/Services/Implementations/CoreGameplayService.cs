@@ -217,4 +217,23 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
         return CoreGameplayDtoMapper.MapRaceResultToDto(latestFinishedRaceWithResult);
     }
+
+    public async Task<RaceDto> GetLatestRaceAsync()
+    {
+        var latestRace = await coreGameplayRepository.GetLatestRaceAsync();
+        if (latestRace == null)
+        {
+            throw new NotFoundException("There is no latest race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceToDto(latestRace);
+    }
+    public async Task<RaceDto> GetCurrentRaceAsync()
+    {
+        var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
+        if (currentRace == null)
+        {
+            throw new NotFoundException("There is no current race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceToDto(currentRace);
+    }
 }

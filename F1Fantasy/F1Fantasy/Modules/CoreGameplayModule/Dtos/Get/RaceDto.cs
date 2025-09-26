@@ -25,9 +25,5 @@ public class RaceDto
 
     public int SeasonYear { get; set; }
 
-    public int CircuitId { get; set; }
-    
-    public string CircuitName { get; set; }
-
-    public string CircuitCode { get; set; }
+    public CircuitDto Circuit { get; set; }
 }

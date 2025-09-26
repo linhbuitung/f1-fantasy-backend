@@ -411,8 +411,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             // Calculate points for all users in latest race
             logger.LogInformation("Start calculating point gained for all users in latest");
             var calculatedRace = await coreGameplayService.CalculatePointsForAllUsersInLastestFinishedRaceAsync();
-            logger.LogInformation("Database calculated point gained for all users in latest race.");
-            
+            logger.LogInformation(calculatedRace == null
+                ? "No points were calculated"
+                : "Database calculated point gained for all users in latest race.");
+
             // Migrate fantasy lineups to next race
             if (calculatedRace != null)
             {

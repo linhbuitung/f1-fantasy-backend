@@ -78,4 +78,22 @@ public class CoreGameplayController(
 
         return Ok(raceDto);
     }
+    
+    [HttpGet("race/current")]
+    public async Task<IActionResult> GetCurrentRace()
+    {
+        var raceDto = await coreGameplayService.GetCurrentRaceAsync();
+
+        return Ok(raceDto);
+    }
+    
+    [HttpGet("race/latest")]
+    public async Task<IActionResult> GetLatestRace()
+    {
+        var raceDto = await coreGameplayService.GetLatestRaceAsync();
+
+        return Ok(raceDto);
+    }
+    
+    
 }

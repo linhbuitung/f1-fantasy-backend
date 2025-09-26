@@ -29,7 +29,6 @@ public class CoreGameplayService(
           try
           {
                var lastestFinishedRace = GetLatestFinishedRaceInCurrentSeasonWithResultAsync().Result;
-               
                if(lastestFinishedRace == null || lastestFinishedRace.Calculated) return null;
                
                // Ensure its at least a day currently after the race date

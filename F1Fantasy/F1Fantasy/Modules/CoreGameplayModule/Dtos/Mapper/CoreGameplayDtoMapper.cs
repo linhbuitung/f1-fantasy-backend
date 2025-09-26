@@ -60,9 +60,16 @@ public class CoreGameplayDtoMapper
             DeadlineDate = race.DeadlineDate,
             Calculated = race.Calculated,
             SeasonYear = race.Season.Year,
-            CircuitId = race.CircuitId,
-            CircuitCode = race.Circuit.Code,
-            CircuitName = race.Circuit.CircuitName
+            Circuit = new Get.CircuitDto
+            {
+                Id = race.Circuit.Id,
+                CircuitName = race.Circuit.CircuitName,
+                Code = race.Circuit.Code,
+                Latitude = race.Circuit.Latitude,
+                Longitude = race.Circuit.Longitude,
+                CountryId = race.Circuit.CountryId,
+                ImgUrl = race.Circuit.ImgUrl,
+            }
         };
     }
 
@@ -78,9 +85,16 @@ public class CoreGameplayDtoMapper
             DeadlineDate = race.DeadlineDate,
             Calculated = race.Calculated,
             SeasonYear = race.Season.Year,
-            CircuitId = race.CircuitId,
-            CircuitCode = race.Circuit.Code,
-            CircuitName = race.Circuit.CircuitName
+            Circuit = new Get.CircuitDto
+            {
+                Id = race.Circuit.Id,
+                CircuitName = race.Circuit.CircuitName,
+                Code = race.Circuit.Code,
+                Latitude = race.Circuit.Latitude,
+                Longitude = race.Circuit.Longitude,
+                CountryId = race.Circuit.CountryId,
+                ImgUrl = race.Circuit.ImgUrl,
+            }
             },
             DriverResults = race.RaceEntries.Select(re => new Get.DriverRaceResultDto
             {
