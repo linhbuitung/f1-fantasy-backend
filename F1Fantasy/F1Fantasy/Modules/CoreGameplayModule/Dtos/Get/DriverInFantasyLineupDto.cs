@@ -14,6 +14,9 @@ public class DriverInFantasyLineupDto
     public string FamilyName { get; set; }
 
     [Required]
+    public bool IsCaptain { get; set; }
+    
+    [Required]
     public DateOnly DateOfBirth { get; set; }
 
     [Required, MaxLength(200)]

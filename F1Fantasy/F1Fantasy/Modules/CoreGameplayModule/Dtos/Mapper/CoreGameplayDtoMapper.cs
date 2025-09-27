@@ -14,17 +14,18 @@ public class CoreGameplayDtoMapper
             PointsGained = fantasyLineup.PointsGained,
             UserId = fantasyLineup.UserId,
             RaceId = fantasyLineup.RaceId,
-            Drivers = fantasyLineup.FantasyLineupDrivers.Select(fld => fld.Driver)
+            Drivers = fantasyLineup.FantasyLineupDrivers.Select(fld => new { fld.Driver, fld.IsCaptain })
                           .Select(d => new Get.DriverInFantasyLineupDto
                           {
-                              Id = d.Id,
-                              GivenName = d.GivenName,
-                              FamilyName = d.FamilyName,
-                              DateOfBirth = d.DateOfBirth,
-                              CountryId = d.CountryId,
-                              Code = d.Code,
-                              Price = d.Price,
-                              ImgUrl = d.ImgUrl
+                              Id = d.Driver.Id,
+                              GivenName = d.Driver.GivenName,
+                              FamilyName = d.Driver.FamilyName,
+                              IsCaptain = d.IsCaptain,
+                              DateOfBirth = d.Driver.DateOfBirth,
+                              CountryId = d.Driver.CountryId,
+                              Code = d.Driver.Code,
+                              Price = d.Driver.Price,
+                              ImgUrl = d.Driver.ImgUrl
                           })
                           .ToList(),
             Constructors = fantasyLineup.FantasyLineupConstructors.Select(flc => flc.Constructor)
@@ -114,6 +115,16 @@ public class CoreGameplayDtoMapper
                 ImgUrl = re.Constructor.ImgUrl
             }).ToList()
         };
-        
+    }
+    
+    public static Get.PowerupDto MapPowerupToGetDto(Powerup powerup)
+    {
+        return new Get.PowerupDto
+        {
+            Id = powerup.Id,
+            Type = powerup.Type,
+            Description = powerup.Description,
+            ImgUrl = powerup.ImgUrl
+        };
     }
 }

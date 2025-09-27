@@ -124,4 +124,16 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
             .OrderBy(r => r.RaceDate)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<List<Powerup>> GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(int userId, Race currentRace)
+    {
+        
+        return await context.Powerups
+            .Include(p => p.PowerupFantasyLineups)
+            .Where(p => p.PowerupFantasyLineups.Any(pf => pf.FantasyLineup.UserId == userId
+                                                          && pf.FantasyLineup.Race.SeasonId == currentRace.SeasonId
+                                                          && pf.FantasyLineup.Race.RaceDate < currentRace.RaceDate))
+            .ToListAsync();
+
+    }
 }

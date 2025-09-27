@@ -94,6 +94,13 @@ public class CoreGameplayController(
 
         return Ok(raceDto);
     }
-    
-    
+
+
+    [HttpGet("powerup/used/user/{userId:int}")]
+    public async Task<IActionResult> GetAllUsedPowerupInCurrentSeasonBeforeCurrentRace(int userId)
+    {
+        var powerupDtos = await coreGameplayService.GetUsedPowerupsBeforeCurrentRaceByUserInASeasonAsync(userId);
+
+        return Ok(powerupDtos);
+    }
 }

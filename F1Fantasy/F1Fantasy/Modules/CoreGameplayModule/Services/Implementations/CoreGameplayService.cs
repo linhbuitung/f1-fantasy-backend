@@ -236,4 +236,16 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
         return CoreGameplayDtoMapper.MapRaceToDto(currentRace);
     }
+
+    public async Task<List<PowerupDto>> GetUsedPowerupsBeforeCurrentRaceByUserInASeasonAsync(int userId)
+    {
+        var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
+        if (currentRace == null)
+        {
+            throw new NotFoundException("There is no current race yet.");
+        }
+        var powerups = await coreGameplayRepository.GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(userId, currentRace);
+        return powerups.Select(CoreGameplayDtoMapper.MapPowerupToGetDto).ToList();
+    }
+
 }

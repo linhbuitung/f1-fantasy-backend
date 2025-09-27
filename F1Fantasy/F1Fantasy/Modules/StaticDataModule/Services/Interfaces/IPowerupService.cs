@@ -11,4 +11,6 @@ public interface IPowerupService
     Task<PowerupDto> GetPowerupByIdAsync(int id);
 
     Task<PowerupDto> GetPowerupByTypeAsync(string type);
+    
+    Task<List<PowerupDto>> GetAllPowerupsAsync();
 }

@@ -25,4 +25,6 @@ public interface ICoreGameplayRepository
     Task<Race?> GetLatestRaceAsync();
     
     Task<Race?> GetCurrentRaceAsync();
+    
+    Task<List<Powerup>> GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(int userId, Race currentRace);
 }

@@ -71,4 +71,10 @@ public class PowerupService(IStaticDataRepository staticDataRepository, WooF1Con
         }
         return StaticDataDtoMapper.MapPowerupToDto(powerup);
     }
+
+    public async Task<List<PowerupDto>> GetAllPowerupsAsync()
+    {
+        List<Powerup> powerups = await staticDataRepository.GetAllPowerupsAsync();
+        return powerups.Select(StaticDataDtoMapper.MapPowerupToDto).ToList();
+    }
 }

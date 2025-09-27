@@ -148,6 +148,11 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await context.Powerups.AsNoTracking().FirstOrDefaultAsync(p => p.Type.Equals(type));
         }
         
+        public async Task<List<Powerup>> GetAllPowerupsAsync()
+        {
+            return await context.Powerups.AsNoTracking().ToListAsync();
+        }
+        
         public async Task<Season> AddSeasonAsync(Season season)
         {
             context.Seasons.Add(season);

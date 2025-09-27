@@ -16,4 +16,6 @@ public interface ICoreGameplayService
     
     Task<RaceDto> GetLatestRaceAsync();
     Task<RaceDto> GetCurrentRaceAsync();
+    
+    Task<List<PowerupDto>> GetUsedPowerupsBeforeCurrentRaceByUserInASeasonAsync(int userId);
 }
