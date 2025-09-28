@@ -15,11 +15,17 @@ public class StatisticDtoMapper
         };
     }
     
-    public static Get.UserGeneralSeasonStatisticDto MapToUserGeneralSeasonStatisticDto(FantasyLineup fantasyLineup, int totalPointsGained)
+    public static Get.UserGeneralSeasonStatisticDto MapToUserGeneralSeasonStatisticDto(
+        FantasyLineup fantasyLineup, 
+        int totalPointsGained, 
+        int totalTransferMade,
+        int overallRank = 0)
     {
         return new Get.UserGeneralSeasonStatisticDto
         {
             TotalPointsGained = totalPointsGained,
+            TotalTransfersMade = totalTransferMade,
+            OverallRank = overallRank,
             BestRaceWeek = new Get.BestRaceWeekOfAnUserDto{
                 FantasyLineupId = fantasyLineup.Id,
                 RaceName = fantasyLineup.Race.RaceName,

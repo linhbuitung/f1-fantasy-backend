@@ -46,6 +46,7 @@ using F1Fantasy.Modules.StatisticModule.Repositories.Implementations;
 using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Services.Implementations;
 using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
+using Newtonsoft.Json.Converters;
 
 var root = Directory.GetCurrentDirectory();
 var dotenv = Path.Combine(root, ".env");
@@ -88,7 +89,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+});
 
 builder.Services.AddDbContext<WooF1Context>(options =>
     options.UseNpgsql(WooF1ContextFactory.GetConnectionString(),

@@ -136,4 +136,29 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
             .ToListAsync();
 
     }
+
+    public async Task<PowerupFantasyLineup> AddPowerupToFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup)
+    {
+
+        var powerupFantasyLineup = new PowerupFantasyLineup
+        {
+            FantasyLineupId = fantasyLineup.Id,
+            PowerupId = powerup.Id
+        };
+        context.PowerupFantasyLineups.Add(powerupFantasyLineup);
+        
+        await context.SaveChangesAsync();
+        return powerupFantasyLineup;
+    }
+    
+    public async Task RemovePowerupFromFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup)
+    {
+        var powerupFantasyLineup = await context.PowerupFantasyLineups
+            .FirstOrDefaultAsync(pfl => pfl.FantasyLineupId == fantasyLineup.Id && pfl.PowerupId == powerup.Id);
+        if (powerupFantasyLineup != null)
+        {
+            context.PowerupFantasyLineups.Remove(powerupFantasyLineup);
+            await context.SaveChangesAsync();
+        }
+    }
 }

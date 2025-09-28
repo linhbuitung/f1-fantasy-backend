@@ -68,7 +68,5 @@ namespace F1Fantasy.Core.Common
         public virtual ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
         public virtual ICollection<RaceEntry> RaceEntries { get; set; }
         public virtual ICollection<ApplicationUser> Users { get; set; }
-        
-        public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
     }
 }

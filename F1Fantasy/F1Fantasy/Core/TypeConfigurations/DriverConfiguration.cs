@@ -19,12 +19,6 @@ namespace F1Fantasy.Core.TypeConfigurations
                 .WithOne(re => re.Driver)
                 .HasForeignKey(re => re.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
-            entity.HasMany(d => d.PowerupFantasyLineups)
-                .WithOne(pf => pf.Driver)
-                .HasForeignKey(pf => pf.DriverId)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

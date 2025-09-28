@@ -30,7 +30,9 @@ public class StatisticService(IStatisticRepository statisticRepository, ICoreGam
         }
         
         var totalPoints = await statisticRepository.GetTotalPointOfAnUserBySeasonIdAsync(userId, seasonId);
-        return StatisticDtoMapper.MapToUserGeneralSeasonStatisticDto(bestFantasyLineup, totalPoints);
+        var totalTransfersMade = await statisticRepository.GetTotalTransfersOfAnUserBySeasonIdAsync(userId, seasonId);
+        var overallRank = await statisticRepository.GetOverallRankOfAnUserBySeasonIdAsync(userId, seasonId);
+        return StatisticDtoMapper.MapToUserGeneralSeasonStatisticDto(bestFantasyLineup, totalPoints, totalTransfersMade, overallRank);
     }
 
     public async Task<Dtos.Get.TeamOfTheRaceDto> GetTeamOfTheRaceByRaceIdAsync( RaceDto raceDto)

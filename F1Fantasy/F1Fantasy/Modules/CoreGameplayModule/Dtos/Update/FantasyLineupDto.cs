@@ -9,9 +9,9 @@ public class FantasyLineupDto
     
     public int? CaptainDriverId { get; set; }
 
-    public List<int> DriverIds { get; set; }
+    public required List<int> DriverIds { get; set; }
     
-    public List<int> ConstructorIds { get; set; }
+    public required List<int> ConstructorIds { get; set; }
     
-    public List<int> PowerupIds { get; set; }
+    public List<int>? PowerupIds { get; set; }
 }

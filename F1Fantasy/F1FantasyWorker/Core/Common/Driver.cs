@@ -33,7 +33,5 @@ public partial class Driver
 
     public virtual PickableItem? PickableItem { get; set; }
 
-    public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; } = new List<PowerupFantasyLineup>();
-
     public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
 }

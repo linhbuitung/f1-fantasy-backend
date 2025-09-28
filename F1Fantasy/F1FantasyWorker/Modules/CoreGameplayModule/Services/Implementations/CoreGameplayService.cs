@@ -67,15 +67,23 @@ public class CoreGameplayService(
                     
                     // Create dictionary to hold driverId and points
                     var pointFromOwnedDriversInLineUp = new Dictionary<int, int>();
-                    foreach (var driverId in lineup.FantasyLineupDrivers.Select(ld => ld.DriverId))
+                    foreach (var driver in lineup.FantasyLineupDrivers)
                     {
-                         if (driverPoints.TryGetValue(driverId, out var points))
+                         if (driverPoints.TryGetValue(driver.DriverId, out var points))
                          {
-                              pointFromOwnedDriversInLineUp.Add(driverId, points);
+                              // x2 points if the driver is captain
+                              if (driver.IsCaptain)
+                              {
+                                   pointFromOwnedDriversInLineUp.Add(driver.DriverId, points*2);
+                              }
+                              else
+                              {
+                                   pointFromOwnedDriversInLineUp.Add(driver.DriverId, points);
+                              }
                          }
                          else
                          {
-                              pointFromOwnedDriversInLineUp.Add(driverId, 0);
+                              pointFromOwnedDriversInLineUp.Add(driver.DriverId, 0);
                          }
                     }
                     
@@ -126,12 +134,12 @@ public class CoreGameplayService(
                     }
                     
                     // Load powerups from fantasy lineup
-                    await context.Entry(lineup).Collection(l => l.PowerupFantasyLineups).LoadAsync();
+                    await context.Entry(lineup).Collection(l => l.Powerups).LoadAsync();
                     
                     // Get all powerups in the lineup by joining with powerups table
-                    var powerUpOwned = lineup.PowerupFantasyLineups
+                    var powerUpOwned = lineup.Powerups
                          .Join(powerupDtos,
-                              pl => pl.PowerupId,
+                              pl => pl.Id,
                               p => p.Id,
                               (pl, p) => CoreGameplayDtoMapper.MapToPowerupForPointApplicationDto(p, pl))
                          .ToList();
@@ -175,12 +183,11 @@ public class CoreGameplayService(
                switch (powerupUsed.Type)
                {
                     case "DRS Enabled":
-                    // Double the points of the driver from the id specified in the powerupUsed.TargetDriverId
-                         if (powerupUsed.DriverId == null) break;
-                         if (pointFromOwnedDriversInLineUp.ContainsKey(powerupUsed.DriverId.Value))
-                         {
-                              pointFromOwnedDriversInLineUp[powerupUsed.DriverId.Value] *= 2;
-                         }
+                    // Double the points of the driver with the highest points in the lineup
+                         if (pointFromOwnedDriversInLineUp.Count == 0) break;
+                         var maxPoint = pointFromOwnedDriversInLineUp.Values.Max();
+                         var driverIdWithMaxPoint = pointFromOwnedDriversInLineUp.FirstOrDefault(x => x.Value == maxPoint).Key;
+                         pointFromOwnedDriversInLineUp[driverIdWithMaxPoint] *= 2;
                          break;
                     case "Free Transfer Week":
                          // Add back the points deducted for transfers

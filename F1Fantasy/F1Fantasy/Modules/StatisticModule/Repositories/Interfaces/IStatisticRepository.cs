@@ -16,6 +16,10 @@ public interface IStatisticRepository
     
     Task<int> GetTotalPointOfAnUserBySeasonIdAsync(int userId, int seasonId);
     
+    Task<int> GetTotalTransfersOfAnUserBySeasonIdAsync(int userId, int seasonId);
+    
+    Task<int> GetOverallRankOfAnUserBySeasonIdAsync(int userId, int seasonId);
+
     Task<List<RaceEntry>> GetTopDriverRaceEntriesInARaceByRaceIdAsync(int raceId, int topN);
     
     Task<List<RaceEntry>> GetTopConstructorRaceEntriesInARaceByRaceIdAsync(int raceId, int topN);

@@ -27,4 +27,9 @@ public interface ICoreGameplayRepository
     Task<Race?> GetCurrentRaceAsync();
     
     Task<List<Powerup>> GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(int userId, Race currentRace);
+    
+    Task<PowerupFantasyLineup> AddPowerupToFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup);
+    
+    Task RemovePowerupFromFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup);
+
 }

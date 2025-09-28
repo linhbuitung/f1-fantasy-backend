@@ -73,6 +73,26 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .SumAsync(fl => fl.PointsGained);
     }
 
+    public async Task<int> GetTotalTransfersOfAnUserBySeasonIdAsync(int userId, int seasonId)
+    {
+        return await context.FantasyLineups
+            .Where(fl => fl.UserId == userId && fl.Race.SeasonId == seasonId)
+            .SumAsync(fl => fl.TransfersMade);
+    }
+
+    public async Task<int> GetOverallRankOfAnUserBySeasonIdAsync(int userId, int seasonId)
+    {
+        var userScores = await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId)
+            .GroupBy(fl => fl.UserId)
+            .Select(g => new { UserId = g.Key, TotalPoints = g.Sum(fl => fl.PointsGained) })
+            .OrderByDescending(x => x.TotalPoints)
+            .ToListAsync();
+
+        var rank = userScores.FindIndex(x => x.UserId == userId) + 1;
+        return rank > 0 ? rank : -1;
+    }
+    
     public async Task<List<RaceEntry>> GetTopDriverRaceEntriesInARaceByRaceIdAsync(int raceId, int topN)
     {
         return await context.RaceEntries
