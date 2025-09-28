@@ -50,6 +50,8 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
         Task<Powerup?> GetPowerupByIdAsync(int id);
 
         Task<Powerup?> GetPowerupByTypeAsync(string type);
+        
+        Task<List<Powerup>> GetAllPowerupsAsync();
 
         Task<Season> AddSeasonAsync(Season season);
 

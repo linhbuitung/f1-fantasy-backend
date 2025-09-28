@@ -82,11 +82,83 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
     public async Task<Race?> GetLatestFinishedRaceAsync()
     {
         return await context.Races
-            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.Now))
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
             .Include(r => r.Circuit)
             .Include(r => r.Season)
             .AsNoTracking()
             .OrderByDescending(r => r.RaceDate)
             .FirstOrDefaultAsync();
+    }
+    
+    public async Task<Race?> GetLatestFinishedRaceResultAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .Include(r => r.RaceEntries)
+            .ThenInclude(re => re.Driver)
+            .Include(r => r.RaceEntries)
+            .ThenInclude(re => re.Constructor)
+            .AsNoTracking()
+            .OrderByDescending(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<Race?> GetLatestRaceAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .OrderByDescending(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<Race?> GetCurrentRaceAsync()
+    {
+        return await context.Races
+            .Where(r => r.RaceDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Include(r => r.Circuit)
+            .Include(r => r.Season)
+            .OrderBy(r => r.RaceDate)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<Powerup>> GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(int userId, Race currentRace)
+    {
+        
+        return await context.Powerups
+            .Include(p => p.PowerupFantasyLineups)
+            .Where(p => p.PowerupFantasyLineups.Any(pf => pf.FantasyLineup.UserId == userId
+                                                          && pf.FantasyLineup.Race.SeasonId == currentRace.SeasonId
+                                                          && pf.FantasyLineup.Race.RaceDate < currentRace.RaceDate))
+            .ToListAsync();
+
+    }
+
+    public async Task<PowerupFantasyLineup> AddPowerupToFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup)
+    {
+
+        var powerupFantasyLineup = new PowerupFantasyLineup
+        {
+            FantasyLineupId = fantasyLineup.Id,
+            PowerupId = powerup.Id
+        };
+        context.PowerupFantasyLineups.Add(powerupFantasyLineup);
+        
+        await context.SaveChangesAsync();
+        return powerupFantasyLineup;
+    }
+    
+    public async Task RemovePowerupFromFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup)
+    {
+        var powerupFantasyLineup = await context.PowerupFantasyLineups
+            .FirstOrDefaultAsync(pfl => pfl.FantasyLineupId == fantasyLineup.Id && pfl.PowerupId == powerup.Id);
+        if (powerupFantasyLineup != null)
+        {
+            context.PowerupFantasyLineups.Remove(powerupFantasyLineup);
+            await context.SaveChangesAsync();
+        }
     }
 }

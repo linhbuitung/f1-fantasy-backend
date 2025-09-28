@@ -14,7 +14,7 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
 
     public async Task<Race?> GetLatestFinishedRaceInCurrentSeasonWithResultAsync()
     {
-        DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
+        DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         return await context.Races
             .Where(r => r.DeadlineDate < currentDate && r.RaceDate > currentDate)
             .OrderByDescending(r => r.DeadlineDate)
@@ -25,7 +25,12 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
 
     public async Task AddFantasyLineupDriverAsync(FantasyLineup fantasyLineup, Driver driver)
     {
-        fantasyLineup.Drivers.Add(driver);
+        fantasyLineup.FantasyLineupDrivers.Add(new FantasyLineupDriver
+        {
+            DriverId = driver.Id,
+            FantasyLineupId = fantasyLineup.Id,
+            IsCaptain = false
+        });
         await context.SaveChangesAsync();
     }
 }

@@ -6,6 +6,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos;
 
 public class RaceDto(
     int? id,
+    string raceName,
     DateOnly raceDate,
     int round,
     DateOnly deadlineDate,
@@ -17,6 +18,8 @@ public class RaceDto(
   
     public int? Id { get; set; } = id ?? null;
 
+    [Required]
+    public string RaceName { get; set; } = raceName;
     [Required]
     public int Round { get; set; } = round;
 

@@ -5,18 +5,16 @@ namespace F1FantasyWorker.Modules.CoreGameplayModule.Dtos.Mapper;
 
 public class CoreGameplayDtoMapper
 {
-    public static PowerupForPointApplicationDto MapToPowerupForPointApplicationDto(PowerupDto powerupDto, PowerupFantasyLineup powerupFantasyLineup )
+    public static PowerupForPointApplicationDto MapToPowerupForPointApplicationDto(PowerupDto powerupDto, Powerup powerup )
     {
-        if (powerupDto.Id != powerupFantasyLineup.PowerupId)
+        if (powerupDto.Id != powerup.Id)
         {
             throw new ArgumentException("Invalid Powerup Id provided");
         }
         return new PowerupForPointApplicationDto
         {
-            PowerupId = powerupFantasyLineup.PowerupId,
+            PowerupId = powerup.Id,
             Type = powerupDto.Type,
-            // Set driver id if the powerup type is 'DRS Enabled'
-            DriverId = powerupDto.Type == "DRS Enabled" ? powerupFantasyLineup.DriverId : null
         };
     }
 }

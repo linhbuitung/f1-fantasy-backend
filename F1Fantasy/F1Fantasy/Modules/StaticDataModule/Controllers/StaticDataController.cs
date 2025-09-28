@@ -8,7 +8,8 @@ namespace F1Fantasy.Modules.StaticDataModule.Controllers;
 public class StaticDataController(
     IDriverService driverService, 
     IConstructorService constructorService, 
-    ICountryService countryService) : ControllerBase
+    ICountryService countryService,
+    IPowerupService powerupService) : ControllerBase
 {
     [HttpGet("drivers")]
     public async Task<IActionResult> GetAllDrivers()
@@ -31,5 +32,12 @@ public class StaticDataController(
     {
         var countryDtos = await countryService.GetAllCountriesAsync();
         return Ok(countryDtos);
+    }
+    
+    [HttpGet("powerups")]
+    public async Task<IActionResult> GetAllPowerups()
+    {
+        var powerupDtos = await powerupService.GetAllPowerupsAsync();
+        return Ok(powerupDtos);
     }
 }

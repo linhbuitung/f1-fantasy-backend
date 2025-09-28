@@ -40,6 +40,8 @@ public partial class WooF1Context : DbContext
 
     public virtual DbSet<FantasyLineup> FantasyLineups { get; set; }
 
+    public virtual DbSet<FantasyLineupDriver> FantasyLineupDrivers { get; set; }
+
     public virtual DbSet<League> Leagues { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -47,8 +49,6 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<PickableItem> PickableItems { get; set; }
 
     public virtual DbSet<Powerup> Powerups { get; set; }
-
-    public virtual DbSet<PowerupFantasyLineup> PowerupFantasyLineups { get; set; }
 
     public virtual DbSet<Prediction> Predictions { get; set; }
 
@@ -59,11 +59,13 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Season> Seasons { get; set; }
 
     public virtual DbSet<UserLeague> UserLeagues { get; set; }
-    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresExtension("pg_stat_statements");
-
         modelBuilder.Entity<AspNetRole>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("pk_asp_net_roles");
@@ -122,13 +124,16 @@ public partial class WooF1Context : DbContext
                 .HasColumnName("country_id");
             entity.Property(e => e.DateOfBirth).HasColumnName("date_of_birth");
             entity.Property(e => e.DisplayName)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasColumnName("display_name");
             entity.Property(e => e.DriverId).HasColumnName("driver_id");
             entity.Property(e => e.Email)
                 .HasMaxLength(128)
                 .HasColumnName("email");
             entity.Property(e => e.EmailConfirmed).HasColumnName("email_confirmed");
+            entity.Property(e => e.JoinDate)
+                .HasDefaultValueSql("'-infinity'::date")
+                .HasColumnName("join_date");
             entity.Property(e => e.LastActiveAt).HasColumnName("last_active_at");
             entity.Property(e => e.LockoutEnabled).HasColumnName("lockout_enabled");
             entity.Property(e => e.LockoutEnd).HasColumnName("lockout_end");
@@ -446,25 +451,50 @@ public partial class WooF1Context : DbContext
                         j.IndexerProperty<int>("ConstructorId").HasColumnName("constructor_id");
                     });
 
-            entity.HasMany(d => d.Drivers).WithMany(p => p.FantasyLineups)
+            entity.HasMany(d => d.Powerups).WithMany(p => p.FantasyLineups)
                 .UsingEntity<Dictionary<string, object>>(
-                    "FantasyLineupDriver",
-                    r => r.HasOne<Driver>().WithMany()
-                        .HasForeignKey("DriverId")
+                    "PowerupFantasyLineup",
+                    r => r.HasOne<Powerup>().WithMany()
+                        .HasForeignKey("PowerupId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_fantasy_lineup_driver_driver_driver_id"),
+                        .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id"),
                     l => l.HasOne<FantasyLineup>().WithMany()
                         .HasForeignKey("FantasyLineupId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_fantasy_lineup_driver_fantasy_lineup_fantasy_lineup_id"),
+                        .HasConstraintName("fk_powerup_fantasy_lineup_fantasy_lineup_fantasy_lineup_id"),
                     j =>
                     {
-                        j.HasKey("FantasyLineupId", "DriverId").HasName("pk_fantasy_lineup_driver");
-                        j.ToTable("fantasy_lineup_driver");
-                        j.HasIndex(new[] { "DriverId" }, "ix_fantasy_lineup_driver_driver_id");
+                        j.HasKey("FantasyLineupId", "PowerupId").HasName("pk_powerup_fantasy_lineup");
+                        j.ToTable("powerup_fantasy_lineup");
+                        j.HasIndex(new[] { "PowerupId" }, "ix_powerup_fantasy_lineup_powerup_id");
                         j.IndexerProperty<int>("FantasyLineupId").HasColumnName("fantasy_lineup_id");
-                        j.IndexerProperty<int>("DriverId").HasColumnName("driver_id");
+                        j.IndexerProperty<int>("PowerupId").HasColumnName("powerup_id");
                     });
+        });
+
+        modelBuilder.Entity<FantasyLineupDriver>(entity =>
+        {
+            entity.HasKey(e => new { e.FantasyLineupId, e.DriverId }).HasName("pk_fantasy_lineup_driver");
+
+            entity.ToTable("fantasy_lineup_driver");
+
+            entity.HasIndex(e => e.DriverId, "ix_fantasy_lineup_driver_driver_id");
+
+            entity.Property(e => e.FantasyLineupId).HasColumnName("fantasy_lineup_id");
+            entity.Property(e => e.DriverId).HasColumnName("driver_id");
+            entity.Property(e => e.IsCaptain)
+                .HasDefaultValue(false)
+                .HasColumnName("is_captain");
+
+            entity.HasOne(d => d.Driver).WithMany(p => p.FantasyLineupDrivers)
+                .HasForeignKey(d => d.DriverId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_fantasy_lineup_driver_driver_driver_id");
+
+            entity.HasOne(d => d.FantasyLineup).WithMany(p => p.FantasyLineupDrivers)
+                .HasForeignKey(d => d.FantasyLineupId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_fantasy_lineup_driver_fantasy_lineup_fantasy_lineup_id");
         });
 
         modelBuilder.Entity<League>(entity =>
@@ -549,36 +579,6 @@ public partial class WooF1Context : DbContext
                 .HasColumnName("type");
         });
 
-        modelBuilder.Entity<PowerupFantasyLineup>(entity =>
-        {
-            entity.HasKey(e => new { e.FantasyLineupId, e.PowerupId }).HasName("pk_powerup_fantasy_lineup");
-
-            entity.ToTable("powerup_fantasy_lineup");
-
-            entity.HasIndex(e => e.DriverId, "ix_powerup_fantasy_lineup_driver_id");
-
-            entity.HasIndex(e => e.PowerupId, "ix_powerup_fantasy_lineup_powerup_id");
-
-            entity.Property(e => e.FantasyLineupId).HasColumnName("fantasy_lineup_id");
-            entity.Property(e => e.PowerupId).HasColumnName("powerup_id");
-            entity.Property(e => e.DriverId).HasColumnName("driver_id");
-
-            entity.HasOne(d => d.Driver).WithMany(p => p.PowerupFantasyLineups)
-                .HasForeignKey(d => d.DriverId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("fk_powerup_fantasy_lineup_driver_driver_id");
-
-            entity.HasOne(d => d.FantasyLineup).WithMany(p => p.PowerupFantasyLineups)
-                .HasForeignKey(d => d.FantasyLineupId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("fk_powerup_fantasy_lineup_fantasy_lineup_fantasy_lineup_id");
-
-            entity.HasOne(d => d.Powerup).WithMany(p => p.PowerupFantasyLineups)
-                .HasForeignKey(d => d.PowerupId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id");
-        });
-
         modelBuilder.Entity<Prediction>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("pk_prediction");
@@ -622,6 +622,10 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DeadlineDate).HasColumnName("deadline_date");
             entity.Property(e => e.RaceDate).HasColumnName("race_date");
+            entity.Property(e => e.RaceName)
+                .HasMaxLength(300)
+                .HasDefaultValueSql("''::character varying")
+                .HasColumnName("race_name");
             entity.Property(e => e.Round).HasColumnName("round");
             entity.Property(e => e.SeasonId).HasColumnName("season_id");
 

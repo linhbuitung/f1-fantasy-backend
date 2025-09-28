@@ -11,6 +11,10 @@ namespace F1Fantasy.Core.Common
         public int Id { get; set; }
         
         [Required]
+        [MaxLength(300)]
+        public string RaceName { get; set; }
+        
+        [Required]
         [Column(TypeName = "date")]
         public DateOnly RaceDate { get; set; }
 

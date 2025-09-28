@@ -6,10 +6,12 @@ public class FantasyLineupDto
 {    
     [Required]
     public int Id { get; set; }
+    
+    public int? CaptainDriverId { get; set; }
 
-    public List<int> DriverIds { get; set; }
+    public required List<int> DriverIds { get; set; }
     
-    public List<int> ConstructorIds { get; set; }
+    public required List<int> ConstructorIds { get; set; }
     
-    public List<int> PowerupIds { get; set; }
+    public List<int>? PowerupIds { get; set; }
 }

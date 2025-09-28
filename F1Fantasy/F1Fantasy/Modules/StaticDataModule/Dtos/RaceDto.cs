@@ -14,6 +14,9 @@ public class RaceDto(
 {
   
     public int? Id { get; set; } = id ?? null;
+    
+    [Required]
+    public string RaceName { get; set; }
 
     [Required]
     public int Round { get; set; } = round;

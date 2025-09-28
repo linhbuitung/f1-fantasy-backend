@@ -76,7 +76,7 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
             var existingConstructors = await dataSyncRepository.GetAllConstructorsAsync();
             var existingRaces = await dataSyncRepository.GetAllRacesAsync();
             
-            var existingRaceEntries = await dataSyncRepository.GetAllRaceEntriesBySeasonYearAsync(DateTime.Now.Year);
+            var existingRaceEntries = await dataSyncRepository.GetAllRaceEntriesBySeasonYearAsync(DateTime.UtcNow.Year);
             var newRaceEntries = new List<RaceEntry>();
             foreach (var raceEntryDto in raceEntryDtos)
             {
@@ -96,10 +96,16 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
                     throw new Exception($"Race with date {raceEntryDto.RaceDate} not found");
                 }
                 
+                // if race entry with userId and race date already exists, skip
+                if (existingRaceEntries.Any(re => re.Driver.Code == raceEntryDto.DriverCode && re.Race.RaceDate == raceEntryDto.RaceDate))
+                {
+                    continue;
+                }
+                
                 RaceEntry raceEntry = StaticDataDtoMapper.MapDtoToRaceEntry(raceEntryDto);
                 raceEntry.DriverId = existingDrivers.First(d => d.Code == raceEntryDto.DriverCode).Id;
                 raceEntry.ConstructorId = existingConstructors.First(c => c.Code == raceEntryDto.ConstructorCode).Id;
-                raceEntry.RaceId = existingRaces.First(r => r.RaceDate != raceEntryDto.RaceDate.Value).Id;
+                raceEntry.RaceId = existingRaces.First(r => r.RaceDate == raceEntryDto.RaceDate.Value).Id;
     
                 newRaceEntries.Add(raceEntry);
             }

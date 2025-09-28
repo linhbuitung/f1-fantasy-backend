@@ -249,6 +249,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
+                    b.Property<DateOnly>("JoinDate")
+                        .HasColumnType("date")
+                        .HasColumnName("join_date");
+
                     b.Property<DateTime?>("LastActiveAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_active_at");
@@ -639,6 +643,10 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnName("driver_id")
                         .HasColumnOrder(2);
 
+                    b.Property<bool>("IsCaptain")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_captain");
+
                     b.HasKey("FantasyLineupId", "DriverId")
                         .HasName("pk_fantasy_lineup_driver");
 
@@ -786,15 +794,8 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnName("powerup_id")
                         .HasColumnOrder(2);
 
-                    b.Property<int?>("DriverId")
-                        .HasColumnType("integer")
-                        .HasColumnName("driver_id");
-
                     b.HasKey("FantasyLineupId", "PowerupId")
                         .HasName("pk_powerup_fantasy_lineup");
-
-                    b.HasIndex("DriverId")
-                        .HasDatabaseName("ix_powerup_fantasy_lineup_driver_id");
 
                     b.HasIndex("PowerupId")
                         .HasDatabaseName("ix_powerup_fantasy_lineup_powerup_id");
@@ -867,6 +868,12 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Property<DateOnly>("RaceDate")
                         .HasColumnType("date")
                         .HasColumnName("race_date");
+
+                    b.Property<string>("RaceName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("race_name");
 
                     b.Property<int>("Round")
                         .HasColumnType("integer")
@@ -1261,12 +1268,6 @@ namespace F1Fantasy.Infrastructure.Migrations
 
             modelBuilder.Entity("F1Fantasy.Core.Common.PowerupFantasyLineup", b =>
                 {
-                    b.HasOne("F1Fantasy.Core.Common.Driver", "Driver")
-                        .WithMany("PowerupFantasyLineups")
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_powerup_fantasy_lineup_driver_driver_id");
-
                     b.HasOne("F1Fantasy.Core.Common.FantasyLineup", "FantasyLineup")
                         .WithMany("PowerupFantasyLineups")
                         .HasForeignKey("FantasyLineupId")
@@ -1280,8 +1281,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_powerup_fantasy_lineup_powerup_powerup_id");
-
-                    b.Navigation("Driver");
 
                     b.Navigation("FantasyLineup");
 
@@ -1443,8 +1442,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.Navigation("DriverPredictions");
 
                     b.Navigation("FantasyLineupDrivers");
-
-                    b.Navigation("PowerupFantasyLineups");
 
                     b.Navigation("RaceEntries");
 

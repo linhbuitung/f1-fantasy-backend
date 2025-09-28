@@ -7,6 +7,8 @@ public class RaceDto
 {
       
     public int? Id { get; set; }
+    [Required]
+    public string RaceName { get; set; }
 
     [Required]
     public int Round { get; set; }
@@ -28,9 +30,10 @@ public class RaceDto
     
     List<RaceEntryDto> RaceEntries { get; set; } = new List<RaceEntryDto>();
 
-    public RaceDto(int? id, DateOnly raceDate, int round,  DateOnly deadlineDate, bool calculated, int? seasonId, int? circuitId, string? circuitCode, List<RaceEntryDto> raceEntries)
+    public RaceDto(int? id, string raceName, DateOnly raceDate, int round,  DateOnly deadlineDate, bool calculated, int? seasonId, int? circuitId, string? circuitCode, List<RaceEntryDto> raceEntries)
     {
         Id = id ?? null;
+        RaceName = raceName;
         RaceDate = raceDate;
         Round = round;
         DeadlineDate = deadlineDate;

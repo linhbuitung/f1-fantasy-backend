@@ -36,6 +36,14 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
+    [HttpGet("fantasy-lineup/{userId:int}/latest-finished")]
+    public async Task<IActionResult> GetLastestFinishedFantasyLineupByUserId(int userId)
+    {
+        var fantasyLineupDto = await coreGameplayService.GetLatestFinishedFantasyLineupByUserIdAsync(userId);
+
+        return Ok(fantasyLineupDto);
+    }
+    
     [HttpPut("fantasy-lineup/{userId:int}/current")]
     public async Task<IActionResult> UpdateCurrentFantasyLineupByUserId(int userId, [FromBody] Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
@@ -57,8 +65,16 @@ public class CoreGameplayController(
         }
         
         fantasyLineupDto.Id = fantasyLineupGetDto.Id;
-        var updatedFantasyLineupDto = await coreGameplayService.UpdateFantasyLineupAsync(fantasyLineupDto);
-        return Ok(updatedFantasyLineupDto);
+        if(fantasyLineupDto.PowerupIds == null)
+        {
+            var updatedFantasyLineupDto = await coreGameplayService.UpdateFantasyLineupAsync(fantasyLineupDto);
+            return Ok(updatedFantasyLineupDto);
+        }
+        else
+        {
+            var updatedFantasyLineupDto = await coreGameplayService.UpdateFantasyLineupWithPowerupsAsync(fantasyLineupDto);
+            return Ok(updatedFantasyLineupDto);
+        }
     }
     
         
@@ -68,5 +84,55 @@ public class CoreGameplayController(
         var raceDto = await coreGameplayService.GetLatestFinishedRaceAsync();
 
         return Ok(raceDto);
+    }
+    
+            
+    [HttpGet("race/latest-finished/result")]
+    public async Task<IActionResult> GetLatestFinishedRaceResult()
+    {
+        var raceDto = await coreGameplayService.GetLatestFinishedRaceResultAsync();
+
+        return Ok(raceDto);
+    }
+    
+    [HttpGet("race/current")]
+    public async Task<IActionResult> GetCurrentRace()
+    {
+        var raceDto = await coreGameplayService.GetCurrentRaceAsync();
+
+        return Ok(raceDto);
+    }
+    
+    [HttpGet("race/latest")]
+    public async Task<IActionResult> GetLatestRace()
+    {
+        var raceDto = await coreGameplayService.GetLatestRaceAsync();
+
+        return Ok(raceDto);
+    }
+
+
+    [HttpGet("powerups/user/{userId:int}")]
+    public async Task<IActionResult> GetAllUsedPowerupInCurrentSeasonBeforeCurrentRace(int userId)
+    {
+        var powerupDtos = await coreGameplayService.GetPowerupsWithStatusBeforeCurrentRaceByUserInASeasonAsync(userId);
+
+        return Ok(powerupDtos);
+    }
+    
+    [HttpPost("fantasy-lineup/{userId:int}/current/powerup/{powerupId:int}/add")]
+    public async Task<IActionResult> UsePowerupForCurrentFantasyLineup(int userId, int powerupId)
+    {
+        await coreGameplayService.AddPowerupToCurrentLineupAsync(userId, powerupId);
+
+        return Ok();
+    }
+    
+    [HttpPost("fantasy-lineup/{userId:int}/current/powerup/{powerupId:int}/remove")]
+    public async Task<IActionResult> RemovePowerupFromCurrentFantasyLineup(int userId, int powerupId)
+    {
+        await coreGameplayService.RemovePowerupFromCurrentLineupAsync(userId, powerupId);
+
+        return Ok();
     }
 }

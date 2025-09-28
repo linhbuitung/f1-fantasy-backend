@@ -26,14 +26,6 @@ public class AdminDtoMapper
         };
     }
     
-    public static Season MapDtoToSeason(SeasonDto seasonDto)
-    {
-        return new Season
-        {
-            Year = seasonDto.Year,
-            IsActive = seasonDto.IsActive,
-        };
-    }
 
     public static Get.PickableItemDto MapPickableItemToDto(PickableItem pickableItem)
     {

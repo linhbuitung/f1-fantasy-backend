@@ -17,6 +17,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
                 .ThenInclude(flc => flc.Constructor)
             .Include(fl => fl.PowerupFantasyLineups)
                 .ThenInclude(pfl => pfl.Powerup)
+            .Include(fl => fl.Race)
             .AsSplitQuery()
             .FirstOrDefaultAsync(fl => fl.Id == fantasyLineupId);
     }
@@ -29,6 +30,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             .ThenInclude(flc => flc.Constructor)
             .Include(fl => fl.PowerupFantasyLineups)
             .ThenInclude(pfl => pfl.Powerup)
+            .Include(fl => fl.Race)
             .AsSplitQuery()
             .AsTracking()
             .FirstOrDefaultAsync(fl => fl.Id == fantasyLineupId);
@@ -42,6 +44,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
                 .ThenInclude(flc => flc.Constructor)
             .Include(fl => fl.PowerupFantasyLineups)
                 .ThenInclude(pfl => pfl.Powerup)
+            .Include(fl => fl.Race)
             .AsSplitQuery()
             .FirstOrDefaultAsync(fl => fl.UserId == userId && fl.RaceId == raceId);
     }
@@ -62,10 +65,11 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
                 .ThenInclude(flc => flc.Constructor)
             .Include(fl => fl.PowerupFantasyLineups)
                 .ThenInclude(pfl => pfl.Powerup)
+            .Include(fl => fl.Race)
             .AsSplitQuery()
             .Where(fl => fl.UserId == userId 
                          && fl.Race.SeasonId == activeSeason.Id 
-                         && fl.Race.RaceDate > DateOnly.FromDateTime(DateTime.Now))
+                         && fl.Race.RaceDate > DateOnly.FromDateTime(DateTime.UtcNow))
             .OrderBy(fl => fl.Race.RaceDate)
             .FirstOrDefaultAsync();
         
@@ -74,17 +78,46 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
     public async Task<FantasyLineup> UpdateFantasyLineupAsync(
         List<int> driverIds, 
         List<int> constructorIds, 
-        List<int> powerupIds, 
         FantasyLineup trackedFantasyLineup,
+        int? captainDriverId,
         int maxDrivers,
         int maxConstructors)
     {
-        RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds, powerupIds);
-        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, maxDrivers, maxConstructors);
+        RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds);
+        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, captainDriverId, maxDrivers, maxConstructors);
         await context.SaveChangesAsync();
         return trackedFantasyLineup;
     }
     
+    public async Task<FantasyLineup> UpdateFantasyLineupAsync(
+        List<int> driverIds, 
+        List<int> constructorIds, 
+        List<int> powerupIds, 
+        FantasyLineup trackedFantasyLineup,
+        int? captainDriverId,
+        int maxDrivers,
+        int maxConstructors)
+    {
+        RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds, powerupIds);
+        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, captainDriverId, maxDrivers, maxConstructors);
+        await context.SaveChangesAsync();
+        return trackedFantasyLineup;
+    }
+    
+    private void RemoveUnselectedLineupItems(
+        FantasyLineup trackedFantasyLineup,
+        List<int> driverIds,
+        List<int> constructorIds)
+    {
+        context.FantasyLineupDrivers.RemoveRange(
+            context.FantasyLineupDrivers
+                .Where(fld => fld.FantasyLineupId == trackedFantasyLineup.Id && !driverIds.Contains(fld.DriverId))
+        );
+        context.FantasyLineupConstructors.RemoveRange(
+            context.FantasyLineupConstructors
+                .Where(flc => flc.FantasyLineupId == trackedFantasyLineup.Id && !constructorIds.Contains(flc.ConstructorId))
+        );
+    }
     private void RemoveUnselectedLineupItems(
         FantasyLineup trackedFantasyLineup,
         List<int> driverIds,
@@ -109,7 +142,77 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         FantasyLineup trackedFantasyLineup,
         List<int> newDriverIds,
         List<int> newConstructorIds,
+        int? captainDriverId,
+        int maxDrivers,
+        int maxConstructors)
+    {
+        // Add new drivers, constructors which are not already in the lineup
+        var existingDriverIds = trackedFantasyLineup.FantasyLineupDrivers.Select(fld => fld.DriverId).ToList();
+        var existingConstructorIds = trackedFantasyLineup.FantasyLineupConstructors.Select(flc => flc.ConstructorId).ToList();
+        
+        // Count driver replacements (drivers removed from old lineup)
+        var replacedDrivers = existingDriverIds.Except(newDriverIds).ToList();
+        var driverTransfers = replacedDrivers.Count;
+
+        // Count constructor replacements
+        var replacedConstructors = existingConstructorIds.Except(newConstructorIds).ToList();
+        var constructorTransfers = replacedConstructors.Count;
+        
+        // Total transfer count
+        var transferCount = driverTransfers + constructorTransfers;
+        trackedFantasyLineup.TransfersMade += transferCount;
+
+        #region Remove old drivers, constructors, and powerups which are not in the new lists
+        context.FantasyLineupDrivers.RemoveRange(
+            context.FantasyLineupDrivers
+                .Where(fld => fld.FantasyLineupId == trackedFantasyLineup.Id && replacedDrivers.Contains(fld.DriverId))
+        );
+
+        context.FantasyLineupConstructors.RemoveRange(
+            context.FantasyLineupConstructors
+                .Where(flc => flc.FantasyLineupId == trackedFantasyLineup.Id && replacedConstructors.Contains(flc.ConstructorId))
+        );
+        #endregion
+        
+        #region Add new drivers, constructors, and powerups which are added in the new lists
+
+        foreach (var driverId in newDriverIds.Except(existingDriverIds))
+        {
+            trackedFantasyLineup.FantasyLineupDrivers.Add(new FantasyLineupDriver
+            {
+                FantasyLineupId = trackedFantasyLineup.Id,
+                DriverId = driverId,
+                IsCaptain = false
+            });
+        }
+        
+        foreach (var constructorId in newConstructorIds.Except(existingConstructorIds))
+        {
+            trackedFantasyLineup.FantasyLineupConstructors.Add(new FantasyLineupConstructor
+            {
+                FantasyLineupId = trackedFantasyLineup.Id,
+                ConstructorId = constructorId
+            });
+        }
+        #endregion
+
+        #region Add captain
+
+        if (captainDriverId != null)
+        {
+            foreach (var fantasyLineupDriver in trackedFantasyLineup.FantasyLineupDrivers)
+            {
+                fantasyLineupDriver.IsCaptain = fantasyLineupDriver.DriverId == captainDriverId;
+            }
+        }
+        #endregion
+    }
+    private void AddNewItemsAndCalculateTransfers(
+        FantasyLineup trackedFantasyLineup,
+        List<int> newDriverIds,
+        List<int> newConstructorIds,
         List<int> newPowerupIds,
+        int? captainDriverId,
         int maxDrivers,
         int maxConstructors)
     {
@@ -157,7 +260,8 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             trackedFantasyLineup.FantasyLineupDrivers.Add(new FantasyLineupDriver
             {
                 FantasyLineupId = trackedFantasyLineup.Id,
-                DriverId = driverId
+                DriverId = driverId,
+                IsCaptain = false
             });
         }
         
@@ -181,6 +285,16 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
 
         #endregion
 
+        #region Add captain
+
+        if (captainDriverId != null)
+        {
+            foreach (var fantasyLineupDriver in trackedFantasyLineup.FantasyLineupDrivers)
+            {
+                fantasyLineupDriver.IsCaptain = fantasyLineupDriver.DriverId == captainDriverId;
+            }
+        }
+        #endregion
     }
 
     public async Task ResetFantasyLineupsBySeasonAsync(Season season)

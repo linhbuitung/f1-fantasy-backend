@@ -14,8 +14,17 @@ public interface IFantasyLineupRepository
     Task<FantasyLineup> UpdateFantasyLineupAsync(
         List<int> driverIds, 
         List<int> constructorIds, 
+        FantasyLineup trackedFantasyLineup,
+        int? captainDriverId,
+        int maxDrivers,
+        int maxConstructors);
+    
+    Task<FantasyLineup> UpdateFantasyLineupAsync(
+        List<int> driverIds, 
+        List<int> constructorIds, 
         List<int> powerupIds, 
         FantasyLineup trackedFantasyLineup,
+        int? captainDriverId,
         int maxDrivers,
         int maxConstructors);
 

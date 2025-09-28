@@ -26,6 +26,8 @@ namespace F1Fantasy.Core.Common
         public int ConsecutiveActiveDays { get; set; }
 
         public DateTime? LastActiveAt { get; set; }
+        
+        public DateOnly JoinDate { get; set; }
 
         public int AskAiCredits { get; set; }
         public int? ConstructorId { get; set; }

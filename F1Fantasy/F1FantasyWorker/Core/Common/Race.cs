@@ -19,6 +19,8 @@ public partial class Race
 
     public int SeasonId { get; set; }
 
+    public string RaceName { get; set; } = null!;
+
     public virtual Circuit Circuit { get; set; } = null!;
 
     public virtual ICollection<FantasyLineup> FantasyLineups { get; set; } = new List<FantasyLineup>();

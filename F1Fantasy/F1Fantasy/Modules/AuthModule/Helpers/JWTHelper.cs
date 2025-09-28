@@ -29,7 +29,7 @@ namespace F1Fantasy.Modules.AuthModule.Helpers
                 issuer: authConfiguration.Issuer,
                 audience: authConfiguration.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(authConfiguration.TokenValidityInHours),
+                expires: DateTime.UtcNow.AddHours(authConfiguration.TokenValidityInHours),
                 signingCredentials: credentials
             );
 

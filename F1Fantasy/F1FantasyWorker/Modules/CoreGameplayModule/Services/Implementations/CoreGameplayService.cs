@@ -29,12 +29,11 @@ public class CoreGameplayService(
           try
           {
                var lastestFinishedRace = GetLatestFinishedRaceInCurrentSeasonWithResultAsync().Result;
-               
                if(lastestFinishedRace == null || lastestFinishedRace.Calculated) return null;
                
                // Ensure its at least a day currently after the race date
                var raceCalculationDeadline = lastestFinishedRace.RaceDate.AddDays(1);
-               if(raceCalculationDeadline >= DateOnly.FromDateTime(DateTime.Now)) return null;
+               if(raceCalculationDeadline >= DateOnly.FromDateTime(DateTime.UtcNow)) return null;
                     
                foreach (var raceEntry in lastestFinishedRace.RaceEntries)
                {
@@ -52,26 +51,44 @@ public class CoreGameplayService(
 
                foreach (var lineup in lastestFinishedRace.FantasyLineups)
                {
-                    await context.Entry(lineup).Collection(l => l.Drivers).LoadAsync();
-
+                    await context.Entry(lineup).Collection(l => l.FantasyLineupDrivers).LoadAsync();
+                    // Load constructors from fantasy lineup
+                    await context.Entry(lineup).Collection(l => l.Constructors).LoadAsync();
+                    
+                    // If total price of drivers and constructors exceed the budget, set points to 0
+                    var totalPrice = lineup.FantasyLineupDrivers.Sum(d => d.Driver.Price) + lineup.Constructors.Sum(c => c.Price);
+                    var budget = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:LineupBudget").Get<int>();
+                    if (totalPrice > budget)
+                    {
+                         lineup.PointsGained = 0;
+                         lineup.TotalAmount = 0;
+                         continue;
+                    }
+                    
                     // Create dictionary to hold driverId and points
                     var pointFromOwnedDriversInLineUp = new Dictionary<int, int>();
-                    foreach (var driverId in lineup.Drivers.Select(ld => ld.Id))
+                    foreach (var driver in lineup.FantasyLineupDrivers)
                     {
-                         if (driverPoints.TryGetValue(driverId, out var points))
+                         if (driverPoints.TryGetValue(driver.DriverId, out var points))
                          {
-                              pointFromOwnedDriversInLineUp.Add(driverId, points);
+                              // x2 points if the driver is captain
+                              if (driver.IsCaptain)
+                              {
+                                   pointFromOwnedDriversInLineUp.Add(driver.DriverId, points*2);
+                              }
+                              else
+                              {
+                                   pointFromOwnedDriversInLineUp.Add(driver.DriverId, points);
+                              }
                          }
                          else
                          {
-                              pointFromOwnedDriversInLineUp.Add(driverId, 0);
+                              pointFromOwnedDriversInLineUp.Add(driver.DriverId, 0);
                          }
                     }
                     
-                    // Load constructors from fantasy lineup
-                    await context.Entry(lineup).Collection(l => l.Constructors).LoadAsync();
-
                     /*
+                     For constructors
                          Both drivers in top 3: 10 points
                          One driver in top 3: 5 points
                          Both drivers in top 10: 3 points
@@ -117,12 +134,12 @@ public class CoreGameplayService(
                     }
                     
                     // Load powerups from fantasy lineup
-                    await context.Entry(lineup).Collection(l => l.PowerupFantasyLineups).LoadAsync();
+                    await context.Entry(lineup).Collection(l => l.Powerups).LoadAsync();
                     
                     // Get all powerups in the lineup by joining with powerups table
-                    var powerUpOwned = lineup.PowerupFantasyLineups
+                    var powerUpOwned = lineup.Powerups
                          .Join(powerupDtos,
-                              pl => pl.PowerupId,
+                              pl => pl.Id,
                               p => p.Id,
                               (pl, p) => CoreGameplayDtoMapper.MapToPowerupForPointApplicationDto(p, pl))
                          .ToList();
@@ -166,12 +183,11 @@ public class CoreGameplayService(
                switch (powerupUsed.Type)
                {
                     case "DRS Enabled":
-                    // Double the points of the driver from the id specified in the powerupUsed.TargetDriverId
-                         if (powerupUsed.DriverId == null) break;
-                         if (pointFromOwnedDriversInLineUp.ContainsKey(powerupUsed.DriverId.Value))
-                         {
-                              pointFromOwnedDriversInLineUp[powerupUsed.DriverId.Value] *= 2;
-                         }
+                    // Double the points of the driver with the highest points in the lineup
+                         if (pointFromOwnedDriversInLineUp.Count == 0) break;
+                         var maxPoint = pointFromOwnedDriversInLineUp.Values.Max();
+                         var driverIdWithMaxPoint = pointFromOwnedDriversInLineUp.FirstOrDefault(x => x.Value == maxPoint).Key;
+                         pointFromOwnedDriversInLineUp[driverIdWithMaxPoint] *= 2;
                          break;
                     case "Free Transfer Week":
                          // Add back the points deducted for transfers
@@ -196,7 +212,7 @@ public class CoreGameplayService(
      
      private async Task<Race?> GetLatestFinishedRaceInCurrentSeasonWithResultAsync()
      {
-          DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
+          DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
           return await context.Races
                .Where(r => r.DeadlineDate < currentDate)
                .OrderByDescending(r => r.DeadlineDate)
@@ -213,7 +229,7 @@ public class CoreGameplayService(
           try
           {
                // Get race to be migrated to
-               Race raceToBeMigratedTo = await context.Races.FirstOrDefaultAsync(r => r.SeasonId == previousRace.SeasonId && r.Round == previousRace.Round + 1);
+               var raceToBeMigratedTo = await context.Races.FirstOrDefaultAsync(r => r.SeasonId == previousRace.SeasonId && r.Round == previousRace.Round + 1);
                
                if (raceToBeMigratedTo == null || raceToBeMigratedTo.Round == 1 )
                {
@@ -231,19 +247,37 @@ public class CoreGameplayService(
                          throw new Exception("New FantasyLineup not existed");
                     }
                     
-                    await context.Entry(previousFantasyLineup).Collection(f => f.Drivers).LoadAsync();
-                    await context.Entry(newFantasyLineup).Collection(f => f.Drivers).LoadAsync();
-
+                    await context.Entry(previousFantasyLineup).Collection(f => f.FantasyLineupDrivers).LoadAsync();
+                    await context.Entry(newFantasyLineup).Collection(f => f.FantasyLineupDrivers).LoadAsync();
+                    await context.Entry(previousFantasyLineup).Collection(f => f.Constructors).LoadAsync();
+                    await context.Entry(newFantasyLineup).Collection(f => f.Constructors).LoadAsync();
+                    
+                    // Clear all drivers and constructors from new lineup first
+                    newFantasyLineup.FantasyLineupDrivers.Clear();
+                    newFantasyLineup.Constructors.Clear();
+                    
                     // copy all connection to drivers from previous race to new
-                    foreach (var driver in previousFantasyLineup.Drivers)
+                    foreach (var fantasyLineupDriver in previousFantasyLineup.FantasyLineupDrivers)
                     {
-                         if (newFantasyLineup.Drivers.Contains(driver))
+                         if (newFantasyLineup.FantasyLineupDrivers.Any(fld => fld.DriverId == fantasyLineupDriver.DriverId))
                          {
                               continue;
                          }
                          
-                         await coreGameplayRepository.AddFantasyLineupDriverAsync(newFantasyLineup, driver);
+                         await coreGameplayRepository.AddFantasyLineupDriverAsync(newFantasyLineup, fantasyLineupDriver.Driver);
                     }
+                    
+                    // copy all connection to constructors from previous race to new
+                    foreach (var constructor in previousFantasyLineup.Constructors)
+                    {
+                         if (newFantasyLineup.Constructors.Any(c => c.Id == constructor.Id))
+                         {
+                              continue;
+                         }
+                         
+                         newFantasyLineup.Constructors.Add(constructor);
+                    }
+                    
                     // transfer made
                     newFantasyLineup.TransfersMade = 0;
                }

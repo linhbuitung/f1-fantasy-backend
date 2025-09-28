@@ -268,6 +268,8 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.RaceEntries
                 .AsNoTracking()
+                .Include(re => re.Driver)
+                .Include(re => re.Race)
                 .Where(re => re.Race.Season.Year == year)
                 .ToListAsync();
         }

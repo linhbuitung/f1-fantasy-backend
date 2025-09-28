@@ -197,7 +197,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         }
         var latestRace = await coreGameplayService.GetLatestFinishedRaceAsync();
         
-        var currentDate = DateOnly.FromDateTime(DateTime.Now);
+        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         if (!(latestRace.RaceDate < currentDate && currentDate < latestRace.RaceDate.AddDays(2)))
         {
             throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race with id {latestRace.Id}." );

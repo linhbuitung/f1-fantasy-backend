@@ -6,7 +6,6 @@ using F1Fantasy.Modules.CoreGameplayModule.Dtos.Mapper;
 using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
-using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.CoreGameplayModule.Services.Implementations;
 
@@ -41,6 +40,22 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
         return CoreGameplayDtoMapper.MapFantasyLineupToGetDto(fantasyLineup);
     }
+
+    public async Task<Dtos.Get.FantasyLineupDto> GetLatestFinishedFantasyLineupByUserIdAsync(int userId)
+    {
+        var latestFinishedRace = await coreGameplayRepository.GetLatestFinishedRaceAsync();
+        if (latestFinishedRace == null)
+        {
+            throw new NotFoundException("There is no finished race yet.");
+        }
+
+        var fantasyLineup = await fantasyLineupRepository.GetFantasyLineupByUserIdAndRaceIdAsync(userId, latestFinishedRace.Id);
+        if (fantasyLineup == null)
+        {
+            throw new NotFoundException("Fantasy lineup not found");
+        }
+        return CoreGameplayDtoMapper.MapFantasyLineupToGetDto(fantasyLineup);
+    }
     
     public async Task<Dtos.Get.FantasyLineupDto> UpdateFantasyLineupAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
@@ -50,6 +65,51 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException("Fantasy lineup not found");
         }
+        PreValidateFantasyLineupDeadline(trackedFantasyLineup);
+        
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var pickableItem = await coreGameplayRepository.GetPickableItemsAsync();
+            if (pickableItem == null)
+            {
+                throw new NotFoundException("Pickables not found");
+            }
+            ValidatePickableItemsAsync(fantasyLineupDto, pickableItem);
+            
+            var maxDrivers = configuration.GetValue<int>("FantasyTeamSettings:MaxDrivers");
+            var maxConstructors = configuration.GetValue<int>("FantasyTeamSettings:MaxConstructors");
+            
+            var updatedFantasyLineup = await fantasyLineupRepository.UpdateFantasyLineupAsync(
+                fantasyLineupDto.DriverIds, 
+                fantasyLineupDto.ConstructorIds,
+                trackedFantasyLineup,
+                fantasyLineupDto.CaptainDriverId ?? null,
+                maxDrivers,
+                maxConstructors);
+            
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return CoreGameplayDtoMapper.MapFantasyLineupToGetDto(updatedFantasyLineup);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error updating fantasy lineup: {ex.Message}");
+            throw;
+        }
+        
+        return CoreGameplayDtoMapper.MapFantasyLineupToGetDto(trackedFantasyLineup);
+    }
+    public async Task<Dtos.Get.FantasyLineupDto> UpdateFantasyLineupWithPowerupsAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto)
+    {
+        PreValidateFantasyLineupConnections(fantasyLineupDto);
+        var trackedFantasyLineup = await fantasyLineupRepository.GetFantasyLineupByIdAsTrackingAsync(fantasyLineupDto.Id);
+        if (trackedFantasyLineup == null)
+        {
+            throw new NotFoundException("Fantasy lineup not found");
+        }
+        PreValidateFantasyLineupDeadline(trackedFantasyLineup);
         
         using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -68,8 +128,9 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             var updatedFantasyLineup = await fantasyLineupRepository.UpdateFantasyLineupAsync(
                 fantasyLineupDto.DriverIds, 
                 fantasyLineupDto.ConstructorIds, 
-                fantasyLineupDto.PowerupIds, 
+                fantasyLineupDto.PowerupIds!, 
                 trackedFantasyLineup,
+                fantasyLineupDto.CaptainDriverId ?? null,
                 maxDrivers,
                 maxConstructors);
             
@@ -111,7 +172,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
     private void ValidatePowerUpPickableAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
         var pickablePowerupIds = coreGameplayRepository.GetAllPowerupsAsync().Result.Select(p => p.Id).ToList();
-        foreach (var powerupId in fantasyLineupDto.PowerupIds)
+        foreach (var powerupId in fantasyLineupDto.PowerupIds!)
         {
             if (!pickablePowerupIds.Contains(powerupId))
             {
@@ -131,6 +192,10 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
     
     private void PreValidateFantasyLineupConnections(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
+        if (fantasyLineupDto.CaptainDriverId != null && !fantasyLineupDto.DriverIds.Contains((int)fantasyLineupDto.CaptainDriverId))
+        {
+            throw new Exception("Captain driver must be one of the selected drivers");
+        }
         // Maximum 5 drivers, 2 constructors
         if (fantasyLineupDto.DriverIds.Count > 5)
         {
@@ -152,10 +217,22 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException($"The following constructor ids do not exist: {string.Join(", ", nonExistingConstructors.Result)}");
         }
-        var nonExistingPowerups = coreGameplayRepository.GetNonExistentPowerupIdsAsync(fantasyLineupDto.PowerupIds);
-        if (nonExistingPowerups.Result.Any())
+
+        if (fantasyLineupDto.PowerupIds != null)
         {
-            throw new NotFoundException($"The following powerup ids do not exist: {string.Join(", ", nonExistingPowerups.Result)}");
+            var nonExistingPowerups = coreGameplayRepository.GetNonExistentPowerupIdsAsync(fantasyLineupDto.PowerupIds);
+            if (nonExistingPowerups.Result.Any())
+            {
+                throw new NotFoundException($"The following powerup ids do not exist: {string.Join(", ", nonExistingPowerups.Result)}");
+            }
+        }
+    }
+
+    private void PreValidateFantasyLineupDeadline(FantasyLineup fantasyLineup)
+    {
+        if (fantasyLineup.Race.DeadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            throw new Exception("The deadline for this fantasy lineup has passed");
         }
     }
 
@@ -192,5 +269,117 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             throw new NotFoundException("There is no finished race yet.");
         }
         return CoreGameplayDtoMapper.MapRaceToDto(latestFinishedRace);
+    }
+
+    public async Task<RaceResultDto> GetLatestFinishedRaceResultAsync()
+    {
+        Race ? latestFinishedRaceWithResult = await coreGameplayRepository.GetLatestFinishedRaceResultAsync();
+        if (latestFinishedRaceWithResult == null)
+        {
+            throw new NotFoundException("There is no finished race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceResultToDto(latestFinishedRaceWithResult);
+    }
+
+    public async Task<RaceDto> GetLatestRaceAsync()
+    {
+        var latestRace = await coreGameplayRepository.GetLatestRaceAsync();
+        if (latestRace == null)
+        {
+            throw new NotFoundException("There is no latest race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceToDto(latestRace);
+    }
+    public async Task<RaceDto> GetCurrentRaceAsync()
+    {
+        var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
+        if (currentRace == null)
+        {
+            throw new NotFoundException("There is no current race yet.");
+        }
+        return CoreGameplayDtoMapper.MapRaceToDto(currentRace);
+    }
+
+    public async Task<List<PowerupDto>> GetPowerupsWithStatusBeforeCurrentRaceByUserInASeasonAsync(int userId)
+    {
+        var fantasyLineup = await fantasyLineupRepository.GetCurrentFantasyLineupByUserIdAsync(userId);
+        if (fantasyLineup == null)
+        {
+            throw new NotFoundException("Fantasy lineup not found");
+        }
+        
+        var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
+        if (currentRace == null)
+        {
+            throw new NotFoundException("There is no current race yet.");
+        }
+        var usedPowerups = await coreGameplayRepository.GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(userId, currentRace);
+        var allPowerups = await coreGameplayRepository.GetAllPowerupsAsync();
+        
+        return allPowerups.Select(powerup =>
+        {
+            var used = usedPowerups.FirstOrDefault(up => up.Id == powerup.Id);
+            var usingNow = fantasyLineup.PowerupFantasyLineups.Any(up => up.PowerupId == powerup.Id);
+            var dto = CoreGameplayDtoMapper.MapPowerupToGetDto(powerup);
+            dto.Status = used != null ? Status.Used : usingNow ? Status.Using : Status.Available;
+            return dto;
+        }).ToList();    
+    }
+
+    public async Task AddPowerupToCurrentLineupAsync(int userId, int powerupId)
+    {
+        var fantasyLineup = await fantasyLineupRepository.GetCurrentFantasyLineupByUserIdAsync(userId);
+        if (fantasyLineup == null)
+        {
+            throw new NotFoundException("Fantasy lineup not found");
+        }
+                
+        var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
+        if (currentRace == null)
+        {
+            throw new NotFoundException("There is no current race yet.");
+        }
+        
+        if(fantasyLineup.PowerupFantasyLineups.Any(pfl => pfl.PowerupId == powerupId))
+        {
+            throw new Exception("You are already using this powerup in your current fantasy lineup.");
+        }
+        
+        var usedPowerups = await coreGameplayRepository.GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(userId, currentRace);
+        var allPowerups = await coreGameplayRepository.GetAllPowerupsAsync();
+        
+        if (usedPowerups.Any(pfl => pfl.Id == powerupId))
+        {
+            throw new Exception("You have already used this powerup in the current season.");
+        }
+        
+        if (allPowerups.All(p => p.Id != powerupId))
+        {
+            throw new NotFoundException("Powerup not found");
+        }
+        
+        await coreGameplayRepository.AddPowerupToFantasyLineupAsync(fantasyLineup, allPowerups.First(p => p.Id == powerupId));
+        
+        await context.SaveChangesAsync();
+    }
+    
+    public async Task RemovePowerupFromCurrentLineupAsync(int userId, int powerupId)
+    {
+        var fantasyLineup = await fantasyLineupRepository.GetCurrentFantasyLineupByUserIdAsync(userId);
+        if (fantasyLineup == null)
+        {
+            throw new NotFoundException("Fantasy lineup not found");
+        }
+        var allPowerups = await coreGameplayRepository.GetAllPowerupsAsync();
+        if (allPowerups.All(p => p.Id != powerupId))
+        {
+            throw new NotFoundException("Powerup not found");
+        }
+
+        if (fantasyLineup.PowerupFantasyLineups.Any(p => p.PowerupId == powerupId))
+        {
+            await coreGameplayRepository.RemovePowerupFromFantasyLineupAsync(fantasyLineup, allPowerups.First(p => p.Id == powerupId));
+        }
+        
     }
 }

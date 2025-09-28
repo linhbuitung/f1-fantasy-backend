@@ -19,4 +19,17 @@ public interface ICoreGameplayRepository
     
     Task<List<int>> GetNonExistentPowerupIdsAsync(List<int> powerupIds);
     Task<Race?> GetLatestFinishedRaceAsync();
+    
+    Task<Race?> GetLatestFinishedRaceResultAsync();
+    
+    Task<Race?> GetLatestRaceAsync();
+    
+    Task<Race?> GetCurrentRaceAsync();
+    
+    Task<List<Powerup>> GetAllUsedPowerupsOfAnUserInSeasonBeforeCurrentRaceAsync(int userId, Race currentRace);
+    
+    Task<PowerupFantasyLineup> AddPowerupToFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup);
+    
+    Task RemovePowerupFromFantasyLineupAsync(FantasyLineup fantasyLineup, Powerup powerup);
+
 }

@@ -29,11 +29,9 @@ public partial class Driver
 
     public virtual ICollection<DriverPrediction> DriverPredictions { get; set; } = new List<DriverPrediction>();
 
+    public virtual ICollection<FantasyLineupDriver> FantasyLineupDrivers { get; set; } = new List<FantasyLineupDriver>();
+
     public virtual PickableItem? PickableItem { get; set; }
 
-    public virtual ICollection<PowerupFantasyLineup> PowerupFantasyLineups { get; set; } = new List<PowerupFantasyLineup>();
-
     public virtual ICollection<RaceEntry> RaceEntries { get; set; } = new List<RaceEntry>();
-
-    public virtual ICollection<FantasyLineup> FantasyLineups { get; set; } = new List<FantasyLineup>();
 }

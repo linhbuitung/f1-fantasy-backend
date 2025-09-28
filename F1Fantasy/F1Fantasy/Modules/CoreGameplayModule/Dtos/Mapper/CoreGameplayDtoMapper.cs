@@ -14,17 +14,18 @@ public class CoreGameplayDtoMapper
             PointsGained = fantasyLineup.PointsGained,
             UserId = fantasyLineup.UserId,
             RaceId = fantasyLineup.RaceId,
-            Drivers = fantasyLineup.FantasyLineupDrivers.Select(fld => fld.Driver)
+            Drivers = fantasyLineup.FantasyLineupDrivers.Select(fld => new { fld.Driver, fld.IsCaptain })
                           .Select(d => new Get.DriverInFantasyLineupDto
                           {
-                              Id = d.Id,
-                              GivenName = d.GivenName,
-                              FamilyName = d.FamilyName,
-                              DateOfBirth = d.DateOfBirth,
-                              CountryId = d.CountryId,
-                              Code = d.Code,
-                              Price = d.Price,
-                              ImgUrl = d.ImgUrl
+                              Id = d.Driver.Id,
+                              GivenName = d.Driver.GivenName,
+                              FamilyName = d.Driver.FamilyName,
+                              IsCaptain = d.IsCaptain,
+                              DateOfBirth = d.Driver.DateOfBirth,
+                              CountryId = d.Driver.CountryId,
+                              Code = d.Driver.Code,
+                              Price = d.Driver.Price,
+                              ImgUrl = d.Driver.ImgUrl
                           })
                           .ToList(),
             Constructors = fantasyLineup.FantasyLineupConstructors.Select(flc => flc.Constructor)
@@ -54,14 +55,76 @@ public class CoreGameplayDtoMapper
         return new Get.RaceDto
         {
             Id = race.Id,
+            RaceName = race.RaceName,
             Round = race.Round,
             RaceDate = race.RaceDate,
             DeadlineDate = race.DeadlineDate,
             Calculated = race.Calculated,
             SeasonYear = race.Season.Year,
-            CircuitId = race.CircuitId,
-            CircuitCode = race.Circuit.Code,
-            CircuitName = race.Circuit.CircuitName
+            Circuit = new Get.CircuitDto
+            {
+                Id = race.Circuit.Id,
+                CircuitName = race.Circuit.CircuitName,
+                Code = race.Circuit.Code,
+                Latitude = race.Circuit.Latitude,
+                Longitude = race.Circuit.Longitude,
+                CountryId = race.Circuit.CountryId,
+                ImgUrl = race.Circuit.ImgUrl,
+            }
+        };
+    }
+
+    public static Get.RaceResultDto MapRaceResultToDto(Race race)
+    {
+        return new Get.RaceResultDto
+        { 
+            Race = {
+            Id = race.Id,
+            RaceName = race.RaceName,
+            Round = race.Round,
+            RaceDate = race.RaceDate,
+            DeadlineDate = race.DeadlineDate,
+            Calculated = race.Calculated,
+            SeasonYear = race.Season.Year,
+            Circuit = new Get.CircuitDto
+            {
+                Id = race.Circuit.Id,
+                CircuitName = race.Circuit.CircuitName,
+                Code = race.Circuit.Code,
+                Latitude = race.Circuit.Latitude,
+                Longitude = race.Circuit.Longitude,
+                CountryId = race.Circuit.CountryId,
+                ImgUrl = race.Circuit.ImgUrl,
+            }
+            },
+            DriverResults = race.RaceEntries.Select(re => new Get.DriverRaceResultDto
+            {
+                Id = re.Driver.Id,
+                GivenName = re.Driver.GivenName,
+                FamilyName = re.Driver.FamilyName,
+                Code = re.Driver.Code,
+                PointGained = re.PointsGained,
+                ImgUrl = re.Driver.ImgUrl
+            }).ToList(),
+            ConstructorResults = race.RaceEntries.Select(re=> new Get.ConstructorRaceResultDto
+            {
+                Id = re.Constructor.Id,
+                Name = re.Constructor.Name,
+                Code = re.Constructor.Code,
+                PointGained = re.PointsGained,
+                ImgUrl = re.Constructor.ImgUrl
+            }).ToList()
+        };
+    }
+    
+    public static Get.PowerupDto MapPowerupToGetDto(Powerup powerup)
+    {
+        return new Get.PowerupDto
+        {
+            Id = powerup.Id,
+            Type = powerup.Type,
+            Description = powerup.Description,
+            ImgUrl = powerup.ImgUrl
         };
     }
 }
