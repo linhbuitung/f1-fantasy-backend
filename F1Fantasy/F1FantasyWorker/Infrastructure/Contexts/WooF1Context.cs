@@ -59,11 +59,7 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Season> Seasons { get; set; }
 
     public virtual DbSet<UserLeague> UserLeagues { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=woof1;TrustServerCertificate=True;Username=woof1;Password=AVerySecretPassword;Include Error Detail=true");
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>
