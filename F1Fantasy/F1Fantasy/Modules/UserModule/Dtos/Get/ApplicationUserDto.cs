@@ -36,4 +36,6 @@ public class ApplicationUserDto
     public string? CountryId { get; set; }
 
     public string? CountryName { get; set; }
+
+    public List<string> Roles { get; set; } = new List<string>();
 }

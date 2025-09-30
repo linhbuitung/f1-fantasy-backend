@@ -20,8 +20,10 @@ public class ApplicationUserDtoMapper
             ConstructorId = user.ConstructorId ?? null,
             ConstructorName = user.Constructor?.Name ?? null,
             DriverId = user.DriverId,
-            DriverName = user.Driver == null ? null : string.Concat(user.Driver.GivenName, " ", user.Driver.FamilyName),            CountryId = user.CountryId,
-            CountryName = user.Country?.ShortName  ?? null
+            DriverName = user.Driver == null ? null : string.Concat(user.Driver.GivenName, " ", user.Driver.FamilyName),            
+            CountryId = user.CountryId,
+            CountryName = user.Country?.ShortName  ?? null,
+            Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
         };
     }
 
