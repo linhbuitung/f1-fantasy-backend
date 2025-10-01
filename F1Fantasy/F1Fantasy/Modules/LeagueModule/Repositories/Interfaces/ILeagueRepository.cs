@@ -8,6 +8,7 @@ public interface ILeagueRepository
     
     Task<League?> GetTrackedLeagueByLeagueIdAndOwnerIdAsync(int leagueId, int ownerId);
     
+    Task<League?> GetLeagueByNameAsync(string leagueName);
     Task<UserLeague> AddUserLeagueAsync(UserLeague userLeague);
     
     Task<League?> GetLeagueByIdIncludesOwnerAndPlayersAsync(int leagueId);

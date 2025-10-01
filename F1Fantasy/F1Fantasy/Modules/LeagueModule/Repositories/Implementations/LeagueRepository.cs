@@ -20,6 +20,12 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
             .AsTracking()
             .FirstOrDefaultAsync(l => l.Id == leagueId && l.OwnerId == ownerId);
     }
+
+    public async Task<League?> GetLeagueByNameAsync(string leagueName)
+    {
+        return await context.Leagues
+            .FirstOrDefaultAsync(l => l.Name.Equals(leagueName));
+    }
     public async Task<UserLeague> AddUserLeagueAsync(UserLeague userLeague)
     {
         context.UserLeagues.Add(userLeague);

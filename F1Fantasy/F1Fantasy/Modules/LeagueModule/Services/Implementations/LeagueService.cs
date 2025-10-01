@@ -33,6 +33,11 @@ public class LeagueService(
         
             await VerifyOwnedLeagueLimitAsync(ownerId: leagueCreateDto.OwnerId);
             
+            var existingLeague = await leagueRepository.GetLeagueByNameAsync(leagueCreateDto.Name);
+            if (existingLeague != null)
+            {
+                throw new InvalidOperationException($"League with name {leagueCreateDto.Name} already exists.");
+            }
             var league = LeagueDtoMapper.MapCreateDtoToLeague(leagueCreateDto, leagueType);
             var newLeague = await leagueRepository.AddLeagueAsync(league);
             
