@@ -22,7 +22,7 @@ public class CoreGameplayService(
 {
      public async Task<Race?> CalculatePointsForAllUsersInLastestFinishedRaceAsync()
      {
-          using var transaction = await context.Database.BeginTransactionAsync();
+          await using var transaction = await context.Database.BeginTransactionAsync();
 
           // Get powerups
           var powerupDtos = await powerupSyncService.GetPowerupsFromStaticResourcesAsync();
@@ -224,7 +224,7 @@ public class CoreGameplayService(
      // This method is to migrate / copy fantasy lineups from the previous race to this race
      public async Task MigrateFantasyLineupsToNextRaceAsync(Race previousRace)
      {
-          using var transaction = await context.Database.BeginTransactionAsync();
+          await using var transaction = await context.Database.BeginTransactionAsync();
           
           try
           {

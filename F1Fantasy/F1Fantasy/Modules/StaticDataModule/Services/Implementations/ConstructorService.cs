@@ -13,7 +13,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
     {
         public async Task<ConstructorDto> AddConstructorAsync(ConstructorDto constructorDto)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {

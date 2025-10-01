@@ -18,7 +18,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
     {
         public async Task<CountryDto> AddCountryAsync(CountryDto countryDto)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
@@ -52,7 +52,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task AddListCountriesAsync(List<CountryDto> countryDtos)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {

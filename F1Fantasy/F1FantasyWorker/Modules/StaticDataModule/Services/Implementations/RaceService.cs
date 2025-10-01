@@ -20,7 +20,7 @@ public class RaceService(
     // Add new race and  add new fantasy lineups for all users for the new race
     public async Task<RaceDto> AddRaceAsync(RaceDto raceDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
@@ -68,7 +68,7 @@ public class RaceService(
     
     public async Task AddListRacesAsync(List<RaceDto> raceDtos)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

@@ -13,7 +13,7 @@ public class SeasonService(IStaticDataRepository staticDataRepository, WooF1Cont
 {
     public async Task<SeasonDto> AddSeasonAsync(SeasonDto seasonDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

@@ -13,7 +13,7 @@ public class RaceService(IStaticDataRepository staticDataRepository, WooF1Contex
 {
     public async Task<RaceDto> AddRaceAsync(RaceDto raceDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

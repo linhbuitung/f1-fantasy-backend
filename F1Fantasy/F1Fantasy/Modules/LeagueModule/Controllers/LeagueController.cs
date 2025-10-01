@@ -42,7 +42,7 @@ public class LeagueController(
         {
             return Forbid();
         }
-        await leagueService.JoinLeagueAsync(userId, leagueId);
+        await leagueService.JoinLeagueAsync(leagueId: leagueId, playerId: userId);
         return Ok();
     }
     
@@ -53,24 +53,31 @@ public class LeagueController(
         return Ok(league);
     }
     
-    [HttpGet("league/{leagueId:int}/join-requests")]
-    public async Task<IActionResult> GetJoinRequestById( int userId, int leagueId)
+    [HttpGet("/owner/{ownerId:int}/league/{leagueId:int}/join-requests")]
+    public async Task<IActionResult> GetJoinRequestByLeagueIdAndOwnerId( int ownerId, int leagueId)
     {        
-        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
+        var authResult = await authorizationService.AuthorizeAsync(User, ownerId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
         }
-        var userLeague = await leagueService.GetUserLeagueByIdAsync(leagueId, userId);
-        return Ok(userLeague);
+        var league = await leagueService.GetLeagueByIdAsync(leagueId, pageNum: 1, pageSize: 1);
+        if (league.Owner!.Id != ownerId)
+        {
+            return Forbid();
+        }
+        var userLeagues = await leagueService.GetUnAcceptedUserLeagueByLeagueIdAsync(leagueId);
+        return Ok(userLeagues);
     }
     
+    /*
     [HttpGet("/league/{leagueId:int}/waiting-requests")]
     public async Task<IActionResult> GetJoinRequestsInLeagueById(int leagueId)
     {
         var userLeagues = await leagueService.GetAllWaitingJoinRequestsAsync(leagueId);
         return Ok(userLeagues);
     }
+    */
     
     [HttpPut("league/{leagueId:int}/handle-join-request")]
     public async Task<IActionResult> JoinLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.UserLeagueDto userLeagueDto)
@@ -86,12 +93,29 @@ public class LeagueController(
         }
         
         var leagueDto = await leagueService.GetLeagueByIdAsync(leagueId, 1, 1);
-        if (leagueDto.Owner.Id != userId)
+        if (leagueDto.Owner!.Id != userId)
         {
             return Forbid();
         }
         
-        var league = await leagueService.HandleJoinRequestAsync(userLeagueDto);
+        var userLeague = await leagueService.HandleJoinRequestAsync(userLeagueDto);
+        return Ok(userLeague);
+    }
+    
+    [HttpPut("league/{leagueId:int}")]
+    public async Task<IActionResult> UpdateLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.LeagueDto leagueDto)
+    {
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
+        if (!authResult.Succeeded || leagueId != leagueDto.Id)
+        {
+            return Forbid();
+        }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var league = await leagueService.UpdateLeagueAsync(leagueDto);
         return Ok(league);
     }
     
@@ -119,4 +143,30 @@ public class LeagueController(
         return Ok();
     }
 
+    [HttpGet("/league/full-text-search")]
+    public async Task<IActionResult> SearchLeagues(
+        [FromQuery] string query,
+        [FromQuery] int pageNum = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return BadRequest("Query is required.");
+
+        var result = await leagueService.SearchLeaguesAsync(query, pageNum, pageSize);
+        return Ok(result);
+    }
+
+    [HttpGet("league/joined")]
+    public async Task<IActionResult> GetLeaguesByUserId(int userId)
+    {
+        var leagues = await leagueService.GetJoinedLeaguesByUserIdAsync(userId);
+        return Ok(leagues);
+    }
+
+    [HttpGet("league/owned")]
+    public async Task<IActionResult> GetOwnedLeaguesByUserId(int userId)
+    {
+        var leagues = await leagueService.GetOwnedLeaguesByUserIdAsync(userId);
+        return Ok(leagues);
+    }
 }

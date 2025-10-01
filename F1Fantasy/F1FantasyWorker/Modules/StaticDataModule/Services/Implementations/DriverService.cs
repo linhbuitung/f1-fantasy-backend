@@ -15,7 +15,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
     {
         public async Task<DriverDto> AddDriverAsync(DriverDto driverDto)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
@@ -57,7 +57,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task AddListDriversAsync(List<DriverDto> driverDtos)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {

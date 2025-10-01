@@ -13,7 +13,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
     {
         public async Task<ConstructorDto> AddConstructorAsync(ConstructorDto constructorDto)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {
@@ -54,7 +54,7 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         public async Task AddListConstructorsAsync(List<ConstructorDto> constructorDtos)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {

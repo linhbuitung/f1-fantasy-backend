@@ -102,7 +102,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
     public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemAsync(Dtos.Update.PickableItemDto dto)
     {
         await PreValidationForActionsAfterLatestRace("Pickable items");
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var pickableItem = await adminRepository.GetPickableItemAsync();

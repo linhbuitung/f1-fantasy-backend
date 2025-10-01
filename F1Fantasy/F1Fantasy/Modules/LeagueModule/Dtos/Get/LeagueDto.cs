@@ -21,7 +21,7 @@ public class LeagueDto
     public string Description { get; set; }
 
     [Required]
-    public UserInLeagueDto Owner { get; set; }
+    public UserInLeagueDto? Owner { get; set; }
     
-    public List<UserInLeagueDto> Users { get; set; } = new List<UserInLeagueDto>();
+    public List<UserInLeagueDto>? Users { get; set; }
 }

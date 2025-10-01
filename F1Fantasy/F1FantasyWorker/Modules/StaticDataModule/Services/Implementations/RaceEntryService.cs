@@ -13,7 +13,7 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
 {
     public async Task<RaceEntryDto> AddRaceEntryAsync(RaceEntryDto raceEntryDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
@@ -68,7 +68,7 @@ public class RaceEntryService(IDataSyncRepository dataSyncRepository, WooF1Conte
 
     public async Task AddListRaceEntriesAsync(List<RaceEntryDto> raceEntryDtos)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

@@ -67,7 +67,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
         PreValidateFantasyLineupDeadline(trackedFantasyLineup);
         
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var pickableItem = await coreGameplayRepository.GetPickableItemsAsync();
@@ -111,7 +111,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         }
         PreValidateFantasyLineupDeadline(trackedFantasyLineup);
         
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var pickableItem = await coreGameplayRepository.GetPickableItemsAsync();
@@ -244,7 +244,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             throw new NotFoundException($"Season {year} not found");
         }
         
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             // Delete all connections to drivers, constructors and powerups from all fantasy lineups from the year inserted

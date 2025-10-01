@@ -124,7 +124,6 @@ builder.Services.Configure<HostOptions>(options =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplicationScoped(); // Custom extension method to register application services
 
@@ -152,6 +151,11 @@ if (builder.Environment.IsProduction())
 } 
 else if (builder.Environment.IsDevelopment())
 {
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.CustomSchemaIds(type => type.FullName);
+    });
+    
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<List<string>>() ?? [];
     // Convert List<string> to string[]
     var originsArray = allowedOrigins?.ToArray();

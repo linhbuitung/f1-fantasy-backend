@@ -55,7 +55,7 @@ public class FantasyLineupSerivce(IDataSyncRepository dataSyncRepository, WooF1C
 
     public async Task AddFantasyLineupForAllUsersInASeasonAsync(int year)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

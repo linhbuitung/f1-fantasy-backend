@@ -16,7 +16,20 @@ public class LeagueDtoMapper
         };
     }
 
-    public static Get.LeagueDto MapLeagueToDto(League league, int pageNum, int pageSize )
+    public static Get.LeagueDto MapLeagueToDto(League league )
+    {
+        return new Get.LeagueDto
+        {
+            Id = league.Id,
+            Name = league.Name,
+            Type = league.Type,
+            Description = league.Description,
+            MaxPlayersNum = league.MaxPlayersNum
+            
+        };
+    }
+    
+    public static Get.LeagueDto MapLeagueToDtoWithPlayers(League league, int pageNum, int pageSize )
     {
         return new Get.LeagueDto
         {
@@ -34,6 +47,19 @@ public class LeagueDtoMapper
         };
     }
 
+    public static Get.LeagueDto MapSearchedLeagueToDto(League league)
+    {
+        return new Get.LeagueDto
+        {
+            Id = league.Id,
+            Name = league.Name,
+            Type = league.Type,
+            Description = league.Description,
+            MaxPlayersNum = league.MaxPlayersNum,
+            Owner = MapUserInLeagueToDto(league.User)
+        };
+    }
+    
     private static Get.UserInLeagueDto MapUserInLeagueToDto(ApplicationUser user)
     {
         return new Get.UserInLeagueDto
@@ -51,6 +77,8 @@ public class LeagueDtoMapper
         {
             UserId = userLeague.UserId,
             LeagueId = userLeague.LeagueId,
+            UserDisplayName = userLeague.User.DisplayName ?? null,
+            UserEmail = userLeague.User.Email ?? string.Empty,
             IsAccepted = userLeague.IsAccepted,
         };
     }
@@ -63,5 +91,12 @@ public class LeagueDtoMapper
             LeagueId = dto.LeagueId,
             IsAccepted = dto.IsAccepted,
         };
+    }
+    
+    public static League MapUpdateDtoToLeague(Dtos.Update.LeagueDto dto, League trackedLeague)
+    {
+        if (dto.Name != null) trackedLeague.Name = dto.Name;
+        if (dto.Description != null) trackedLeague.Description = dto.Description;
+        return trackedLeague;
     }
 } 

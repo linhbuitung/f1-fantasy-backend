@@ -8,7 +8,7 @@ public class PickableItemService(IDataSyncRepository dataSyncRepository, WooF1Co
 {
     public async Task<int?> AddPickableItemAsync()
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

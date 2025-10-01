@@ -13,7 +13,7 @@ public class SeasonService(IDataSyncRepository dataSyncRepository, WooF1Context 
 {
     public async Task<SeasonDto> AddSeasonAsync(SeasonDto seasonDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
@@ -45,7 +45,7 @@ public class SeasonService(IDataSyncRepository dataSyncRepository, WooF1Context 
 
     public async Task AddListSeasonsAsync(List<SeasonDto> seasonDtos)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
