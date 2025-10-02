@@ -22,6 +22,11 @@ public class CoreGameplayService(
 {
      public async Task<Race?> CalculatePointsForAllUsersInLastestFinishedRaceAsync()
      {
+          var budget = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:LineupBudget").Get<int>();
+          var priceKFactor = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:PriceKFactor").Get<double>();
+          var minPrice = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:MinPrice").Get<int>();
+          var maxPrice = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:MaxPrice").Get<int>();
+
           await using var transaction = await context.Database.BeginTransactionAsync();
 
           // Get powerups
@@ -49,6 +54,52 @@ public class CoreGameplayService(
 
                var driverPoints = lastestFinishedRace.RaceEntries.ToDictionary(e => e.DriverId, e => e.PointsGained);
 
+               /*
+                For constructors
+                    Both drivers in top 3: 10 points
+                    One driver in top 3: 5 points
+                    Both drivers in top 10: 3 points
+                    One driver in top 10: 1 point
+                    Neither in top 10: -1 point
+                */
+               // Get points for each constructor in the race
+               var constructorPoints = new Dictionary<int, int>();
+               var constructorIdsInRace = lastestFinishedRace.RaceEntries.Select(e => e.ConstructorId).Distinct().ToList();
+               // create a dictionary with constructorId as key and 0 as value
+               foreach (var constructorId in constructorIdsInRace)
+               {
+                    constructorPoints[constructorId] = 0;
+                    var raceEntriesForConstructorPointCalculation = lastestFinishedRace.RaceEntries
+                         .Where(e => e.ConstructorId == constructorId)
+                         .ToList();
+                    
+                    var positions = raceEntriesForConstructorPointCalculation.Select(d => d.Position).ToList();
+
+                    if (positions.Count == 2)
+                    {
+                         bool bothTop3 = positions.All(p => p > 0 && p <= 3);
+                         bool oneTop3 = positions.Count(p => p > 0 && p <= 3) == 1;
+                         bool bothTop10 = positions.All(p => p > 0 && p <= 10);
+                         bool oneTop10 = positions.Count(p => p > 0 && p <= 10) == 1;
+
+                         if (bothTop3)
+                              constructorPoints[constructorId] += 10;
+                         else if (oneTop3)
+                              constructorPoints[constructorId] += 5;
+                         else if (bothTop10)
+                              constructorPoints[constructorId] += 3;
+                         else if (oneTop10)
+                              constructorPoints[constructorId] += 1;
+                         else
+                              constructorPoints[constructorId] += -1;
+                    }
+                    else
+                    {
+                         // Handle missing drivers if needed
+                         constructorPoints[constructorId] = -1;
+                    }
+               }
+                    
                foreach (var lineup in lastestFinishedRace.FantasyLineups)
                {
                     await context.Entry(lineup).Collection(l => l.FantasyLineupDrivers).LoadAsync();
@@ -57,7 +108,6 @@ public class CoreGameplayService(
                     
                     // If total price of drivers and constructors exceed the budget, set points to 0
                     var totalPrice = lineup.FantasyLineupDrivers.Sum(d => d.Driver.Price) + lineup.Constructors.Sum(c => c.Price);
-                    var budget = configuration.GetSection("CoreGameplaySettings:FantasyTeamSettings:LineupBudget").Get<int>();
                     if (totalPrice > budget)
                     {
                          lineup.PointsGained = 0;
@@ -87,49 +137,14 @@ public class CoreGameplayService(
                          }
                     }
                     
-                    /*
-                     For constructors
-                         Both drivers in top 3: 10 points
-                         One driver in top 3: 5 points
-                         Both drivers in top 10: 3 points
-                         One driver in top 10: 1 point
-                         Neither in top 10: -1 point
-                     */
+                    
                     int totalPointsFromConstructor = 0;
 
                     foreach (var constructor in lineup.Constructors)
                     {
-                         // Get all drivers for this constructor in the race
-                         var raceEntriesForConstructorPointCalculation = lastestFinishedRace.RaceEntries
-                              .Where(e => e.ConstructorId == constructor.Id)
-                              .ToList();
-
-                         // Get their positions
-                         var positions = raceEntriesForConstructorPointCalculation.Select(d => d.Position).ToList();
-
-
-                         if (positions.Count == 2)
+                         if (constructorPoints.TryGetValue(constructor.Id, out var points))
                          {
-                              bool bothTop3 = positions.All(p => p > 0 && p <= 3);
-                              bool oneTop3 = positions.Count(p => p > 0 && p <= 3) == 1;
-                              bool bothTop10 = positions.All(p => p > 0 && p <= 10);
-                              bool oneTop10 = positions.Count(p => p > 0 && p <= 10) == 1;
-
-                              if (bothTop3)
-                                   totalPointsFromConstructor += 10;
-                              else if (oneTop3)
-                                   totalPointsFromConstructor += 5;
-                              else if (bothTop10)
-                                   totalPointsFromConstructor += 3;
-                              else if (oneTop10)
-                                   totalPointsFromConstructor += 1;
-                              else
-                                   totalPointsFromConstructor += -1;
-                         }
-                         else
-                         {
-                              // Handle missing drivers if needed
-                              totalPointsFromConstructor = -1;
+                              totalPointsFromConstructor += points;
                          }
                     }
                     
@@ -155,6 +170,8 @@ public class CoreGameplayService(
                }
 
                lastestFinishedRace.Calculated = true;
+               await UpdateDriverPricesAsync(lastestFinishedRace, k: priceKFactor, minPrice: minPrice, maxPrice: maxPrice);
+               await UpdateConstructorPricesAfterRaceAsync(lastestFinishedRace, k: priceKFactor, minPrice: minPrice, maxPrice: maxPrice);
                
                await context.SaveChangesAsync();
                await transaction.CommitAsync();
@@ -216,7 +233,11 @@ public class CoreGameplayService(
           return await context.Races
                .Where(r => r.DeadlineDate < currentDate)
                .OrderByDescending(r => r.DeadlineDate)
+               .Include(r => r.Season)
                .Include(r => r.RaceEntries)
+               .ThenInclude(re => re.Driver)
+               .Include(r => r.RaceEntries)
+               .ThenInclude(re => re.Constructor)
                .AsTracking()
                .FirstOrDefaultAsync();
      }
@@ -292,5 +313,91 @@ public class CoreGameplayService(
 
                throw;
           }
+     }
+     
+     public async Task UpdateDriverPricesAsync(Race race, double k = 0.2, int minPrice = 5, int maxPrice = 100)
+     {
+          var drivers = race.RaceEntries.Select(re => re.Driver).Distinct().ToList();
+          // Load Season for race
+          foreach (var driver in drivers)
+          {
+               var raceResults = await context.RaceEntries
+                    .Where(r => r.DriverId == driver.Id && r.Race.SeasonId == race.SeasonId)
+                    .OrderBy(r => r.Race.RaceDate)
+                    .ToListAsync();
+
+               if (raceResults.Count < 2)
+                    continue;
+
+               var lastResult = raceResults.Last();
+               var previousResults = raceResults.Take(raceResults.Count - 1).ToList();
+
+               double sRace = lastResult.PointsGained;
+               double sAvg = previousResults.Average(r => r.PointsGained);
+
+               double priceRange = maxPrice - minPrice;
+               double priceFactor = 1.0 - ((driver.Price - minPrice) / priceRange);
+               priceFactor = Math.Max(0.1, priceFactor); // Prevents priceFactor from going to zero
+
+               double delta = k * (sRace - sAvg) * priceFactor;
+               double newPrice = driver.Price + delta;
+               newPrice = Math.Max(minPrice, Math.Min(maxPrice, Math.Round(newPrice)));
+
+               if (driver.Price != (int)newPrice)
+               {
+                    driver.Price = (int)newPrice;
+                    context.Drivers.Update(driver);
+               }
+          }
+          await context.SaveChangesAsync();
+     }
+     
+     // Calculate new prices for constructors based on their drivers' performance
+     public async Task UpdateConstructorPricesAfterRaceAsync(Race race, double k = 0.2, int minPrice = 5, int maxPrice = 100)
+     {
+          var constructors =  race.RaceEntries.Select(re => re.Constructor).Distinct().ToList();
+          foreach (var constructor in constructors)
+          {
+               // Get all race results for this constructor up to and including this race
+               var raceResults = await context.RaceEntries
+                    .Where(r => r.ConstructorId == constructor.Id && r.Race.SeasonId == race.SeasonId)
+                    .OrderBy(r => r.Race.RaceDate)
+                    .ToListAsync();
+               
+               // Combine race results where has same raceId (i.e. both drivers in same race)
+               raceResults = raceResults
+                    .GroupBy(r => r.RaceId)
+                    .Select(g =>
+                    {
+                         var combined = g.First();
+                         combined.PointsGained = g.Sum(x => x.PointsGained);
+                         return combined;
+                    })
+                    .ToList();
+               
+               if (raceResults.Count < 2)
+                    continue; // Not enough data to adjust
+
+               var lastResult = raceResults.Last();
+               var previousResults = raceResults.Take(raceResults.Count - 1).ToList();
+
+               double sRace = lastResult.PointsGained;
+               double sAvg = previousResults.Average(r => r.PointsGained);
+
+               double priceRange = maxPrice - minPrice;
+               double priceFactor = 1.0 - ((constructor.Price - minPrice) / priceRange);
+               priceFactor = Math.Max(0.1, priceFactor); // Prevents priceFactor from going to zero
+
+               double delta = k * (sRace - sAvg) * priceFactor;
+               double newPrice = constructor.Price + delta;
+               newPrice = Math.Max(minPrice, Math.Min(maxPrice, Math.Round(newPrice)));
+
+               if (constructor.Price != (int)newPrice)
+               {
+                    constructor.Price = (int)newPrice;
+                    context.Constructors.Update(constructor);
+               }
+          }
+          await context.SaveChangesAsync();
      }
 }
