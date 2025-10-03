@@ -106,12 +106,32 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
 
     public async Task<List<RaceEntry>> GetTopConstructorRaceEntriesInARaceByRaceIdAsync(int raceId, int topN)
     {
+        
+        // Step 1: Get top N constructor IDs by total points
+        var topConstructorIds = await context.RaceEntries
+            .Where(re => re.RaceId == raceId && re.Finished)
+            .GroupBy(re => re.ConstructorId)
+            .Select(g => new { ConstructorId = g.Key, TotalPoints = g.Sum(re => re.PointsGained) })
+            .OrderByDescending(x => x.TotalPoints)
+            .Take(topN)
+            .Select(x => x.ConstructorId)
+            .ToListAsync();
+
+        // Step 2: Get all entries for those constructors in this race
         return await context.RaceEntries
             .Include(re => re.Constructor)
             .AsNoTracking()
+            .Where(re => re.RaceId == raceId && re.Finished && topConstructorIds.Contains(re.ConstructorId))
+            .ToListAsync();
+    }
+
+    public async Task<List<RaceEntry>> GetAllRaceEntriesByRaceIdAsync(int raceId)
+    {
+        return await context.RaceEntries
             .Where(re => re.RaceId == raceId && re.Finished)
-            .OrderByDescending(re => re.PointsGained)
-            .Take(topN)
+            .Include(re => re.Driver)
+            .Include(re => re.Constructor)
+            .AsNoTracking()
             .ToListAsync();
     }
 }
