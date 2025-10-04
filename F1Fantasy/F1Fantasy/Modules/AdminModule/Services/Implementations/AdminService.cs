@@ -101,8 +101,12 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
 
     public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemAsync(Dtos.Update.PickableItemDto dto)
     {
-        await PreValidationForActionsAfterLatestRace("Pickable items");
-        using var transaction = await context.Database.BeginTransactionAsync();
+        // check if is development environment
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production" )
+        {
+            await PreValidationForActionsAfterLatestRace("Pickable items");
+        }
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var pickableItem = await adminRepository.GetPickableItemAsync();
@@ -172,8 +176,10 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Season with year {seasonYear} not found.");
         }
-
-        await PreValidationForActionsAfterLatestRace("Pickable items");
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production" )
+        {
+            await PreValidationForActionsAfterLatestRace("Pickable items");
+        }
         
         var allDriverIdsInSeason = (await staticDataRepository.GetAllDriversBySeasonIdAsync(season.Id)).Select(d => d.Id).ToList();
         var allConstructorIdsInSeason = (await staticDataRepository.GetAllConstructorsBySeasonIdAsync(season.Id)).Select(c => c.Id).ToList();

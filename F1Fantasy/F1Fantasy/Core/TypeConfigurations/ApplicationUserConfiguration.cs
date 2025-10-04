@@ -13,6 +13,10 @@ namespace F1Fantasy.Core.TypeConfigurations
             entity.Property(u => u.Email).HasMaxLength(128);
             entity.Property(u => u.NormalizedEmail).HasMaxLength(128);
 
+            entity.HasIndex(e => new { e.DisplayName, e.Email })
+                .HasMethod("GIN")
+                .HasAnnotation("Npgsql:TsVectorConfig", "english");
+        
             entity.HasOne(e => e.Constructor)
                 .WithMany(c => c.Users)
                 .HasForeignKey(e => e.ConstructorId)

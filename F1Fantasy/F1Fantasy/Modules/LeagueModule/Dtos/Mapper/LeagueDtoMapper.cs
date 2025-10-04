@@ -16,7 +16,20 @@ public class LeagueDtoMapper
         };
     }
 
-    public static Get.LeagueDto MapLeagueToDto(League league, int pageNum, int pageSize )
+    public static Get.LeagueDto MapLeagueToDto(League league )
+    {
+        return new Get.LeagueDto
+        {
+            Id = league.Id,
+            Name = league.Name,
+            Type = league.Type,
+            Description = league.Description,
+            MaxPlayersNum = league.MaxPlayersNum
+            
+        };
+    }
+    
+    public static Get.LeagueDto MapLeagueToDtoWithPlayers(League league, List<Get.UserInLeagueDto> userInLeagueDtos, int pageNum, int pageSize )
     {
         return new Get.LeagueDto
         {
@@ -26,14 +39,40 @@ public class LeagueDtoMapper
             Description = league.Description,
             MaxPlayersNum = league.MaxPlayersNum,
             Owner = MapUserInLeagueToDto(league.User),
-            Users = league.UserLeagues
+            TotalPlayersNum = userInLeagueDtos.Count,
+            // Order users by TotalPoints descending and apply pagination
+            Users = userInLeagueDtos
+                .OrderByDescending(ul => ul.TotalPoints)
                 .Skip((pageNum - 1) * pageSize)
                 .Take(pageSize)
-                .Select(ul => MapUserInLeagueToDto(ul.User))
                 .ToList()
         };
     }
 
+    public static Get.UserInLeagueDto MapUserLeagueToUserInLeagueDto(UserLeague userLeague, int currentSeasonId)
+    {
+        return new Get.UserInLeagueDto
+        {
+            Id = userLeague.User.Id,
+            DisplayName = userLeague.User.DisplayName ?? string.Empty,
+            Email = userLeague.User.Email ?? string.Empty,
+            CountryName = userLeague.User.Country?.ShortName ?? string.Empty,
+            TotalPoints = userLeague.User.FantasyLineups.Where(ul => ul.Race.SeasonId == currentSeasonId).Sum(fl => fl.PointsGained)
+        };
+    }
+    public static Get.LeagueDto MapSearchedLeagueToDto(League league)
+    {
+        return new Get.LeagueDto
+        {
+            Id = league.Id,
+            Name = league.Name,
+            Type = league.Type,
+            Description = league.Description,
+            MaxPlayersNum = league.MaxPlayersNum,
+            Owner = MapUserInLeagueToDto(league.User)
+        };
+    }
+    
     private static Get.UserInLeagueDto MapUserInLeagueToDto(ApplicationUser user)
     {
         return new Get.UserInLeagueDto
@@ -51,6 +90,8 @@ public class LeagueDtoMapper
         {
             UserId = userLeague.UserId,
             LeagueId = userLeague.LeagueId,
+            UserDisplayName = userLeague.User.DisplayName ?? null,
+            UserEmail = userLeague.User.Email ?? string.Empty,
             IsAccepted = userLeague.IsAccepted,
         };
     }
@@ -63,5 +104,12 @@ public class LeagueDtoMapper
             LeagueId = dto.LeagueId,
             IsAccepted = dto.IsAccepted,
         };
+    }
+    
+    public static League MapUpdateDtoToLeague(Dtos.Update.LeagueDto dto, League trackedLeague)
+    {
+        if (dto.Name != null) trackedLeague.Name = dto.Name;
+        if (dto.Description != null) trackedLeague.Description = dto.Description;
+        return trackedLeague;
     }
 } 

@@ -13,7 +13,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
     {
         public async Task<CircuitDto> AddCircuitAsync(CircuitDto circuitDto)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {

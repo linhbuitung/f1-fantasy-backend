@@ -12,7 +12,7 @@ public class PowerupService(IDataSyncRepository dataSyncRepository, WooF1Context
 {
     public async Task<PowerupDto> AddPowerupAsync(PowerupDto powerupDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
@@ -44,7 +44,7 @@ public class PowerupService(IDataSyncRepository dataSyncRepository, WooF1Context
     
     public async Task AddListPowerupsAsync(List<PowerupDto> powerupDtos)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

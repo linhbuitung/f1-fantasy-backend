@@ -15,7 +15,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
     {
         public async Task<DriverDto> AddDriverAsync(DriverDto driverDto)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
             try
             {

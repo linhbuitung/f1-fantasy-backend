@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using F1Fantasy.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace F1Fantasy.Infrastructure.Migrations
 {
     [DbContext(typeof(WooF1Context))]
-    partial class WooF1ContextModelSnapshot : ModelSnapshot
+    [Migration("20251001124523_ModifyIndexForLeague")]
+    partial class ModifyIndexForLeague
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -698,9 +701,6 @@ namespace F1Fantasy.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_league");
-
-                    b.HasAlternateKey("Name")
-                        .HasName("ak_league_name");
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("ix_league_owner_id");

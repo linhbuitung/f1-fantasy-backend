@@ -35,29 +35,16 @@ public class StatisticDtoMapper
         };
     }
 
-    public static Get.TeamOfTheRaceDto MapToTeamOfTheRaceDto(int raceId, string raceName, int round, List<RaceEntry> driverEntries,
-        List<RaceEntry> constructorEntries)
+    public static Get.TeamOfTheRaceDto MapToTeamOfTheRaceDto(int raceId, string raceName, int round, List<Get.DriverInTeamOfTheRaceDto> driverEntries,
+        List<Get.ConstructorInTeamOfTheRaceDto> constructorEntries)
     {
         return new Get.TeamOfTheRaceDto
         {
             Id = raceId,
             RaceName = raceName,
             Round = round,
-            Drivers = driverEntries.Select(re => new Get.DriverInTeamOfTheRaceDto
-            {
-                Id = re.DriverId,
-                Name = String.Concat(re.Driver.GivenName, " ", re.Driver.FamilyName),
-                PointGained = re.PointsGained,
-                ImgUrl = re.Driver.ImgUrl
-
-            }).ToList(),
-            Constructors = constructorEntries.Select(re => new Get.ConstructorInTeamOfTheRaceDto
-            {
-                Id = re.ConstructorId,
-                Name =re.Constructor.Name,
-                PointGained = re.PointsGained,
-                ImgUrl = re.Constructor.ImgUrl
-            }).ToList()
+            Drivers = driverEntries,
+            Constructors = constructorEntries
         };
     }
 }

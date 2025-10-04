@@ -13,7 +13,7 @@ public class PowerupService(IStaticDataRepository staticDataRepository, WooF1Con
 {
     public async Task<PowerupDto> AddPowerupAsync(PowerupDto powerupDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {

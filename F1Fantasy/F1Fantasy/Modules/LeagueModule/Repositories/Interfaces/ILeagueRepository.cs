@@ -6,6 +6,9 @@ public interface ILeagueRepository
 {
     Task<League> AddLeagueAsync(League league);
     
+    Task<League?> GetTrackedLeagueByLeagueIdAndOwnerIdAsync(int leagueId, int ownerId);
+    
+    Task<League?> GetLeagueByNameAsync(string leagueName);
     Task<UserLeague> AddUserLeagueAsync(UserLeague userLeague);
     
     Task<League?> GetLeagueByIdIncludesOwnerAndPlayersAsync(int leagueId);
@@ -22,4 +25,8 @@ public interface ILeagueRepository
     
     Task DeleteUserLeagueByIdAsync(int leagueId, int playerId);
     Task DeleteLeagueByIdAsync(int leagueId);
+    
+    Task<List<UserLeague>> GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(int leagueId, bool isAccepted, int? currentSeasonId);
+    
+    public Task<(List<League> Leagues, int TotalCount)> SearchLeaguesViaFullTextSearchAsync(string query, int skip, int take);
 }

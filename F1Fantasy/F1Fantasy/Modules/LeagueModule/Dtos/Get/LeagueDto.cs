@@ -19,9 +19,11 @@ public class LeagueDto
 
     [MaxLength(500)]
     public string Description { get; set; }
+    
+    public int TotalPlayersNum { get; set; }
 
     [Required]
-    public UserInLeagueDto Owner { get; set; }
+    public UserInLeagueDto? Owner { get; set; }
     
-    public List<UserInLeagueDto> Users { get; set; } = new List<UserInLeagueDto>();
+    public List<UserInLeagueDto>? Users { get; set; }
 }

@@ -13,7 +13,7 @@ public class UserService(IUserRepository userRepository, WooF1Context context) :
 {
     public async Task<Dtos.Get.ApplicationUserDto> UpdateUserAsync(Dtos.Update.ApplicationUserDto userUpdateDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
 
         try
         {
