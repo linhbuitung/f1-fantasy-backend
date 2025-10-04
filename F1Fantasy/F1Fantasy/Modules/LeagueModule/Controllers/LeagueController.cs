@@ -34,7 +34,7 @@ public class LeagueController(
         return Ok(league);
     }
     
-    [HttpPost("league/join/{leagueId:int}")]
+    [HttpPost("league/{leagueId:int}/join")]
     public async Task<IActionResult> JoinLeagueById(int userId, int leagueId)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
@@ -80,7 +80,7 @@ public class LeagueController(
     */
     
     [HttpPut("league/{leagueId:int}/handle-join-request")]
-    public async Task<IActionResult> JoinLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.UserLeagueDto userLeagueDto)
+    public async Task<IActionResult> HandleJoinLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.UserLeagueDto userLeagueDto)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
@@ -185,5 +185,17 @@ public class LeagueController(
     {
         var leagues = await leagueService.GetOwnedLeaguesByUserIdAsync(userId);
         return Ok(leagues);
+    }
+    
+    [HttpGet("league/{leagueId:int}/join-request")]
+    public async Task<IActionResult> GetJoinRequestByPlayerIdAndLeagueId(int userId, int leagueId)
+    {
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var userLeague = await leagueService.GetUserLeagueByIdAsync(leagueId, userId);
+        return Ok(userLeague);
     }
 }

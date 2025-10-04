@@ -122,6 +122,7 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
             return await context.UserLeagues
                 .Include(ul => ul.User)
                 .ThenInclude(u => u.FantasyLineups)
+                .ThenInclude(fl => fl.Race)
                 .Where(ul => ul.LeagueId == leagueId && ul.IsAccepted == isAccepted)
                 .AsNoTracking()
                 .ToListAsync();

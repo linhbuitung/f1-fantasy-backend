@@ -39,6 +39,7 @@ public class LeagueDtoMapper
             Description = league.Description,
             MaxPlayersNum = league.MaxPlayersNum,
             Owner = MapUserInLeagueToDto(league.User),
+            TotalPlayersNum = userInLeagueDtos.Count,
             // Order users by TotalPoints descending and apply pagination
             Users = userInLeagueDtos
                 .OrderByDescending(ul => ul.TotalPoints)
