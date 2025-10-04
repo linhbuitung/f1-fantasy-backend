@@ -29,7 +29,7 @@ public class LeagueDtoMapper
         };
     }
     
-    public static Get.LeagueDto MapLeagueToDtoWithPlayers(League league, int pageNum, int pageSize )
+    public static Get.LeagueDto MapLeagueToDtoWithPlayers(League league, List<Get.UserInLeagueDto> userInLeagueDtos, int pageNum, int pageSize )
     {
         return new Get.LeagueDto
         {
@@ -39,14 +39,26 @@ public class LeagueDtoMapper
             Description = league.Description,
             MaxPlayersNum = league.MaxPlayersNum,
             Owner = MapUserInLeagueToDto(league.User),
-            Users = league.UserLeagues
+            // Order users by TotalPoints descending and apply pagination
+            Users = userInLeagueDtos
+                .OrderByDescending(ul => ul.TotalPoints)
                 .Skip((pageNum - 1) * pageSize)
                 .Take(pageSize)
-                .Select(ul => MapUserInLeagueToDto(ul.User))
                 .ToList()
         };
     }
 
+    public static Get.UserInLeagueDto MapUserLeagueToUserInLeagueDto(UserLeague userLeague, int currentSeasonId)
+    {
+        return new Get.UserInLeagueDto
+        {
+            Id = userLeague.User.Id,
+            DisplayName = userLeague.User.DisplayName ?? string.Empty,
+            Email = userLeague.User.Email ?? string.Empty,
+            CountryName = userLeague.User.Country?.ShortName ?? string.Empty,
+            TotalPoints = userLeague.User.FantasyLineups.Where(ul => ul.Race.SeasonId == currentSeasonId).Sum(fl => fl.PointsGained)
+        };
+    }
     public static Get.LeagueDto MapSearchedLeagueToDto(League league)
     {
         return new Get.LeagueDto

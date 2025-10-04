@@ -37,8 +37,6 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
     {
         return await context.Leagues
             .Include(l => l.User)
-            .Include(l => l.UserLeagues)
-            .ThenInclude(ul => ul.User)
             .FirstOrDefaultAsync(l => l.Id == leagueId);
     }
     
@@ -117,19 +115,29 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
             .Where(ul => ul.LeagueId == leagueId && !ul.IsAccepted).ToListAsync();
     }
     
-    public async Task<List<UserLeague>> GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(int leagueId, bool isAccepted)
+    public async Task<List<UserLeague>> GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(int leagueId, bool isAccepted, int? currentSeasonId)
     {
+        if(isAccepted && currentSeasonId != null)
+        {
+            return await context.UserLeagues
+                .Include(ul => ul.User)
+                .ThenInclude(u => u.FantasyLineups)
+                .Where(ul => ul.LeagueId == leagueId && ul.IsAccepted == isAccepted)
+                .AsNoTracking()
+                .ToListAsync();
+        }
         return await context.UserLeagues
             .Include(ul => ul.User)
             .Where(ul => ul.LeagueId == leagueId && ul.IsAccepted == isAccepted)
+            .AsNoTracking()
             .ToListAsync();
     }
     public async Task<(List<League> Leagues, int TotalCount)> SearchLeaguesViaFullTextSearchAsync(string query, int skip, int take)
     {
         var leaguesQuery = context.Leagues
             .Where(l =>
-                EF.Functions.ToTsVector("english", l.Name + " " + l.Description)
-                    .Matches(EF.Functions.PlainToTsQuery("english", query)))
+                EF.Functions.ILike(l.Name, $"%{query}%") ||
+                EF.Functions.ILike(l.Description, $"%{query}%"))
             .Include(l => l.User);
 
         var totalCount = await leaguesQuery.CountAsync();

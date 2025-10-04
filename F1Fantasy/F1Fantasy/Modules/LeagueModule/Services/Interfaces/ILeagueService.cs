@@ -24,7 +24,7 @@ public interface ILeagueService
     Task<List<Dtos.Get.UserLeagueDto>> GetUnAcceptedUserLeagueByLeagueIdAsync(int leagueId);
 
     // This method is for the owner to accept or reject a join request
-    Task LeaveLeagueAsync(int leagueId, int playerId);
+    Task RemovePlayerFromLeagueAsync(int leagueId, int playerId);
     
     Task<PagedResult<Dtos.Get.LeagueDto>> SearchLeaguesAsync(string query, int pageNum, int pageSize);
     

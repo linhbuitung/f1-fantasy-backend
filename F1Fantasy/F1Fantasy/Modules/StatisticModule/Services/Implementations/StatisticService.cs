@@ -64,20 +64,20 @@ public class StatisticService(IStatisticRepository statisticRepository, ICoreGam
                 bool oneTop10 = positions.Count(p => p > 0 && p <= 10) == 1;
 
                 if (bothTop3)
-                    constructorPoints[constructorId] += 10;
+                    constructorPoints[constructorId] += 30;
                 else if (oneTop3)
-                    constructorPoints[constructorId] += 5;
+                    constructorPoints[constructorId] += 20;
                 else if (bothTop10)
-                    constructorPoints[constructorId] += 3;
+                    constructorPoints[constructorId] += 15;
                 else if (oneTop10)
-                    constructorPoints[constructorId] += 1;
+                    constructorPoints[constructorId] += 10;
                 else
-                    constructorPoints[constructorId] += -1;
+                    constructorPoints[constructorId] += -10;
             }
             else
             {
                 // Handle missing drivers if needed
-                constructorPoints[constructorId] = -1;
+                constructorPoints[constructorId] = -10;
             }
         }
         // Get top 2 constructors based on points from constructorPoints dictionary, if tie, sort by constructorId 

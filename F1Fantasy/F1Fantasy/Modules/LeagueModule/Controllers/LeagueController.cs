@@ -139,10 +139,27 @@ public class LeagueController(
         { 
             return Forbid();
         }
-        await leagueService.LeaveLeagueAsync(leagueId, userId);
+        await leagueService.RemovePlayerFromLeagueAsync(leagueId, userId);
         return Ok();
     }
 
+    [HttpDelete("league/{leagueId:int}/kick/{playerId:int}")]
+    public async Task<IActionResult> KickPlayerFromLeague(int userId, int leagueId, int playerId)
+    {
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+        var leagueDto = await leagueService.GetLeagueByIdAsync(leagueId, 1, 1);
+        if (leagueDto.Owner!.Id != userId)
+        {
+            return Forbid();
+        }
+        await leagueService.RemovePlayerFromLeagueAsync(leagueId, playerId);
+        return Ok();
+    }
+    
     [HttpGet("/league/full-text-search")]
     public async Task<IActionResult> SearchLeagues(
         [FromQuery] string query,

@@ -14,4 +14,6 @@ public class UserInLeagueDto
     public string? DisplayName { get; set; }
     
     public string? CountryName { get; set; }
+    
+    public int TotalPoints { get; set; }
 }

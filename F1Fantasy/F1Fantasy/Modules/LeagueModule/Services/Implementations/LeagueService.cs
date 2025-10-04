@@ -1,6 +1,7 @@
 ﻿using F1Fantasy.Core.Common;
 using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
+using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.LeagueModule.Dtos.Get;
 using F1Fantasy.Modules.LeagueModule.Dtos.Mapper;
 using F1Fantasy.Modules.LeagueModule.Repositories.Interfaces;
@@ -14,6 +15,7 @@ public class LeagueService(
     IConfiguration configuration,
     ILeagueRepository leagueRepository,
     IUserService userService,
+    IAdminService adminService,
     WooF1Context context)
     : ILeagueService
 {
@@ -58,14 +60,17 @@ public class LeagueService(
 
     public async Task<Dtos.Get.LeagueDto> GetLeagueByIdAsync(int leagueId, int pageNum = 1, int pageSize = 10)
     {
+        var currentActiveSeason = await adminService.GetActiveSeasonAsync();
         var league = await leagueRepository.GetLeagueByIdIncludesOwnerAndPlayersAsync(leagueId);
-
+        
         if (league == null)
         {
             throw new NotFoundException("League not found.");
         }
+        var usersInLeague = await leagueRepository.GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(leagueId, isAccepted:true, currentSeasonId: currentActiveSeason.Id);
+        var userInLeagueDtos = usersInLeague.Select(ul => LeagueDtoMapper.MapUserLeagueToUserInLeagueDto(ul, currentActiveSeason.Id)).ToList();
         
-        var leagueDto = LeagueDtoMapper.MapLeagueToDtoWithPlayers(league, pageNum, pageSize);
+        var leagueDto = LeagueDtoMapper.MapLeagueToDtoWithPlayers(league, userInLeagueDtos, pageNum, pageSize);
         return leagueDto;
     }
     
@@ -209,7 +214,7 @@ public class LeagueService(
         return LeagueDtoMapper.MapUserLeagueToDto(userLeague);
     }
 
-    public async Task LeaveLeagueAsync(int leagueId, int playerId)
+    public async Task RemovePlayerFromLeagueAsync(int leagueId, int playerId)
     {
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -311,7 +316,7 @@ public class LeagueService(
 
     public async Task<List<Dtos.Get.UserLeagueDto>> GetUnAcceptedUserLeagueByLeagueIdAsync(int leagueId)
     {
-        var userLeagues = await leagueRepository.GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(leagueId, false);
+        var userLeagues = await leagueRepository.GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(leagueId, false, currentSeasonId: null);
         return userLeagues.Select(LeagueDtoMapper.MapUserLeagueToDto).ToList();
     }
 }

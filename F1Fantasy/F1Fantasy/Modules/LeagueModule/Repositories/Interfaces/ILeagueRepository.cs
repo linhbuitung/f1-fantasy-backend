@@ -26,7 +26,7 @@ public interface ILeagueRepository
     Task DeleteUserLeagueByIdAsync(int leagueId, int playerId);
     Task DeleteLeagueByIdAsync(int leagueId);
     
-    Task<List<UserLeague>> GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(int leagueId, bool isAccepted);
+    Task<List<UserLeague>> GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(int leagueId, bool isAccepted, int? currentSeasonId);
     
     public Task<(List<League> Leagues, int TotalCount)> SearchLeaguesViaFullTextSearchAsync(string query, int skip, int take);
 }
