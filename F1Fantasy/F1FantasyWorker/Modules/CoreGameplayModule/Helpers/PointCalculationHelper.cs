@@ -108,7 +108,7 @@ public class PointCalculationHelper
     {
         if(startPosition == null || endPosition == null)
             return 0;
-        return endPosition.Value - startPosition.Value;
+        return startPosition.Value - endPosition.Value;
     }
     
     public static int GetDriverFastestLapPoint(int? fastestLap)

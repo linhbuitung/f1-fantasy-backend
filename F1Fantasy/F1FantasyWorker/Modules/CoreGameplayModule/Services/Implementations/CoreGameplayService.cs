@@ -38,7 +38,6 @@ public class CoreGameplayService(
                
                // Ensure its at least a day currently after the race date
                var raceCalculationDeadline = lastestFinishedRace.RaceDate.AddDays(1);
-               var daynow = DateOnly.FromDateTime(DateTime.UtcNow);
                if(raceCalculationDeadline > DateOnly.FromDateTime(DateTime.UtcNow)) return null;
                     
                foreach (var raceEntry in lastestFinishedRace.RaceEntries)
@@ -368,25 +367,28 @@ public class CoreGameplayService(
                // Get all race results for this constructor up to and including this race
                var raceResults = await context.RaceEntries
                     .Where(r => r.ConstructorId == constructor.Id && r.Race.SeasonId == race.SeasonId)
+                    .Include(r => r.Race)
+                    .AsNoTracking()
                     .OrderBy(r => r.Race.RaceDate)
                     .ToListAsync();
                
-               // Combine race results where has same raceId (i.e. both drivers in same race)
-               raceResults = raceResults
+                              // Combine per-race points into a separate projection (NOT mutate tracked entities)
+               var combinedResults = raceResults
                     .GroupBy(r => r.RaceId)
-                    .Select(g =>
-                    {
-                         var combined = g.First();
-                         combined.PointsGained = g.Sum(x => x.PointsGained);
-                         return combined;
-                    })
+                    .Select(g => new
+                         {
+                              RaceId = g.Key,
+                              RaceDate = g.First().Race.RaceDate,
+                              PointsGained = g.Sum(x => x.PointsGained)
+                         })
+                    .OrderBy(x => x.RaceDate)
                     .ToList();
                
-               if (raceResults.Count < 2)
+               if (combinedResults.Count < 2)
                     continue; // Not enough data to adjust
 
-               var lastResult = raceResults.Last();
-               var previousResults = raceResults.Take(raceResults.Count - 1).ToList();
+               var lastResult = combinedResults.Last();
+               var previousResults = combinedResults.Take(combinedResults.Count - 1).ToList();
 
                double sRace = lastResult.PointsGained;
                double sAvg = previousResults.Average(r => r.PointsGained);
