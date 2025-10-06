@@ -38,7 +38,8 @@ public class CoreGameplayService(
                
                // Ensure its at least a day currently after the race date
                var raceCalculationDeadline = lastestFinishedRace.RaceDate.AddDays(1);
-               if(raceCalculationDeadline >= DateOnly.FromDateTime(DateTime.UtcNow)) return null;
+               var daynow = DateOnly.FromDateTime(DateTime.UtcNow);
+               if(raceCalculationDeadline > DateOnly.FromDateTime(DateTime.UtcNow)) return null;
                     
                foreach (var raceEntry in lastestFinishedRace.RaceEntries)
                {
@@ -103,8 +104,15 @@ public class CoreGameplayService(
                foreach (var lineup in lastestFinishedRace.FantasyLineups)
                {
                     await context.Entry(lineup).Collection(l => l.FantasyLineupDrivers).LoadAsync();
+                    foreach (var fld in lineup.FantasyLineupDrivers)
+                    {
+                         await context.Entry(fld).Reference(f => f.Driver).LoadAsync();
+                    }
+                    
                     // Load constructors from fantasy lineup
                     await context.Entry(lineup).Collection(l => l.Constructors).LoadAsync();
+                    // Load powerups from fantasy lineup
+                    await context.Entry(lineup).Collection(l => l.Powerups).LoadAsync();
                     
                     // If total price of drivers and constructors exceed the budget, set points to 0
                     var totalPrice = lineup.FantasyLineupDrivers.Sum(d => d.Driver.Price) + lineup.Constructors.Sum(c => c.Price);
@@ -148,8 +156,7 @@ public class CoreGameplayService(
                          }
                     }
                     
-                    // Load powerups from fantasy lineup
-                    await context.Entry(lineup).Collection(l => l.Powerups).LoadAsync();
+
                     
                     // Get all powerups in the lineup by joining with powerups table
                     var powerUpOwned = lineup.Powerups
