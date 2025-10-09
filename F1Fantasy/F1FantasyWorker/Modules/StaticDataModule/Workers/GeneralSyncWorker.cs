@@ -415,13 +415,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 ? "No points were calculated"
                 : "Database calculated point gained for all users in latest race.");
 
+            // removed since this logic is moved to F1Fantasy transfer route
             // Migrate fantasy lineups to next race
-            if (calculatedRace != null)
-            {
-                logger.LogInformation("Start migrating fantasy lineups to next race");
-                await coreGameplayService.MigrateFantasyLineupsToNextRaceAsync(calculatedRace);
-                logger.LogInformation("Migrated fantasy lineups to next race");
-            }
+            // if (calculatedRace != null)
+            // {
+            //     logger.LogInformation("Start migrating fantasy lineups to next race");
+            //     await coreGameplayService.MigrateFantasyLineupsToNextRaceAsync(calculatedRace);
+            //     logger.LogInformation("Migrated fantasy lineups to next race");
+            // }
         }
     }
 }

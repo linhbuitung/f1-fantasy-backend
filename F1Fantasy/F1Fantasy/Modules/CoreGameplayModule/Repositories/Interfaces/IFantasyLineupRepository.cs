@@ -28,5 +28,7 @@ public interface IFantasyLineupRepository
         int maxDrivers,
         int maxConstructors);
 
+    Task UpdateAllFutureFantasyLineupAsync(
+        FantasyLineup trackedFantasyLineup) ;
     Task ResetFantasyLineupsBySeasonAsync(Season season);
 }

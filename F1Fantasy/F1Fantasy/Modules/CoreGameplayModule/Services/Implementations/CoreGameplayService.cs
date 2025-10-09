@@ -77,8 +77,8 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             }
             ValidatePickableItemsAsync(fantasyLineupDto, pickableItem);
             
-            var maxDrivers = configuration.GetValue<int>("FantasyTeamSettings:MaxDrivers");
-            var maxConstructors = configuration.GetValue<int>("FantasyTeamSettings:MaxConstructors");
+            var maxDrivers = configuration.GetValue<int>("CoreGameplaySettings:FantasyTeamSettings:MaxDrivers");
+            var maxConstructors = configuration.GetValue<int>("CoreGameplaySettings:FantasyTeamSettings:MaxConstructors");
             
             var updatedFantasyLineup = await fantasyLineupRepository.UpdateFantasyLineupAsync(
                 fantasyLineupDto.DriverIds, 
@@ -122,8 +122,8 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             ValidatePickableItemsAsync(fantasyLineupDto, pickableItem);
             ValidatePowerUpPickableAsync(fantasyLineupDto);
             
-            var maxDrivers = configuration.GetValue<int>("FantasyTeamSettings:MaxDrivers");
-            var maxConstructors = configuration.GetValue<int>("FantasyTeamSettings:MaxConstructors");
+            var maxDrivers = configuration.GetValue<int>("CoreGameplaySettings:FantasyTeamSettings:MaxDrivers");
+            var maxConstructors = configuration.GetValue<int>("CoreGameplaySettings:FantasyTeamSettings:MaxConstructors");
             
             var updatedFantasyLineup = await fantasyLineupRepository.UpdateFantasyLineupAsync(
                 fantasyLineupDto.DriverIds, 
