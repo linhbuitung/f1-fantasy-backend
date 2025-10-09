@@ -11,7 +11,7 @@ public class StatisticDtoMapper
             HighestPoint = highestPoint,
             TotalTransferMade = totalTransferMade,
             MostPickedDriver = mostPickedDriver,
-            AveragePoints = averagePoints
+            AveragePoints = Math.Round(averagePoints, 2),
         };
     }
     

@@ -69,7 +69,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             .AsSplitQuery()
             .Where(fl => fl.UserId == userId 
                          && fl.Race.SeasonId == activeSeason.Id 
-                         && fl.Race.RaceDate > DateOnly.FromDateTime(DateTime.UtcNow))
+                         && fl.Race.RaceDate >= DateOnly.FromDateTime(DateTime.UtcNow))
             .OrderBy(fl => fl.Race.RaceDate)
             .FirstOrDefaultAsync();
         
@@ -83,8 +83,17 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         int maxDrivers,
         int maxConstructors)
     {
+        if (driverIds.Count > maxDrivers)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxDrivers} drivers.");
+        }
+        if (constructorIds.Count > maxConstructors)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxConstructors} constructors.");
+        }
         RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds);
         AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, captainDriverId, maxDrivers, maxConstructors);
+        await UpdateAllFutureFantasyLineupAsync(trackedFantasyLineup);
         await context.SaveChangesAsync();
         return trackedFantasyLineup;
     }
@@ -98,12 +107,69 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         int maxDrivers,
         int maxConstructors)
     {
+        if (driverIds.Count > maxDrivers)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxDrivers} drivers.");
+        }
+        if (constructorIds.Count > maxConstructors)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxConstructors} constructors.");
+        }
         RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds, powerupIds);
         AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, captainDriverId, maxDrivers, maxConstructors);
+        await UpdateAllFutureFantasyLineupAsync(trackedFantasyLineup);
         await context.SaveChangesAsync();
         return trackedFantasyLineup;
     }
-    
+
+    public async Task UpdateAllFutureFantasyLineupAsync(FantasyLineup trackedFantasyLineup)
+    {
+        var futureLineups = await context.FantasyLineups
+            .Include(fl => fl.FantasyLineupDrivers)
+            .Include(fl => fl.FantasyLineupConstructors)
+            .Include(fl => fl.PowerupFantasyLineups)
+            .Include(fl => fl.Race)
+            .AsTracking()
+            .Where(fl =>
+                fl.UserId == trackedFantasyLineup.UserId && fl.Race.Season.IsActive && fl.Race.RaceDate > trackedFantasyLineup.Race.RaceDate)
+            .ToListAsync();
+        foreach (var futureLineup in futureLineups)
+        {
+            // Remove all existing drivers, constructors, and powerups
+            context.FantasyLineupDrivers.RemoveRange(
+                context.FantasyLineupDrivers.Where(fld => fld.FantasyLineupId == futureLineup.Id)
+            );
+            context.FantasyLineupConstructors.RemoveRange(
+                context.FantasyLineupConstructors.Where(flc => flc.FantasyLineupId == futureLineup.Id)
+            );
+            context.PowerupFantasyLineups.RemoveRange(
+                context.PowerupFantasyLineups.Where(pfl => pfl.FantasyLineupId == futureLineup.Id)
+            );
+            
+            // Add drivers, constructors from the trackedFantasyLineup
+            foreach (var driver in trackedFantasyLineup.FantasyLineupDrivers)
+            {
+                futureLineup.FantasyLineupDrivers.Add(new FantasyLineupDriver
+                {
+                    FantasyLineupId = futureLineup.Id,
+                    DriverId = driver.DriverId,
+                    IsCaptain = false
+                });
+            }
+
+            foreach (var constructor in trackedFantasyLineup.FantasyLineupConstructors)
+            {
+                futureLineup.FantasyLineupConstructors.Add(new FantasyLineupConstructor
+                {
+                    FantasyLineupId = futureLineup.Id,
+                    ConstructorId = constructor.ConstructorId
+                });
+            }
+        }
+        
+        await context.SaveChangesAsync();
+    }
+
     private void RemoveUnselectedLineupItems(
         FantasyLineup trackedFantasyLineup,
         List<int> driverIds,
@@ -146,6 +212,14 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         int maxDrivers,
         int maxConstructors)
     {
+        if (newDriverIds.Count > maxDrivers)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxDrivers} drivers.");
+        }
+        if (newConstructorIds.Count > maxConstructors)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxConstructors} constructors.");
+        }
         // Add new drivers, constructors which are not already in the lineup
         var existingDriverIds = trackedFantasyLineup.FantasyLineupDrivers.Select(fld => fld.DriverId).ToList();
         var existingConstructorIds = trackedFantasyLineup.FantasyLineupConstructors.Select(flc => flc.ConstructorId).ToList();
@@ -216,6 +290,14 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         int maxDrivers,
         int maxConstructors)
     {
+        if (newDriverIds.Count > maxDrivers)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxDrivers} drivers.");
+        }
+        if (newConstructorIds.Count > maxConstructors)
+        {
+            throw new InvalidOperationException($"You can only select up to {maxConstructors} constructors.");
+        }
         // Add new drivers, constructors, and powerups which are not already in the lineup
         var existingDriverIds = trackedFantasyLineup.FantasyLineupDrivers.Select(fld => fld.DriverId).ToList();
         var existingConstructorIds = trackedFantasyLineup.FantasyLineupConstructors.Select(flc => flc.ConstructorId).ToList();
