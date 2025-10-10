@@ -24,7 +24,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
         }
-
+        public async Task<Driver?> GetDriverByIdAsTrackingAsync(int id)
+        {
+            return await context.Drivers.AsTracking().FirstOrDefaultAsync(d => d.Id == id);
+        }
         public async Task<Driver?> GetDriverByCodeAsync(string code)
         {
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
@@ -52,7 +55,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
-
+        public async Task<Constructor?> GetConstructorByIdAsTrackingAsync(int id)
+        {
+            return await context.Constructors.AsTracking().FirstOrDefaultAsync(c => c.Id == id);
+        }
         public async Task<Constructor?> GetConstructorByCodeAsync(string code)
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));

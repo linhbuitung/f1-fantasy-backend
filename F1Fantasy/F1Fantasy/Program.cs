@@ -42,6 +42,8 @@ using F1Fantasy.Modules.UserModule.Services.Implementations;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Migrations;
 using F1Fantasy.Infrastructure.Extensions;
+using F1Fantasy.Modules.AdminModule.Extensions.Implementations;
+using F1Fantasy.Modules.AdminModule.Extensions.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Repositories.Implementations;
 using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Services.Implementations;
@@ -247,6 +249,7 @@ public static class ServiceExtensions
         services.AddScoped<IStatisticRepository, StatisticRepository>();
         
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
+        services.AddTransient<ICloudStorage, GoogleCloudStorage>();
     }
 
     public static async Task SeedRoles(IServiceProvider services)

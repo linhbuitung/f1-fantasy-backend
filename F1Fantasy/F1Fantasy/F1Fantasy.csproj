@@ -35,7 +35,6 @@
     <Folder Include="API\" />
     <Folder Include="Infrastructure\ExternalServices\Interfaces\" />
     <Folder Include="Modules\AdminModule\Dtos\Create\" />
-    <Folder Include="Modules\AdminModule\Extensions\CloudStorage\" />
     <Folder Include="Modules\AskAiModule\Controllers\" />
     <Folder Include="Modules\AskAiModule\Dtos\" />
     <Folder Include="Modules\CoreGameplayModule\Dtos\Create\" />

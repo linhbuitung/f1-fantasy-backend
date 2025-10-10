@@ -10,7 +10,7 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
         Task<Driver> AddDriverAsync(Driver driver);
 
         Task<Driver?> GetDriverByIdAsync(int id);
-
+        Task<Driver?> GetDriverByIdAsTrackingAsync(int id);
         Task<Driver?> GetDriverByCodeAsync(string code);
         
         Task<List<Driver>> GetAllDriversAsync();
@@ -20,6 +20,8 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
         Task<Constructor> AddConstructorAsync(Constructor constructor);
 
         Task<Constructor?> GetConstructorByIdAsync(int id);
+
+        Task<Constructor?> GetConstructorByIdAsTrackingAsync(int id);
 
         Task<Constructor?> GetConstructorByCodeAsync(string code);
         

@@ -5,6 +5,7 @@ using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.AdminModule.Dtos;
 using F1Fantasy.Modules.AdminModule.Dtos.Get;
 using F1Fantasy.Modules.AdminModule.Dtos.Mapper;
+using F1Fantasy.Modules.AdminModule.Extensions.Interfaces;
 using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.AuthModule.Extensions;
@@ -15,7 +16,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace F1Fantasy.Modules.AdminModule.Services.Implementations;
 
-public class AdminService(IAdminRepository adminRepository, IStaticDataRepository staticDataRepository, ICoreGameplayService coreGameplayService, WooF1Context context) : IAdminService
+public class AdminService(IAdminRepository adminRepository, IStaticDataRepository staticDataRepository, ICoreGameplayService coreGameplayService, WooF1Context context, IConfiguration configuration, ICloudStorage cloudStorage) : IAdminService
 {
     public async Task<SeasonDto> StartSeasonAsync(int year)
     {
@@ -101,6 +102,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
 
     public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemAsync(Dtos.Update.PickableItemDto dto)
     {
+        var defaultPrice = configuration.GetValue<int?>("AdminSettings:DefaultPrice") ?? 15;
         // check if is development environment
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production" )
         {
@@ -127,12 +129,13 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             var driversToAdd = dto.DriverIds.Where(id => !existingDriverIds.Contains(id)).ToList();
             foreach (var driverId in driversToAdd)
             {
-                var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
+                var driver = await staticDataRepository.GetDriverByIdAsTrackingAsync(driverId);
                 if (driver == null)
                 {
                     throw new NotFoundException($"Driver with ID {driverId} not found.");
                 }
 
+                driver.Price = defaultPrice;
                 pickableItem.Drivers.Add(driver);
             }
             
@@ -148,11 +151,13 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             var constructorsToAdd = dto.ConstructorIds.Where(id => !existingConstructorIds.Contains(id)).ToList();
             foreach (var constructorId in constructorsToAdd)
             {
-                var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
+                var constructor = await staticDataRepository.GetConstructorByIdAsTrackingAsync(constructorId);
                 if (constructor == null)
                 {
                     throw new NotFoundException($"Constructor with ID {constructorId} not found.");
                 }   
+                
+                constructor.Price = defaultPrice;
                 pickableItem.Constructors.Add(constructor);
             }
             
@@ -212,13 +217,15 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
 
     public async Task<Dtos.Get.DriverDto> UpdateDriverInfoAsync(Dtos.Update.DriverDto dto)
     {
+        
         var existingDriver = await staticDataRepository.GetDriverByIdAsync(dto.Id);
         if (existingDriver == null)
         {
             throw new NotFoundException($"Driver with ID {dto.Id} not found.");
         }
         
-        var updatedDriver = AdminDtoMapper.MapUpdateDtoToDriver(dto);
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/drivers/" + existingDriver.Code);
+        var updatedDriver = AdminDtoMapper.MapUpdateDtoToDriver(dto, imgUrl);
         var resultDriver = await adminRepository.UpdateDriverInfoAsync(updatedDriver);
         
         return AdminDtoMapper.MapDriverToGetDto(resultDriver);
@@ -232,7 +239,8 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             throw new NotFoundException($"Constructor with ID {dto.Id} not found.");
         }
         
-        var updatedConstructor = AdminDtoMapper.MapUpdateDtoToConstructor(dto);
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/constructors/" + existingConstructor.Code);
+        var updatedConstructor = AdminDtoMapper.MapUpdateDtoToConstructor(dto, imgUrl);
         var resultConstructor = await adminRepository.UpdateConstructorInfoAsync(updatedConstructor);
         
         return AdminDtoMapper.MapConstructorToGetDto(resultConstructor);
@@ -245,8 +253,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Circuit with ID {dto.Id} not found.");
         }
-        
-        var updatedCircuit = AdminDtoMapper.MapUpdateDtoToCircuit(dto);
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/circuits/" + existingCircuit.Code);
+
+        var updatedCircuit = AdminDtoMapper.MapUpdateDtoToCircuit(dto, imgUrl);
         var resultCircuit = await adminRepository.UpdateCircuitInfoAsync(updatedCircuit);
         
         return AdminDtoMapper.MapCircuitToGetDto(resultCircuit);
@@ -260,7 +269,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             throw new NotFoundException($"Powerup with ID {dto.Id} not found.");
         }
         
-        var updatedPowerup = AdminDtoMapper.MapUpdateDtoToPowerup(dto);
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, $"imgs/powerups/{existingPowerup.Id}");
+
+        var updatedPowerup = AdminDtoMapper.MapUpdateDtoToPowerup(dto,imgUrl);
         var resultPowerup = await adminRepository.UpdatePowerupInfoAsync(updatedPowerup);
         
         return AdminDtoMapper.MapPowerupToGetDto(resultPowerup);
