@@ -69,7 +69,7 @@ public class NotificationService(INotificationRepository notificationRepository,
                 UserId = user.Id,
                 Header = "Race Results Available",
                 Content =
-                    $"The results for race {raceId} have been calculated. Check out your fantasy lineup to see how you did!",
+                    $"The results for race {race.RaceName} in {race.Season.Year} have been calculated. Check out your fantasy lineup to see how you did!",
             };
             
             // If user has a favorite driver or constructor in the race, customize the notification
@@ -78,7 +78,7 @@ public class NotificationService(INotificationRepository notificationRepository,
                 var raceEntryDriverResult = race.RaceEntries.FirstOrDefault(re => re.DriverId == user.DriverId);
                 if (raceEntryDriverResult is not null)
                 {
-                    notificationDto.Content += $" Your favorite driver got ${raceEntryDriverResult.PointsGained} not accounting for any powerup!";
+                    notificationDto.Content += $" Your favorite driver {raceEntryDriverResult.Driver.GivenName} {raceEntryDriverResult.Driver.FamilyName} got {raceEntryDriverResult.PointsGained} not accounting for any powerup!";
                 }
             }
 
@@ -105,7 +105,7 @@ public class NotificationService(INotificationRepository notificationRepository,
                     else
                         constructorPoints += -10;
                     
-                    notificationDto.Content += $" Your favorite constructor got ${constructorPoints} not accounting for any powerup!";
+                    notificationDto.Content += $" Your favorite constructor {raceEntryConstructorResult.First().Constructor.Name} got {constructorPoints} not accounting for any powerup!";
                 }
             }
             

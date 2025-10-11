@@ -131,6 +131,9 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await context.Races.Include(r => r.Season)
                 .Include(r => r.Circuit)
                 .Include(r => r.RaceEntries)
+                .ThenInclude(r => r.Driver)
+                .Include(r => r.RaceEntries)
+                .ThenInclude(r => r.Constructor)
                 .AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
         }
 
