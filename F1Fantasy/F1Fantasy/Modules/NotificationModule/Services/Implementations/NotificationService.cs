@@ -11,7 +11,12 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace F1Fantasy.Modules.NotificationModule.Services.Implementations;
 
-public class NotificationService(INotificationRepository notificationRepository, IUserRepository userRepository, IStaticDataRepository staticDataRepository, WooF1Context context, IHubContext<NotificationHub> hubContext) : INotificationService
+public class NotificationService(
+    INotificationRepository notificationRepository, 
+    IUserRepository userRepository, 
+    IStaticDataRepository staticDataRepository, 
+    WooF1Context context, 
+    IHubContext<NotificationHub> hubContext) : INotificationService
 {
     public async Task AddAndSendNotificationAsync(Dtos.Create.NotificationDto notificationDto)
     {
@@ -41,7 +46,7 @@ public class NotificationService(INotificationRepository notificationRepository,
             
             await context.SaveChangesAsync();
             await hubContext.Clients.Client(notificationDto.UserId.ToString()).SendAsync("ReceiveNotification",
-                new { Title = notificationDto.Header, Content = notificationDto.Content });
+               NotificationDtoMapper.MapNotificationToGetDto(newNotification));
 
             await transaction.CommitAsync();
         }
@@ -54,7 +59,7 @@ public class NotificationService(INotificationRepository notificationRepository,
         }
     }
 
-    public async Task AddNotificationForEachUserInForARaceAsync(int raceId)
+    public async Task AddAndSendNotificationForEachUserInForARaceAsync(int raceId)
     {
         var race = await staticDataRepository.GetRaceByIdAsync(raceId);
         if (race == null)
@@ -72,16 +77,27 @@ public class NotificationService(INotificationRepository notificationRepository,
                     $"The results for race {race.RaceName} in {race.Season.Year} have been calculated. Check out your fantasy lineup to see how you did!",
             };
             
+            await AddAndSendNotificationAsync(notificationDto);
+
             // If user has a favorite driver or constructor in the race, customize the notification
             if (user.DriverId.HasValue)
             {
                 var raceEntryDriverResult = race.RaceEntries.FirstOrDefault(re => re.DriverId == user.DriverId);
                 if (raceEntryDriverResult is not null)
                 {
-                    notificationDto.Content += $" Your favorite driver {raceEntryDriverResult.Driver.GivenName} {raceEntryDriverResult.Driver.FamilyName} got {raceEntryDriverResult.PointsGained} not accounting for any powerup!";
+                    var driverNotificationDto = new Dtos.Create.NotificationDto
+                    {
+                        UserId = user.Id,
+                        Header = "Your Favorite Driver Points Update",
+                        Content =
+                            $" Your favorite driver {raceEntryDriverResult.Driver.GivenName} {raceEntryDriverResult.Driver.FamilyName} got {raceEntryDriverResult.PointsGained} points in latest race!",
+                    };
+                    await AddAndSendNotificationAsync(driverNotificationDto);
+
                 }
             }
 
+            
             if (user.ConstructorId.HasValue)
             {
                 int constructorPoints = 0;
@@ -105,11 +121,100 @@ public class NotificationService(INotificationRepository notificationRepository,
                     else
                         constructorPoints += -10;
                     
-                    notificationDto.Content += $" Your favorite constructor {raceEntryConstructorResult.First().Constructor.Name} got {constructorPoints} not accounting for any powerup!";
+                    var constructorNotificationDto = new Dtos.Create.NotificationDto
+                    {
+                        UserId = user.Id,
+                        Header = "Your Favorite Constructor Points Update",
+                        Content =
+                            $" Your favorite constructor {raceEntryConstructorResult.First().Constructor.Name} got {constructorPoints} points in latest race!",
+                    };
+                    await AddAndSendNotificationAsync(constructorNotificationDto);
                 }
             }
+        }
+    }
+
+    public async Task<Dtos.Get.NotificationDto> GetNotificationAsync(int notificationId)
+    {
+        var notification = await notificationRepository.GetNotificationAsTrackingAsync(notificationId);
+        if (notification == null)
+        {
+            throw new NotFoundException("Notification not found");
+        }
+        return NotificationDtoMapper.MapNotificationToGetDto(notification);
+    }
+    
+    public async Task<List<Dtos.Get.NotificationDto>> GetAllUnreadNotificationsByUserIdAsync(int userId)
+    {
+        var notifications = await notificationRepository.GetAllUnreadNotificationsByUserIdAsTrackingAsync(userId);
+        return notifications.Select(NotificationDtoMapper.MapNotificationToGetDto).ToList();    
+    }
+
+    public async Task<Dtos.Get.NotificationDto> MarkNotificationAsReadAsync(int userId, int notificationId)
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Check if user exists
+            var user = await userRepository.GetUserByIdAsync(userId);
+            if(user == null)
+            {
+                throw new NotFoundException($"User with ID {userId} not found.");
+            }
+            var notification = await notificationRepository.GetNotificationAsTrackingAsync(notificationId);
+            if (notification == null)
+            {
+                throw new NotFoundException("Notification not found");
+            }
+            if(notification.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to mark this notification as read");
+            }
+            notification.ReadAt = DateTime.UtcNow;
             
-            await AddAndSendNotificationAsync(notificationDto);
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            return NotificationDtoMapper.MapNotificationToGetDto(notification);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error updating notification: {ex.Message}");
+
+            throw;
+        }
+    }
+
+    public async Task MarkAllNotificationsAsReadAsync(int userId)
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Check if user exists
+            var user = await userRepository.GetUserByIdAsync(userId);
+            if(user == null)
+            {
+                throw new NotFoundException($"User with ID {userId} not found.");
+            }
+            var notification = await notificationRepository.GetAllUnreadNotificationsByUserIdAsTrackingAsync(userId);
+
+            // Update all as read            
+            foreach (var note in notification)
+            {
+                note.ReadAt = DateTime.UtcNow;
+            }
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error updating notifications: {ex.Message}");
+
+            throw;
         }
     }
 }

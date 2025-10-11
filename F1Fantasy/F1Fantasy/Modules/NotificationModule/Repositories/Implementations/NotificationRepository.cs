@@ -25,4 +25,28 @@ public class NotificationRepository(WooF1Context context) : INotificationReposit
             .ToListAsync();
             
     }
+    
+    public async Task<List<Notification>> GetAllNotificationsByUserIdAsync(int userId)
+    {
+        return await context.Notifications
+            .AsNoTracking()
+            .Where(n => n.UserId == userId)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<List<Notification>> GetAllUnreadNotificationsByUserIdAsTrackingAsync(int userId)
+    {
+        return await context.Notifications
+            .AsTracking()
+            .Where(n => n.UserId == userId && n.ReadAt == null)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<Notification?> GetNotificationAsTrackingAsync(int notificationId)
+    {
+        return await context.Notifications.AsTracking().FirstOrDefaultAsync(n => n.Id == notificationId);
+
+    }
 }

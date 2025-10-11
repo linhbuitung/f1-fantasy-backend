@@ -4,5 +4,13 @@ public interface INotificationService
 {
     Task AddAndSendNotificationAsync(Dtos.Create.NotificationDto notification);
 
-    Task AddNotificationForEachUserInForARaceAsync(int raceId);
+    Task AddAndSendNotificationForEachUserInForARaceAsync(int raceId);
+    
+    Task<Dtos.Get.NotificationDto> GetNotificationAsync(int notificationId);
+
+    Task<List<Dtos.Get.NotificationDto>> GetAllUnreadNotificationsByUserIdAsync(int userId);
+    
+    Task<Dtos.Get.NotificationDto> MarkNotificationAsReadAsync(int userId, int notificationId);
+    
+    Task MarkAllNotificationsAsReadAsync(int userId);
 }

@@ -12,7 +12,7 @@ public class NotificationDtoMapper
             Header = notification.Header,
             Content = notification.Content,
             CreatedAt = notification.CreatedAt,
-            ReadAt = notification.ReadAt,
+            ReadAt = notification.ReadAt ?? null,
             UserId = notification.UserId
         };
     }
