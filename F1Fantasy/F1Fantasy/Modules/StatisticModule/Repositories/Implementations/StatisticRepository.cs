@@ -14,7 +14,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
         return await context.FantasyLineups
             .Where(fl => fl.Race.SeasonId == seasonId)
             .GroupBy(fl => fl.UserId)
-            .Select(g => g.Sum(fl => fl.PointsGained))
+            .Select(g => g.Sum(fl => fl.TotalAmount))
             .MaxAsync();    
     }
 
@@ -25,7 +25,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .Where(fl => fl.Race.SeasonId == seasonId 
                          && fl.Race.DeadlineDate > fl.User.JoinDate)
             .GroupBy(fl => fl.UserId)
-            .Select(g => g.Sum(fl => fl.PointsGained))
+            .Select(g => g.Sum(fl => fl.TotalAmount))
             .AverageAsync();
     }
     
@@ -61,7 +61,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .Include(fl => fl.Race)
             .AsNoTracking()
             .Where(fl => fl.Race.SeasonId == seasonId && fl.UserId == userId && fl.Race.Calculated)
-            .OrderByDescending(fl => fl.PointsGained)
+            .OrderByDescending(fl => fl.TotalAmount)
             .ThenByDescending(fl => fl.Race.RaceDate)
             .FirstOrDefaultAsync();
     }
@@ -70,7 +70,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
     {
         return await context.FantasyLineups
             .Where(fl => fl.Race.SeasonId == seasonId && fl.UserId == userId)
-            .SumAsync(fl => fl.PointsGained);
+            .SumAsync(fl => fl.TotalAmount);
     }
 
     public async Task<int> GetTotalTransfersOfAnUserBySeasonIdAsync(int userId, int seasonId)

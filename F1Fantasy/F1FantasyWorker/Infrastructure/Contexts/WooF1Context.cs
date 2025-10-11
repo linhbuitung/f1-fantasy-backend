@@ -59,7 +59,7 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Season> Seasons { get; set; }
 
     public virtual DbSet<UserLeague> UserLeagues { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>
@@ -499,6 +499,8 @@ public partial class WooF1Context : DbContext
 
             entity.ToTable("league");
 
+            entity.HasIndex(e => e.Name, "ak_league_name").IsUnique();
+
             entity.HasIndex(e => e.OwnerId, "ix_league_owner_id");
 
             entity.Property(e => e.Id).HasColumnName("id");
@@ -534,6 +536,7 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Header)
                 .HasMaxLength(200)
                 .HasColumnName("header");
+            entity.Property(e => e.ReadAt).HasColumnName("read_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)

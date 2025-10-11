@@ -79,7 +79,8 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
                     Content = "You've earned an extra AI credit for your activity! Keep it up!",
                 });
             
-            await hub.Clients.User(user.Id.ToString()).SendAsync("ReceiveNotification", notification);        }
+            await hub.Clients.User(user.Id.ToString()).SendAsync("ReceiveNotification", notification);        
+        }
         user.LastActiveAt = now;
     }
 }

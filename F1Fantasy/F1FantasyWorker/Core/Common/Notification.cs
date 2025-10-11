@@ -15,5 +15,7 @@ public partial class Notification
 
     public int UserId { get; set; }
 
+    public DateTime? ReadAt { get; set; }
+
     public virtual AspNetUser User { get; set; } = null!;
 }

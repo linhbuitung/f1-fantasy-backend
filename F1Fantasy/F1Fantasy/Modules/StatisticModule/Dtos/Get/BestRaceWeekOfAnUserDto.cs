@@ -7,7 +7,7 @@ public class BestRaceWeekOfAnUserDto
 
     public string RaceName { get; set; } = null!;
 
-    public int PointsGained { get; set; }
+    public int TotalAmount { get; set; }
 
     public DateOnly RaceDate { get; set; }
 

@@ -4,10 +4,11 @@ using F1Fantasy.Modules.NotificationModule.Dtos.Mapper;
 using F1Fantasy.Modules.NotificationModule.Repositories.Interfaces;
 using F1Fantasy.Modules.NotificationModule.Services.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 
 namespace F1Fantasy.Modules.NotificationModule.Services.Implementations;
 
-public class NotificationService(INotificationRepository notificationRepository, IUserService userService, WooF1Context context) : INotificationService
+public class NotificationService(INotificationRepository notificationRepository, IUserService userService, WooF1Context context, IHubContext<NotificationHub> hubContext) : INotificationService
 {
     public async Task<Dtos.Get.NotificationDto> AddNotificationAsync(Dtos.Create.NotificationDto notificationDto)
     {
@@ -43,5 +44,10 @@ public class NotificationService(INotificationRepository notificationRepository,
 
             throw;
         }
+    }
+
+    public async Task AddNotificationForEachUserInForARaceAsync(int raceId)
+    {
+        
     }
 }
