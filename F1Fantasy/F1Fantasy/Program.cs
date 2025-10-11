@@ -256,7 +256,7 @@ public static class ServiceExtensions
         services.AddScoped<IStatisticRepository, StatisticRepository>();
         
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
-        services.AddTransient<ICloudStorage, GoogleCloudStorage>();
+        services.AddSingleton<ICloudStorage, GoogleCloudStorage>();
         
         services.AddSignalR();
         services.AddScoped<INotificationService, NotificationService>();

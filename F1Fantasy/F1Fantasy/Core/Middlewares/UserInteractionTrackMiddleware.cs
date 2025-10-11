@@ -22,7 +22,7 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
                 var user = await userManager.FindByIdAsync(userId);
                 if (ShouldUpdateUserActivity(user))
                 {
-                    await UpdateUserActivity(user, askAiService);
+                    await UpdateUserActivity(user, askAiService, context);
                     await userManager.UpdateAsync(user);
                 }
             }
@@ -42,10 +42,10 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
         return user.LastActiveAt == null || user.LastActiveAt < DateTime.UtcNow.AddMinutes(-5);
     }
 
-    private async Task UpdateUserActivity(ApplicationUser user, IAskAIService askAIService)
+    private async Task UpdateUserActivity(ApplicationUser user, IAskAIService askAIService, HttpContext context)
     {
-        var hub = serviceProvider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<F1Fantasy.Modules.NotificationModule.NotificationHub>>();
-        var notificationService = serviceProvider.GetRequiredService<F1Fantasy.Modules.NotificationModule.Services.Interfaces.INotificationService>();
+        var hub = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<F1Fantasy.Modules.NotificationModule.NotificationHub>>();
+        var notificationService = context.RequestServices.GetRequiredService<F1Fantasy.Modules.NotificationModule.Services.Interfaces.INotificationService>();
         
         var lastActive = user.LastActiveAt;
         var now = DateTime.UtcNow;

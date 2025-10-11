@@ -25,7 +25,7 @@ public class GoogleCloudStorage : ICloudStorage
         googleCredential = GoogleCredential.FromStream(credentialStream);
         
         storageClient = StorageClient.Create(googleCredential);
-        bucketName = configuration.GetValue<string>("GoogleCloudStorageBucket");
+        bucketName = configuration.GetValue<string>("AdminSettings:GoogleCloudStorageBucket");
     }
 
     public async Task<string> UploadFileAsync(IFormFile imageFile, string fileNameForStorage)
