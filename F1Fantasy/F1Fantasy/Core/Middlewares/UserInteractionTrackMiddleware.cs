@@ -71,15 +71,13 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
         {
             await askAIService.AddAskAiCreditAsync(userId: user.Id);
             user.ConsecutiveActiveDays = 0;
-            var notification = await notificationService.AddNotificationAsync(
+            await notificationService.AddAndSendNotificationAsync(
                 new NotificationDto
                 {
                     UserId = user.Id,
                     Header = "AI Reward",
                     Content = "You've earned an extra AI credit for your activity! Keep it up!",
                 });
-            
-            await hub.Clients.User(user.Id.ToString()).SendAsync("ReceiveNotification", notification);        
         }
         user.LastActiveAt = now;
     }

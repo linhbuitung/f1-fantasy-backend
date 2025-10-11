@@ -128,7 +128,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Race?> GetRaceByIdAsync(int id)
         {
-            return await context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
+            return await context.Races.Include(r => r.Season)
+                .Include(r => r.Circuit)
+                .Include(r => r.RaceEntries)
+                .AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
         }
 
         public async Task<Race?> GetRaceByRaceDateAsync(DateOnly date)

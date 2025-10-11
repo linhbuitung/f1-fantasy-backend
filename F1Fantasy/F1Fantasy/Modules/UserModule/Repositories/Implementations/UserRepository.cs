@@ -63,4 +63,9 @@ public class UserRepository(WooF1Context context) : IUserRepository
             .ToListAsync();
     }
 
+    public async Task<List<ApplicationUser>> GetAllUsersAsync()
+    {
+        return await context.Users.ToListAsync();
+    }
+
 }

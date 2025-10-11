@@ -18,14 +18,15 @@ public class NotificationController(IHubContext<NotificationHub> hubContext, INo
         await hubContext.Clients.Client(userConnectionId).SendAsync("ReceiveNotification", message);
     }
     
-    [HttpPost("worker/race-calculated")]
-    public async Task SendRaceCalculatedNotification()
+    [HttpPost("worker/race-calculated/{raceId:int}")]
+    public async Task<IActionResult> SendRaceCalculatedNotification(int raceId)
     {
         var apiKey = Request.Headers["Worker-Api-Key"].FirstOrDefault();
         var expectedApiKey = Environment.GetEnvironmentVariable("WORKER_API_KEY");
-        if (apiKey is null || apiKey != expectedApiKey) return;
-        
-        
+        if (apiKey is null ||expectedApiKey is null || apiKey != expectedApiKey) return BadRequest();
+
+        await notificationService.AddNotificationForEachUserInForARaceAsync(raceId);
+        return Ok();
         // TO DO
     }
 

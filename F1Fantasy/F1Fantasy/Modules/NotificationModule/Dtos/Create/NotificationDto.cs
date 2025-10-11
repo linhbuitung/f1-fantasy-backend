@@ -11,6 +11,4 @@ public class NotificationDto
 
     [Required, MaxLength(1000)]
     public required string Content { get; set; }
-    
-    public DateTime? ReadAt { get; set; }
 }

@@ -1,16 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.NotificationModule.Dtos.Mapper;
 using F1Fantasy.Modules.NotificationModule.Repositories.Interfaces;
 using F1Fantasy.Modules.NotificationModule.Services.Interfaces;
+using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
+using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
 namespace F1Fantasy.Modules.NotificationModule.Services.Implementations;
 
-public class NotificationService(INotificationRepository notificationRepository, IUserService userService, WooF1Context context, IHubContext<NotificationHub> hubContext) : INotificationService
+public class NotificationService(INotificationRepository notificationRepository, IUserRepository userRepository, IStaticDataRepository staticDataRepository, WooF1Context context, IHubContext<NotificationHub> hubContext) : INotificationService
 {
-    public async Task<Dtos.Get.NotificationDto> AddNotificationAsync(Dtos.Create.NotificationDto notificationDto)
+    public async Task AddAndSendNotificationAsync(Dtos.Create.NotificationDto notificationDto)
     {
         var validationContext = new ValidationContext(notificationDto);
         var results = new List<ValidationResult>();
@@ -28,14 +31,19 @@ public class NotificationService(INotificationRepository notificationRepository,
         try
         {
             // Check if user exists
-            _ = await userService.GetUserByIdAsync(notificationDto.UserId);
+            var user = await userRepository.GetUserByIdAsync(notificationDto.UserId);
+            if(user == null)
+            {
+                throw new NotFoundException($"User with ID {notificationDto.UserId} not found.");
+            }
             var notification = NotificationDtoMapper.MapCreateDtoToNotification(notificationDto);
             var newNotification = await notificationRepository.AddNotificationAsync(notification);
             
             await context.SaveChangesAsync();
+            await hubContext.Clients.Client(notificationDto.UserId.ToString()).SendAsync("ReceiveNotification",
+                new { Title = notificationDto.Header, Content = notificationDto.Content });
+
             await transaction.CommitAsync();
-            
-            return NotificationDtoMapper.MapNotificationToGetDto(newNotification);
         }
         catch (Exception ex)
         {
@@ -48,6 +56,60 @@ public class NotificationService(INotificationRepository notificationRepository,
 
     public async Task AddNotificationForEachUserInForARaceAsync(int raceId)
     {
-        
+        var race = await staticDataRepository.GetRaceByIdAsync(raceId);
+        if (race == null)
+        {
+            throw new NotFoundException("Race not found");
+        }
+        var users = await userRepository.GetAllUsersAsync();
+        foreach (var user in users)
+        {
+            var notificationDto = new Dtos.Create.NotificationDto
+            {
+                UserId = user.Id,
+                Header = "Race Results Available",
+                Content =
+                    $"The results for race {raceId} have been calculated. Check out your fantasy lineup to see how you did!",
+            };
+            
+            // If user has a favorite driver or constructor in the race, customize the notification
+            if (user.DriverId.HasValue)
+            {
+                var raceEntryDriverResult = race.RaceEntries.FirstOrDefault(re => re.DriverId == user.DriverId);
+                if (raceEntryDriverResult is not null)
+                {
+                    notificationDto.Content += $" Your favorite driver got ${raceEntryDriverResult.PointsGained} not accounting for any powerup!";
+                }
+            }
+
+            if (user.ConstructorId.HasValue)
+            {
+                int constructorPoints = 0;
+                var raceEntryConstructorResult = race.RaceEntries.Where(re => re.ConstructorId == user.ConstructorId).ToList();
+
+                if (raceEntryConstructorResult.Count == 2)
+                {
+                    bool bothTop3 = raceEntryConstructorResult.All(p => p.Position> 0 && p.Position <= 3);
+                    bool oneTop3 = raceEntryConstructorResult.Count(p => p.Position > 0 && p.Position <= 3) == 1;
+                    bool bothTop10 = raceEntryConstructorResult.All(p => p.Position > 0 && p.Position <= 10);
+                    bool oneTop10 = raceEntryConstructorResult.Count(p => p.Position > 0 && p.Position <= 10) == 1;
+
+                    if (bothTop3)
+                        constructorPoints += 30;
+                    else if (oneTop3)
+                        constructorPoints += 20;
+                    else if (bothTop10)
+                        constructorPoints += 15;
+                    else if (oneTop10)
+                        constructorPoints += 10;
+                    else
+                        constructorPoints += -10;
+                    
+                    notificationDto.Content += $" Your favorite constructor got ${constructorPoints} not accounting for any powerup!";
+                }
+            }
+            
+            await AddAndSendNotificationAsync(notificationDto);
+        }
     }
 }
