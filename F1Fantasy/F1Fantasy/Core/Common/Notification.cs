@@ -19,6 +19,8 @@ namespace F1Fantasy.Core.Common
         [Required]
         public DateOnly CreatedAt { get; set; }
 
+        public DateTime? ReadAt { get; set; }
+        
         [Required]
         public int UserId { get; set; }
 

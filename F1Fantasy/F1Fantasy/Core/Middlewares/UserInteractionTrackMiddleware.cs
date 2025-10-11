@@ -1,6 +1,8 @@
 ﻿using F1Fantasy.Core.Common;
 using F1Fantasy.Modules.AskAiModule.Services.Interfaces;
+using F1Fantasy.Modules.NotificationModule.Dtos.Create;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 
 namespace F1Fantasy.Core.Middlewares;
 
@@ -42,6 +44,9 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
 
     private async Task UpdateUserActivity(ApplicationUser user, IAskAIService askAIService)
     {
+        var hub = serviceProvider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<F1Fantasy.Modules.NotificationModule.NotificationHub>>();
+        var notificationService = serviceProvider.GetRequiredService<F1Fantasy.Modules.NotificationModule.Services.Interfaces.INotificationService>();
+        
         var lastActive = user.LastActiveAt;
         var now = DateTime.UtcNow;
 
@@ -65,7 +70,16 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
         if (user.ConsecutiveActiveDays >= consecutiveActiveDaysPerCreditAdded)
         {
             await askAIService.AddAskAiCreditAsync(userId: user.Id);
-        }
+            user.ConsecutiveActiveDays = 0;
+            var notification = await notificationService.AddNotificationAsync(
+                new NotificationDto
+                {
+                    UserId = user.Id,
+                    Header = "AI Reward",
+                    Content = "You've earned an extra AI credit for your activity! Keep it up!",
+                });
+            
+            await hub.Clients.User(user.Id.ToString()).SendAsync("ReceiveNotification", notification);        }
         user.LastActiveAt = now;
     }
 }

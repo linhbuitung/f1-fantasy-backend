@@ -44,6 +44,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using F1Fantasy.Infrastructure.Extensions;
 using F1Fantasy.Modules.AdminModule.Extensions.Implementations;
 using F1Fantasy.Modules.AdminModule.Extensions.Interfaces;
+using F1Fantasy.Modules.NotificationModule;
+using F1Fantasy.Modules.NotificationModule.Repositories.Implementations;
+using F1Fantasy.Modules.NotificationModule.Repositories.Interfaces;
+using F1Fantasy.Modules.NotificationModule.Services.Implementations;
+using F1Fantasy.Modules.NotificationModule.Services.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Repositories.Implementations;
 using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Services.Implementations;
@@ -211,6 +216,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHub<NotificationHub>("/hub/notification");
+
 app.Run();
 
 public static class ServiceExtensions
@@ -250,6 +257,10 @@ public static class ServiceExtensions
         
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
         services.AddTransient<ICloudStorage, GoogleCloudStorage>();
+        
+        services.AddSignalR();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
     }
 
     public static async Task SeedRoles(IServiceProvider services)
