@@ -29,7 +29,7 @@ public class StatisticDtoMapper
             BestRaceWeek = new Get.BestRaceWeekOfAnUserDto{
                 FantasyLineupId = fantasyLineup.Id,
                 RaceName = fantasyLineup.Race.RaceName,
-                PointsGained = fantasyLineup.PointsGained,
+                TotalAmount = fantasyLineup.TotalAmount,
                 RaceDate = fantasyLineup.Race.RaceDate
             }
         };

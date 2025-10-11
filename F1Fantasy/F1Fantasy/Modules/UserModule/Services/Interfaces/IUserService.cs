@@ -12,4 +12,5 @@ public interface IUserService
     Task<Dtos.Get.ApplicationUserDto> GetUserByIdAsync(int id);
     
     Task<List<Dtos.Get.ApplicationUserDto>> FindUserByDisplayNameAsync(string name);
+    
 }

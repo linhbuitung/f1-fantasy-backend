@@ -9,4 +9,6 @@ public interface IUserRepository
     Task<ApplicationUser?> GetUserByIdAsync(int id);
     
     Task<List<ApplicationUser>> FindUserByDisplayNameAsync(string name);
+    
+    Task<List<ApplicationUser>> GetAllUsersAsync();
 }

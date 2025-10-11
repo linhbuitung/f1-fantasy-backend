@@ -170,9 +170,8 @@ public class CoreGameplayService(
                     // sum up all points from drivers in lineup
                     var totalPointFromDrivers = pointFromOwnedDriversInLineUp.Values.Sum();
 
-                    lineup.PointsGained = totalPointFromDrivers;
-                    lineup.TotalAmount = totalPointFromDrivers + totalPointsFromConstructor - transferPointsDeducted;
-                    // Use totalPoints as needed
+                    lineup.PointsGained = totalPointFromDrivers + totalPointsFromConstructor;
+                    lineup.TotalAmount = lineup.PointsGained - transferPointsDeducted;
                }
 
                lastestFinishedRace.Calculated = true;

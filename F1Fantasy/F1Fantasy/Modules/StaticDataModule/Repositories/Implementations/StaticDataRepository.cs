@@ -24,7 +24,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
         }
-
+        public async Task<Driver?> GetDriverByIdAsTrackingAsync(int id)
+        {
+            return await context.Drivers.AsTracking().FirstOrDefaultAsync(d => d.Id == id);
+        }
         public async Task<Driver?> GetDriverByCodeAsync(string code)
         {
             return await context.Drivers.AsNoTracking().FirstOrDefaultAsync(d => d.Code.Equals(code));
@@ -52,7 +55,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
-
+        public async Task<Constructor?> GetConstructorByIdAsTrackingAsync(int id)
+        {
+            return await context.Constructors.AsTracking().FirstOrDefaultAsync(c => c.Id == id);
+        }
         public async Task<Constructor?> GetConstructorByCodeAsync(string code)
         {
             return await context.Constructors.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
@@ -122,7 +128,13 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Race?> GetRaceByIdAsync(int id)
         {
-            return await context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
+            return await context.Races.Include(r => r.Season)
+                .Include(r => r.Circuit)
+                .Include(r => r.RaceEntries)
+                .ThenInclude(r => r.Driver)
+                .Include(r => r.RaceEntries)
+                .ThenInclude(r => r.Constructor)
+                .AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
         }
 
         public async Task<Race?> GetRaceByRaceDateAsync(DateOnly date)

@@ -30,7 +30,10 @@ public class AdminController(
     public async Task<IActionResult> UpdateUserRoles(int userId, [FromBody] Dtos.Update.ApplicationUserForAdminDto dto)
     {
         var user = await userService.GetUserByIdAsync(userId);
-        
+        if (user.Roles.Contains(AppRoles.SuperAdmin))
+        {
+            return Forbid("You cannot update superadmin");
+        }
         Dtos.Get.ApplicationUserForAdminDto updatedUser = await adminService.UpdateUserRoleAsync(userId, dto.Roles);
         return Ok(updatedUser);
     }

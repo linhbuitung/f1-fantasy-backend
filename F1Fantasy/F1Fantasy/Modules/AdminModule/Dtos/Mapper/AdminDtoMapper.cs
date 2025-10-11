@@ -55,13 +55,12 @@ public class AdminDtoMapper
         };
     }
 
-    public static Driver MapUpdateDtoToDriver(Update.DriverDto driver)
+    public static Driver MapUpdateDtoToDriver(Update.DriverDto driver, string imgUrl)
     {
         return new Driver
         {
             Id = driver.Id,
-            Price = driver.Price ?? 0,
-            ImgUrl = driver.ImgUrl
+            ImgUrl = imgUrl
         };
     }
     public static Get.DriverDto MapDriverToGetDto(Driver driver)
@@ -79,13 +78,12 @@ public class AdminDtoMapper
         };
     }
     
-    public static Constructor MapUpdateDtoToConstructor(Update.ConstructorDto constructor)
+    public static Constructor MapUpdateDtoToConstructor(Update.ConstructorDto constructor, string imgUrl)
     {
         return new Constructor
         {
             Id = constructor.Id,
-            Price = constructor.Price ?? 0,
-            ImgUrl = constructor.ImgUrl
+            ImgUrl = imgUrl
         };
     }
     
@@ -102,12 +100,12 @@ public class AdminDtoMapper
         };
     }
     
-    public static Circuit MapUpdateDtoToCircuit(Update.CircuitDto circuit)
+    public static Circuit MapUpdateDtoToCircuit(Update.CircuitDto circuit, string imgUrl)
     {
         return new Circuit
         {
             Id = circuit.Id,
-            ImgUrl = circuit.ImgUrl
+            ImgUrl = imgUrl
         };
     }
     
@@ -126,12 +124,12 @@ public class AdminDtoMapper
         };
     }
 
-    public static Powerup MapUpdateDtoToPowerup(Update.PowerupDto powerup)
+    public static Powerup MapUpdateDtoToPowerup(Update.PowerupDto powerup, string imgUrl)
     {
         return new Powerup
         {
             Id = powerup.Id,
-            ImgUrl = powerup.ImgUrl
+            ImgUrl = imgUrl
         };
     }
     

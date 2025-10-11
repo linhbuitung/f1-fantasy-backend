@@ -88,7 +88,6 @@ public static class AuthMinimalApiMapper
             await SendConfirmationEmailAsync(user, userManager, context, email);
             return TypedResults.Ok();
         });
-
         
         routeGroup.MapPost("/login", async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
             ([FromBody] LoginRequest login, [FromServices] IServiceProvider sp) =>
@@ -98,6 +97,42 @@ public static class AuthMinimalApiMapper
 
             var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent:true, lockoutOnFailure: true);
 
+            if (result.RequiresTwoFactor)
+            {
+                if (!string.IsNullOrEmpty(login.TwoFactorCode))
+                {
+                    result = await signInManager.TwoFactorAuthenticatorSignInAsync(login.TwoFactorCode, isPersistent: true, rememberClient: true);
+                }
+                else if (!string.IsNullOrEmpty(login.TwoFactorRecoveryCode))
+                {
+                    result = await signInManager.TwoFactorRecoveryCodeSignInAsync(login.TwoFactorRecoveryCode);
+                }
+            }
+
+            if (!result.Succeeded)
+            {
+                return TypedResults.Problem(result.ToString(), statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            // The signInManager already produced the needed response in the form of a cookie or bearer token.
+            return TypedResults.Empty;
+        });
+        
+        routeGroup.MapPost("/login-admin", async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
+            ([FromBody] LoginRequest login, [FromServices] IServiceProvider sp) =>
+        {
+            var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
+            signInManager.AuthenticationScheme = IdentityConstants.ApplicationScheme;
+            
+            var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = await userManager.FindByNameAsync(login.Email);
+            if (user is not null && !await userManager.IsInRoleAsync(user, AppRoles.Admin) || !await userManager.IsInRoleAsync(user, AppRoles.SuperAdmin))
+            {
+                return TypedResults.Problem("User is not Admin or SuperAdmin", statusCode: StatusCodes.Status401Unauthorized);
+            }
+            
+            var result = await signInManager.PasswordSignInAsync(login.Email, login.Password, isPersistent:true, lockoutOnFailure: true);
+            
             if (result.RequiresTwoFactor)
             {
                 if (!string.IsNullOrEmpty(login.TwoFactorCode))

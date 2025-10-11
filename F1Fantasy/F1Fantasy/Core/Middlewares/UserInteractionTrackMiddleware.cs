@@ -1,6 +1,8 @@
 ﻿using F1Fantasy.Core.Common;
 using F1Fantasy.Modules.AskAiModule.Services.Interfaces;
+using F1Fantasy.Modules.NotificationModule.Dtos.Create;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 
 namespace F1Fantasy.Core.Middlewares;
 
@@ -20,7 +22,7 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
                 var user = await userManager.FindByIdAsync(userId);
                 if (ShouldUpdateUserActivity(user))
                 {
-                    await UpdateUserActivity(user, askAiService);
+                    await UpdateUserActivity(user, askAiService, context);
                     await userManager.UpdateAsync(user);
                 }
             }
@@ -40,8 +42,11 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
         return user.LastActiveAt == null || user.LastActiveAt < DateTime.UtcNow.AddMinutes(-5);
     }
 
-    private async Task UpdateUserActivity(ApplicationUser user, IAskAIService askAIService)
+    private async Task UpdateUserActivity(ApplicationUser user, IAskAIService askAIService, HttpContext context)
     {
+        var hub = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<F1Fantasy.Modules.NotificationModule.NotificationHub>>();
+        var notificationService = context.RequestServices.GetRequiredService<F1Fantasy.Modules.NotificationModule.Services.Interfaces.INotificationService>();
+        
         var lastActive = user.LastActiveAt;
         var now = DateTime.UtcNow;
 
@@ -65,6 +70,14 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
         if (user.ConsecutiveActiveDays >= consecutiveActiveDaysPerCreditAdded)
         {
             await askAIService.AddAskAiCreditAsync(userId: user.Id);
+            user.ConsecutiveActiveDays = 0;
+            await notificationService.AddAndSendNotificationAsync(
+                new NotificationDto
+                {
+                    UserId = user.Id,
+                    Header = "AI Reward",
+                    Content = "You've earned an extra AI credit for your activity! Keep it up!",
+                });
         }
         user.LastActiveAt = now;
     }

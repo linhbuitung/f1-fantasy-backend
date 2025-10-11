@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using F1Fantasy.Modules.AdminModule.Dtos.Validations;
 
 namespace F1Fantasy.Modules.AdminModule.Dtos.Update;
 
@@ -6,9 +7,8 @@ public class ConstructorDto
 {
     [Required]
     public int Id { get; set; }
-    [Range(1,100)]
-    public int? Price { get; set; }
 
-    [MaxLength(300)]
-    public string? ImgUrl { get; set; }
+    [MaxFileSize(5 * (1024 * 1024))] // 5 MB
+    [PermittedExtensions([".jpg", ".jpeg", ".png"])]
+    public required IFormFile Img{ get; set; }
 }
