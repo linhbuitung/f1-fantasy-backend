@@ -47,7 +47,7 @@ public class AskAiController(
     
     [Authorize]
     [HttpPost("user/{userId:int}/prediction/main-race")]
-    public async Task<IActionResult> MakeQualifyingPrediction(int userId, MainRacePredictionCreateDto mainRacePrediction)
+    public async Task<IActionResult> MakeNewMainRacePrediction(int userId, MainRacePredictionCreateAsNewDto mainRacePrediction)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
@@ -56,10 +56,35 @@ public class AskAiController(
         }
         
         var prediction = await askAiService.MakeMainRacePredictionAsNewPredictionAsync(userId, mainRacePrediction);
-        if (prediction.UserId != userId)
+        return Ok(prediction);
+    }
+    
+    [Authorize]
+    [HttpPost("user/{userId:int}/prediction/qualifying")]
+    public async Task<IActionResult> MakeNewQualifyingPrediction(int userId, QualifyingPredictionCreateDto qualifyingPredictionCreateDto)
+    {
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
+        if (!authResult.Succeeded)
         {
             return Forbid();
         }
+        
+        var prediction = await askAiService.MakeQualifyingPredictionAsync(userId, qualifyingPredictionCreateDto);
+        return Ok(prediction);
+    }
+    
+    
+    [Authorize]
+    [HttpPost("user/{userId:int}/prediction/{predictionId:int}/main-race")]
+    public async Task<IActionResult> MakeNewQualifyingPrediction(int userId, int predictionId, MainRacePredictionCreateAsAdditionDto mainRacePredictionCreateAsAdditionDto)
+    {
+        var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+        
+        var prediction = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
         return Ok(prediction);
     }
 }

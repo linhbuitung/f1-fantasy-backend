@@ -13,7 +13,8 @@ public class AskAiDtoMapper
         {
             Id = prediction.Id,
             DatePredicted = prediction.DatePredicted,
-            PredictYear = prediction.PredictYear,
+            RaceDate = prediction.RaceDate,
+            QualifyingDate = prediction.QualifyingDate,
             Rain = prediction.Rain,
             UserId = prediction.UserId,
             // if there is any driver prediction entity linked with a grid position not null, then set true
@@ -64,7 +65,8 @@ public class AskAiDtoMapper
         {
             Id = prediction.Id,
             DatePredicted = prediction.DatePredicted,
-            PredictYear = prediction.PredictYear,
+            RaceDate = prediction.RaceDate,
+            QualifyingDate = prediction.QualifyingDate,
             Rain = prediction.Rain,
             UserId = prediction.UserId,
             // if there is any driver prediction entity linked with a grid position not null, then set true
@@ -86,29 +88,58 @@ public class AskAiDtoMapper
         };
     }
 
-    public static List<Api.MainRacePredictInputDto> MapMainRaceCreateDtoToApiInputDto(
-        Dtos.Create.MainRacePredictionCreateDto createDto)
+    public static List<Api.MainRacePredictInputDto> MapMainRaceCreateAsNewDtoToApiInputDto(
+        Dtos.Create.MainRacePredictionCreateAsNewDto createAsNewDto, Dictionary<int, string> driverIdToCode, Dictionary<int, string> constructorIdToCode, string circuitCode)
     {
-        return createDto.Entries.Select(dto => new Dtos.Api.MainRacePredictInputDto
+        return createAsNewDto.Entries.Select(dto => new Dtos.Api.MainRacePredictInputDto
         {
-            DriverCode = dto.DriverCode,
-            ConstructorCode = dto.ConstructorCode,
-            CircuitCode = createDto.CircuitCode,
-            Rain = createDto.Rain,
-            Laps = createDto.Laps,
-            RaceDate = createDto.RaceDate,
+            DriverCode = driverIdToCode[dto.DriverId],
+            ConstructorCode = constructorIdToCode[dto.ConstructorId],
+            CircuitCode = circuitCode,
+            Rain = createAsNewDto.Rain ? 1 : 0,
+            Laps = createAsNewDto.Laps,
+            RaceDate = DateOnly.FromDateTime(createAsNewDto.RaceDate),
+        }).ToList();
+    }
+    
+    public static List<Api.MainRacePredictInputDto> MapMainRaceCreateAsAdditionToApiInputDto(
+        Dtos.Create.MainRacePredictionCreateAsAdditionDto createAsAdditionDto, Prediction prediction)
+    {
+        return prediction.DriverPredictions.Select(dp => new Dtos.Api.MainRacePredictInputDto
+        {
+            DriverCode = dp.Driver.Code,
+            ConstructorCode = dp.Constructor.Code,
+            CircuitCode = prediction.Circuit.Code,
+            Rain = createAsAdditionDto.Rain ? 1 : 0,
+            Laps = createAsAdditionDto.Laps,
+            RaceDate = DateOnly.FromDateTime(createAsAdditionDto.RaceDate),
         }).ToList();
     }
             
     public static Prediction MapMainRaceCreateDtoToPrediction( int userId,
-        Dtos.Create.MainRacePredictionCreateDto createDto)
+        Dtos.Create.MainRacePredictionCreateAsNewDto createAsNewDto)
     {
         return new Prediction
         {
             DatePredicted = DateOnly.FromDateTime(DateTime.UtcNow),
-            PredictYear = createDto.RaceDate.Year,
-            Rain = createDto.Rain,
+            RaceDate = createAsNewDto.RaceDate,
+            QualifyingDate = createAsNewDto.QualifyingDate,
+            Rain = createAsNewDto.Rain,
+            CircuitId = createAsNewDto.CircuitId,
             UserId = userId
+        };
+    }
+    
+    public static Prediction MapQualifyingCreateDtoToPrediction( int userId,
+        Dtos.Create.QualifyingPredictionCreateDto createDto)
+    {
+        return new Prediction
+        {
+            DatePredicted = DateOnly.FromDateTime(DateTime.UtcNow),
+            QualifyingDate = createDto.QualifyingDate,
+            Rain = false,
+            UserId = userId,
+            CircuitId = createDto.CircuitId
         };
     }
     
@@ -139,38 +170,69 @@ public class AskAiDtoMapper
         }
         return driverPredictions;
     }
-    public static List<Api.QualifyingPredictInputDto> MapQualifyingCreateDtoToApiInputDto(Dtos.Create.QualifyingPredictionCreateDto createDto)
+    
+    public static List<DriverPrediction> MapApiResultToNewDriverPrediction( int predictionId,
+        List<ProccessedQualifyingPredictionDto> proccessedQualifyingPredictionDtos)
+    {
+        var driverPredictions = new List<DriverPrediction>();
+        foreach (var entryPrediction in proccessedQualifyingPredictionDtos)
+        {
+            driverPredictions.Add(new DriverPrediction
+            {
+                PredictionId = predictionId,
+                DriverId = entryPrediction.DriverId,
+                ConstructorId = entryPrediction.ConstructorId,
+                GridPosition = entryPrediction.GridPosition,
+            });
+            
+        }
+        return driverPredictions;
+    }
+    
+    public static List<Api.QualifyingPredictInputDto> MapQualifyingCreateDtoToApiInputDto(
+        Dtos.Create.QualifyingPredictionCreateDto createDto, 
+        Dictionary<int, string> driverIdToCode, 
+        Dictionary<int, string> constructorIdToCode, 
+        string circuitCode)
     {
         return createDto.Entries.Select(dto => new Dtos.Api.QualifyingPredictInputDto
         {
-            DriverCode = dto.DriverCode,
-            ConstructorCode = dto.ConstructorCode,
-            CircuitCode = createDto.CircuitCode,
-            RaceDate = createDto.RaceDate,
+            DriverCode = driverIdToCode[dto.DriverId],
+            ConstructorCode = constructorIdToCode[dto.ConstructorId],
+            CircuitCode = circuitCode,
+            RaceDate = DateOnly.FromDateTime(createDto.QualifyingDate),
         }).ToList();
     }
     
-    public static List<Api.StatusPredictInputDto> MapStatusCreateDtoToApiInputDto(Dtos.Create.StatusPredictionCreateDto createDto)
+    public static List<Api.StatusPredictInputDto> MapStatusCreateDtoToApiInputDto(
+        Dtos.Create.StatusPredictionCreateDto createDto, 
+        Dictionary<int, string> driverIdToCode, 
+        Dictionary<int, string> constructorIdToCode, 
+        string circuitCode)
     {
         return createDto.Entries.Select(dto => new Dtos.Api.StatusPredictInputDto
         {
-            DriverCode = dto.DriverCode,
-            ConstructorCode = dto.ConstructorCode,
-            CircuitCode = createDto.CircuitCode,
-            Rain = createDto.Rain,
-            RaceDate = createDto.RaceDate,
+            DriverCode = driverIdToCode[dto.DriverId],
+            ConstructorCode = constructorIdToCode[dto.ConstructorId],
+            CircuitCode = circuitCode,
+            Rain = createDto.Rain ? 1 : 0,
+            RaceDate = DateOnly.FromDateTime(createDto.RaceDate),
         }).ToList();
     }
     
-    public static List<Api.StatusPredictInputDto> MapMainRaceCreateDtoToStatusApiInputDto(Dtos.Create.MainRacePredictionCreateDto createDto)
+    public static List<Api.StatusPredictInputDto> MapMainRaceCreateDtoToStatusApiInputDto(
+        Dtos.Create.MainRacePredictionCreateAsNewDto createAsNewDto,         
+        Dictionary<int, string> driverIdToCode, 
+        Dictionary<int, string> constructorIdToCode, 
+        string circuitCode)
     {
-        return createDto.Entries.Select(dto => new Dtos.Api.StatusPredictInputDto
+        return createAsNewDto.Entries.Select(dto => new Dtos.Api.StatusPredictInputDto
         {
-            DriverCode = dto.DriverCode,
-            ConstructorCode = dto.ConstructorCode,
-            CircuitCode = createDto.CircuitCode,
-            Rain = createDto.Rain,
-            RaceDate = createDto.RaceDate,
+            DriverCode = driverIdToCode[dto.DriverId],
+            ConstructorCode = constructorIdToCode[dto.ConstructorId],
+            CircuitCode = circuitCode,
+            Rain = createAsNewDto.Rain ? 1 : 0,
+            RaceDate = DateOnly.FromDateTime(createAsNewDto.RaceDate),
         }).ToList();
     }
 }

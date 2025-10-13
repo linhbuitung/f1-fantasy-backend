@@ -19,11 +19,10 @@ public class StatusPredictInputDto
     public string DriverCode { get; set; }
 
     [JsonPropertyName("race_date")]
-    public DateTime RaceDate { get; set; }
+    public DateOnly RaceDate { get; set; }
 
     [JsonPropertyName("rain")]
-    [JsonConverter(typeof(BoolToZeroOneConverter<bool>))]
-    public bool? Rain { get; set; }
+    public int? Rain { get; set; }
 }
 
 public class StatusPredictionItemDto

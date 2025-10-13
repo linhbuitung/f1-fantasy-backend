@@ -9,13 +9,15 @@ public partial class Prediction
 
     public DateOnly DatePredicted { get; set; }
 
-    public int PredictYear { get; set; }
-
     public bool Rain { get; set; }
 
     public int UserId { get; set; }
 
     public int CircuitId { get; set; }
+
+    public DateTime QualifyingDate { get; set; }
+
+    public DateTime? RaceDate { get; set; }
 
     public virtual Circuit Circuit { get; set; } = null!;
 

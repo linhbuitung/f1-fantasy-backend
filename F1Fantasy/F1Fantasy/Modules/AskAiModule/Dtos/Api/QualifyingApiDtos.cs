@@ -15,7 +15,7 @@ public class QualifyingPredictInputDto
     public string DriverCode { get; set; }
 
     [JsonPropertyName("race_date")]
-    public DateTime RaceDate { get; set; }
+    public DateOnly RaceDate { get; set; }
 }
 
 public class QualifyingPredictionItemDto

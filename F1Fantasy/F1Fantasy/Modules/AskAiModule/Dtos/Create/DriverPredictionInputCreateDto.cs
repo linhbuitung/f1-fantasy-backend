@@ -1,15 +1,16 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace F1Fantasy.Modules.AskAiModule.Dtos.Create;
 
 public class DriverPredictionInputCreateDto
 {
-    [JsonPropertyName("qualification_position")]
+    [Required]
     public int? QualificationPosition { get; set; }
     
-    [JsonPropertyName("constructor")]
-    public string ConstructorCode { get; set; }
+    [Required]
+    public int ConstructorId { get; set; }
 
-    [JsonPropertyName("driver")]
-    public string DriverCode { get; set; }
+    [Required]
+    public int DriverId { get; set; }
 }

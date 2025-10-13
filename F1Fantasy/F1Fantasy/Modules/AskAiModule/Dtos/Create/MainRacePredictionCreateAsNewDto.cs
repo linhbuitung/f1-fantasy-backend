@@ -1,23 +1,26 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using F1Fantasy.Modules.AskAiModule.Dtos.Api;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace F1Fantasy.Modules.AskAiModule.Dtos.Create;
 
-public class MainRacePredictionCreateDto
+public class MainRacePredictionCreateAsNewDto
 {
-    [JsonPropertyName("laps")]
+    [Required]
     public int Laps { get; set; }
 
-    [JsonPropertyName("circuit")]
-    public string CircuitCode { get; set; }
+    [Required]
+    public int CircuitId { get; set; }
 
-    [JsonPropertyName("race_date")]
+    [Required]
     public DateTime RaceDate { get; set; }
+    
+    [Required]
+    public DateTime QualifyingDate { get; set; }
 
-    [JsonPropertyName("rain")]
+    [Required]
     public bool Rain { get; set; }
     
-    [JsonPropertyName("entries")]
     public List<DriverPredictionInputCreateDto> Entries { get; set; }
 }

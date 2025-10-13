@@ -6,7 +6,7 @@ public class AskAiClient : HttpClient
 
     public AskAiClient(IConfiguration configuration)
     {
-        var url = configuration.GetValue<string>("AskAiSettings:AskAiUrl");
+        var url = configuration.GetValue<string>("CoreGameplaySettings:AskAiSettings:AskAiUrl");
         if (string.IsNullOrEmpty(url))
         {
             throw new Exception("AI service URL is not configured");
