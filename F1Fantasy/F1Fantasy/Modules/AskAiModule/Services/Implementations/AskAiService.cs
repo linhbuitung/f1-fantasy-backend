@@ -88,7 +88,7 @@ public class AskAiService(
         ValidatePredictionCountCap(mainRacePredictionCreateAsNewDto.Entries.Count);
         
         var apiInputDto = AskAiDtoMapper.MapMainRaceCreateAsNewDtoToApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
-        var apiStatusInputDto = AskAiDtoMapper.MapMainRaceCreateDtoToStatusApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
+        var apiStatusInputDto = AskAiDtoMapper.MapMainRaceCreateAsNewDtoToStatusApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
         
         var predictionResults = await askAiClient.CallMainRacePrediction(apiInputDto);
         if (predictionResults == null || predictionResults.Predictions.Count != mainRacePredictionCreateAsNewDto.Entries.Count)
@@ -114,10 +114,20 @@ public class AskAiService(
         {
             var newPrediction = AskAiDtoMapper.MapMainRaceCreateDtoToPrediction(userId, mainRacePredictionCreateAsNewDto);
             var createdPrediction = await askAiRepository.AddPredictionAsync(newPrediction);
+            
             var driverPredictions = AskAiDtoMapper.MapApiResultToNewDriverPrediction(createdPrediction.Id, 
                 processedMainRacePredictionGetDtos, 
                 processedStatusDtos);
-            await askAiRepository.AddDriverPredictionsAsync(driverPredictions);
+            // Move All Crashed to the bottom and reorder final positions accordingly
+            var orderedDriverPredictions = driverPredictions
+                .OrderBy(dp => dp.Crashed) // False (not crashed) comes before True (crashed)
+                .ThenBy(dp => dp.FinalPosition) // Then order by final position
+                .ToList();
+            for (int i = 0; i < orderedDriverPredictions.Count; i++)
+            {
+                orderedDriverPredictions[i].FinalPosition = i + 1;
+            }
+            await askAiRepository.AddDriverPredictionsAsync(orderedDriverPredictions);
             
             user.AskAiCredits -= 1;
             var result = await userManager.UpdateAsync(user);
@@ -236,16 +246,31 @@ public class AskAiService(
             throw new InvalidOperationException("This prediction already has a main race prediction associated with it");
         }
         
+        var (driverIdToCode, 
+            driverCodeToId, 
+            constructorIdToCode, 
+            constructorCodeToId) = await CreateDictionariesExtensionFromPrediction(existingPrediction);
+
         var apiInputDtos = AskAiDtoMapper.MapMainRaceCreateAsAdditionToApiInputDto(mainRacePredictionCreateAsAdditionDto, existingPrediction);
-        
+        var apiStatusInputDto = AskAiDtoMapper.MapMainRaceCreateAsAdditionDtoToStatusApiInputDto( existingPrediction.DriverPredictions.ToList() ,mainRacePredictionCreateAsAdditionDto, driverIdToCode, constructorIdToCode, existingPrediction.Circuit.Code);
+
         var predictionResults = await askAiClient.CallMainRacePrediction(apiInputDtos);
         if (predictionResults == null || predictionResults.Predictions.Count != existingPrediction.DriverPredictions.Count)
         {
             throw new Exception("Invalid main race prediction response from AI service");
         }
         
+        var predictionStatusResults = await askAiClient.CallStatusPrediction(apiStatusInputDto);
+        if (predictionStatusResults == null || predictionStatusResults.Percentages.Count != existingPrediction.DriverPredictions.Count)
+        {
+            throw new Exception("Invalid status prediction response from AI service");
+        }
+        
+        var processedStatusDtos = ProcessStatusPredictionGetDtos(predictionStatusResults, 
+            driverCodeToId, 
+            constructorCodeToId);
+        
         await using var transaction = await context.Database.BeginTransactionAsync();
-
         try
         {
             foreach (var driverPrediction in existingPrediction.DriverPredictions)
@@ -256,7 +281,23 @@ public class AskAiService(
                     throw new Exception("Prediction for driver-constructor pair not found");
                 }
                 driverPrediction.FinalPosition = prediction.PredictedFinalPosition;
+                var statusPrediction = processedStatusDtos.FirstOrDefault(p => p.DriverId == driverPrediction.DriverId && p.ConstructorId == driverPrediction.ConstructorId);
+                if (statusPrediction == null)
+                {
+                    throw new Exception("Status prediction for driver-constructor pair not found");
+                }
+                driverPrediction.Crashed = statusPrediction.Crashed;
             }
+            // Move All Crashed to the bottom and reorder final positions accordingly
+            var orderedDriverPredictions = existingPrediction.DriverPredictions
+                .OrderBy(dp => dp.Crashed) // False (not crashed) comes before True (crashed)
+                .ThenBy(dp => dp.FinalPosition) // Then order by final position
+                .ToList();
+            for (int i = 0; i < orderedDriverPredictions.Count; i++)
+            {
+                orderedDriverPredictions[i].FinalPosition = i + 1;
+            }
+            
             user.AskAiCredits -= 1;
             var result = await userManager.UpdateAsync(user);
             if (!result.Succeeded)
@@ -303,10 +344,10 @@ public class AskAiService(
 
         foreach (var driverId in drivers)
         {
-            var driver = await staticDataRepository.GetCircuitByIdAsync(driverId);
+            var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
             if (driver == null)
             {
-                throw new NotFoundException($"Driver with code {driverId} not found");
+                throw new NotFoundException($"Driver with id {driverId} not found");
             }
             driverIdToCode[driverId] = driver.Code;
             driverCodeToId[driver.Code] = driverId;
@@ -316,7 +357,7 @@ public class AskAiService(
             var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
             if (constructor == null)
             {
-                throw new NotFoundException($"Constructor with code {constructorId} not found");
+                throw new NotFoundException($"Constructor with id {constructorId} not found");
             }
             constructorIdToCode[constructorId] = constructor.Code;
             constructorCodeToId[constructor.Code] = constructorId;
@@ -395,10 +436,10 @@ public class AskAiService(
 
         foreach (var driverId in drivers)
         {
-            var driver = await staticDataRepository.GetCircuitByIdAsync(driverId);
+            var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
             if (driver == null)
             {
-                throw new NotFoundException($"Driver with code {driverId} not found");
+                throw new NotFoundException($"Driver with id {driverId} not found");
             }
             driverIdToCode[driverId] = driver.Code;
             driverCodeToId[driver.Code] = driverId;
@@ -408,7 +449,7 @@ public class AskAiService(
             var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
             if (constructor == null)
             {
-                throw new NotFoundException($"Constructor with code {constructorId} not found");
+                throw new NotFoundException($"Constructor with id {constructorId} not found");
             }
             constructorIdToCode[constructorId] = constructor.Code;
             constructorCodeToId[constructor.Code] = constructorId;
@@ -502,5 +543,27 @@ public class AskAiService(
         {
             throw new InvalidOperationException("Prediction entry count must be greater than one");
         }
+    }
+
+    private async Task<(
+        Dictionary<int, string> driverIdToCode,
+        Dictionary<string, int> driverCodeToId,
+        Dictionary<int, string> constructorIdToCode,
+        Dictionary<string, int> constructorCodeToId)> CreateDictionariesExtensionFromPrediction(Prediction prediction)
+    {
+        var driverIdToCode = new Dictionary<int, string>();
+        var driverCodeToId = new Dictionary<string, int>();
+        var constructorIdToCode = new Dictionary<int, string>();
+        var constructorCodeToId = new Dictionary<string, int>();
+
+        foreach (var driverPrediction in prediction.DriverPredictions)
+        {
+            driverIdToCode[driverPrediction.DriverId] = driverPrediction.Driver.Code;
+            driverCodeToId[ driverPrediction.Driver.Code] = driverPrediction.DriverId;
+            
+            constructorIdToCode[driverPrediction.ConstructorId] = driverPrediction.Constructor.Code;
+            constructorCodeToId[driverPrediction.Constructor.Code] = driverPrediction.ConstructorId;
+        }
+        return (driverIdToCode, driverCodeToId, constructorIdToCode, constructorCodeToId);
     }
 }

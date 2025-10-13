@@ -93,6 +93,7 @@ public class AskAiDtoMapper
     {
         return createAsNewDto.Entries.Select(dto => new Dtos.Api.MainRacePredictInputDto
         {
+            QualificationPosition = dto.QualificationPosition ?? 0,
             DriverCode = driverIdToCode[dto.DriverId],
             ConstructorCode = constructorIdToCode[dto.ConstructorId],
             CircuitCode = circuitCode,
@@ -220,13 +221,30 @@ public class AskAiDtoMapper
         }).ToList();
     }
     
-    public static List<Api.StatusPredictInputDto> MapMainRaceCreateDtoToStatusApiInputDto(
+    public static List<Api.StatusPredictInputDto> MapMainRaceCreateAsNewDtoToStatusApiInputDto(
         Dtos.Create.MainRacePredictionCreateAsNewDto createAsNewDto,         
         Dictionary<int, string> driverIdToCode, 
         Dictionary<int, string> constructorIdToCode, 
         string circuitCode)
     {
         return createAsNewDto.Entries.Select(dto => new Dtos.Api.StatusPredictInputDto
+        {
+            DriverCode = driverIdToCode[dto.DriverId],
+            ConstructorCode = constructorIdToCode[dto.ConstructorId],
+            CircuitCode = circuitCode,
+            Rain = createAsNewDto.Rain ? 1 : 0,
+            RaceDate = DateOnly.FromDateTime(createAsNewDto.RaceDate),
+        }).ToList();
+    }
+    
+    public static List<Api.StatusPredictInputDto> MapMainRaceCreateAsAdditionDtoToStatusApiInputDto(
+        List<DriverPrediction> driverPredictions,
+        Dtos.Create.MainRacePredictionCreateAsAdditionDto createAsNewDto,         
+        Dictionary<int, string> driverIdToCode, 
+        Dictionary<int, string> constructorIdToCode, 
+        string circuitCode)
+    {
+        return driverPredictions.Select(dto => new Dtos.Api.StatusPredictInputDto
         {
             DriverCode = driverIdToCode[dto.DriverId],
             ConstructorCode = constructorIdToCode[dto.ConstructorId],
