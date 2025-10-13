@@ -16,8 +16,10 @@ namespace F1Fantasy.Core.Common
         [Column( TypeName = "date")]
         public DateOnly DatePredicted { get; set; }
 
+        public DateTime? RaceDate { get; set; }
+
         [Required]
-        public int PredictYear { get; set; }
+        public DateTime QualifyingDate { get; set; }
 
         [Required]
         public bool Rain { get; set; }

@@ -59,7 +59,7 @@ public partial class WooF1Context : DbContext
     public virtual DbSet<Season> Seasons { get; set; }
 
     public virtual DbSet<UserLeague> UserLeagues { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>
@@ -591,7 +591,10 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DatePredicted).HasColumnName("date_predicted");
-            entity.Property(e => e.PredictYear).HasColumnName("predict_year");
+            entity.Property(e => e.QualifyingDate)
+                .HasDefaultValueSql("'-infinity'::timestamp with time zone")
+                .HasColumnName("qualifying_date");
+            entity.Property(e => e.RaceDate).HasColumnName("race_date");
             entity.Property(e => e.Rain).HasColumnName("rain");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 

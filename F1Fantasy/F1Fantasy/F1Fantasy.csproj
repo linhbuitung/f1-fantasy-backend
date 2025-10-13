@@ -35,8 +35,6 @@
     <Folder Include="API\" />
     <Folder Include="Infrastructure\ExternalServices\Interfaces\" />
     <Folder Include="Modules\AdminModule\Dtos\Create\" />
-    <Folder Include="Modules\AskAiModule\Controllers\" />
-    <Folder Include="Modules\AskAiModule\Dtos\" />
     <Folder Include="Modules\CoreGameplayModule\Dtos\Create\" />
     <Folder Include="Modules\CoreGameplayModule\Dtos\Delete\" />
     <Folder Include="Modules\LeagueModule\Dtos\Delete\" />

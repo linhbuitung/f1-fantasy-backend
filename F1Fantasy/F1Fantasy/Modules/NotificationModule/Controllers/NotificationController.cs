@@ -13,16 +13,6 @@ public class NotificationController(
     IAuthorizationService authorizationService,
     INotificationService notificationService) : ControllerBase
 {
-    public async Task BroadcastNotification(Dtos.Get.NotificationDto notification)
-    { 
-       await hubContext.Clients.All.SendAsync("ReceiveNotification", notification);
-    }
-    
-    public async Task SendNotificationToUser (string userConnectionId, string message)
-    {
-        await hubContext.Clients.Client(userConnectionId).SendAsync("ReceiveNotification", message);
-    }
-    
     [HttpPost("worker/race-calculated/{raceId:int}")]
     public async Task<IActionResult> SendRaceCalculatedNotification(int raceId)
     {

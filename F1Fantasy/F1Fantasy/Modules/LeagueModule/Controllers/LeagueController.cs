@@ -34,6 +34,7 @@ public class LeagueController(
         return Ok(league);
     }
     
+    [Authorize]
     [HttpPost("league/{leagueId:int}/join")]
     public async Task<IActionResult> JoinLeagueById(int userId, int leagueId)
     {
@@ -53,6 +54,7 @@ public class LeagueController(
         return Ok(league);
     }
     
+    [Authorize]
     [HttpGet("/owner/{ownerId:int}/league/{leagueId:int}/join-requests")]
     public async Task<IActionResult> GetJoinRequestByLeagueIdAndOwnerId( int ownerId, int leagueId)
     {        
@@ -79,6 +81,7 @@ public class LeagueController(
     }
     */
     
+    [Authorize]
     [HttpPut("league/{leagueId:int}/handle-join-request")]
     public async Task<IActionResult> HandleJoinLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.UserLeagueDto userLeagueDto)
     {
@@ -102,6 +105,7 @@ public class LeagueController(
         return Ok(userLeague);
     }
     
+    [Authorize]
     [HttpPut("league/{leagueId:int}")]
     public async Task<IActionResult> UpdateLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.LeagueDto leagueDto)
     {
@@ -119,6 +123,7 @@ public class LeagueController(
         return Ok(league);
     }
     
+    [Authorize]
     [HttpDelete("league/{leagueId:int}")]
     public async Task<IActionResult> DeleteLeagueById(int userId, int leagueId)
     {
@@ -131,6 +136,7 @@ public class LeagueController(
         return Ok();
     }
     
+    [Authorize]
     [HttpDelete("league/{leagueId:int}/leave")]
     public async Task<IActionResult> LeaveLeagueById(int userId, int leagueId)
     {
@@ -143,6 +149,7 @@ public class LeagueController(
         return Ok();
     }
 
+    [Authorize]
     [HttpDelete("league/{leagueId:int}/kick/{playerId:int}")]
     public async Task<IActionResult> KickPlayerFromLeague(int userId, int leagueId, int playerId)
     {

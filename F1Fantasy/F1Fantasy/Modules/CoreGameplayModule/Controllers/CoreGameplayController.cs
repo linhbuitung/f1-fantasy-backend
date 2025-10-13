@@ -12,6 +12,7 @@ public class CoreGameplayController(
     ICoreGameplayService coreGameplayService)
     : ControllerBase
 {
+    [Authorize]
     [HttpGet("fantasy-lineup/{fantasyLineupId:int}")]
     public async Task<IActionResult> GetFantasyLineupById(int fantasyLineupId)
     {
@@ -20,6 +21,7 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
+    [Authorize]
     [HttpGet("fantasy-lineup/race/{raceId:int}/user/{userId:int}")]
     public async Task<IActionResult> GetFantasyLineupByUserIdAndRaceId(int userId, int raceId)
     {
@@ -28,6 +30,7 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
+    [Authorize]
     [HttpGet("fantasy-lineup/{userId:int}/current")]
     public async Task<IActionResult> GetCurrentFantasyLineupByUserId(int userId)
     {
@@ -36,6 +39,7 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
+    [Authorize]
     [HttpGet("fantasy-lineup/{userId:int}/latest-finished")]
     public async Task<IActionResult> GetLastestFinishedFantasyLineupByUserId(int userId)
     {
@@ -44,6 +48,7 @@ public class CoreGameplayController(
         return Ok(fantasyLineupDto);
     }
     
+    [Authorize]
     [HttpPut("fantasy-lineup/{userId:int}/current")]
     public async Task<IActionResult> UpdateCurrentFantasyLineupByUserId(int userId, [FromBody] Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
@@ -112,6 +117,7 @@ public class CoreGameplayController(
     }
 
 
+    [Authorize]
     [HttpGet("powerups/user/{userId:int}")]
     public async Task<IActionResult> GetAllUsedPowerupInCurrentSeasonBeforeCurrentRace(int userId)
     {
@@ -120,6 +126,7 @@ public class CoreGameplayController(
         return Ok(powerupDtos);
     }
     
+    [Authorize]
     [HttpPost("fantasy-lineup/{userId:int}/current/powerup/{powerupId:int}/add")]
     public async Task<IActionResult> UsePowerupForCurrentFantasyLineup(int userId, int powerupId)
     {
@@ -128,6 +135,7 @@ public class CoreGameplayController(
         return Ok();
     }
     
+    [Authorize]
     [HttpPost("fantasy-lineup/{userId:int}/current/powerup/{powerupId:int}/remove")]
     public async Task<IActionResult> RemovePowerupFromCurrentFantasyLineup(int userId, int powerupId)
     {

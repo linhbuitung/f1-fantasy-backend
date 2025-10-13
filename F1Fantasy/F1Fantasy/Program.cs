@@ -44,6 +44,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using F1Fantasy.Infrastructure.Extensions;
 using F1Fantasy.Modules.AdminModule.Extensions.Implementations;
 using F1Fantasy.Modules.AdminModule.Extensions.Interfaces;
+using F1Fantasy.Modules.AskAiModule.Extensions;
 using F1Fantasy.Modules.NotificationModule;
 using F1Fantasy.Modules.NotificationModule.Repositories.Implementations;
 using F1Fantasy.Modules.NotificationModule.Repositories.Interfaces;
@@ -261,6 +262,8 @@ public static class ServiceExtensions
         services.AddSignalR();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        
+        services.AddSingleton<AskAiClient>();
     }
 
     public static async Task SeedRoles(IServiceProvider services)
