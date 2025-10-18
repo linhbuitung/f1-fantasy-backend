@@ -253,4 +253,36 @@ public class AskAiDtoMapper
             RaceDate = DateOnly.FromDateTime(createAsNewDto.RaceDate),
         }).ToList();
     }
+    
+    public static PickableDriverGetDto MapDriverToMlPickableDriverGetDto(Core.Common.Driver driver)
+    {
+        return new Get.PickableDriverGetDto
+        {
+            Id = driver.Id,
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            DateOfBirth = driver.DateOfBirth,
+            Code = driver.Code,
+        };
+    }
+    
+    public static Get.PickableConstructorGetDto MapConstructorToMlPickableConstructorGetDto(Core.Common.Constructor constructor)
+    {
+        return new Get.PickableConstructorGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            Code = constructor.Code,
+        };
+    }
+    
+    public static Get.PickableCircuitGetDto MapCircuitToMlPickableCircuitGetDto(Core.Common.Circuit circuit)
+    {
+        return new Get.PickableCircuitGetDto
+        {
+            Id = circuit.Id,
+            CircuitName = circuit.CircuitName,
+            Code = circuit.Code,
+        };
+    }
 }

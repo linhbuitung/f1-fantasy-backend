@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace F1Fantasy.Modules.AskAiModule.Dtos.Api;
 
 public class PickableCircuitApiDto
 {
-    [JsonProperty ("circuitRef")]
+    [JsonPropertyName ("circuitRef")]
     public required string CircuitRef { get; set; }
-    [JsonProperty ("circuit_nationality")]
+    [JsonPropertyName ("circuit_nationality")]
     public required string CircuitNationality { get; set; }
 }

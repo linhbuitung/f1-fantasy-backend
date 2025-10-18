@@ -87,4 +87,54 @@ public class AskAiController(
         var prediction = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
         return Ok(prediction);
     }
+    
+    [Authorize]
+    [HttpGet("drivers/main-race")]
+    public async Task<IActionResult> GetMlPickableDriversForMainRace()
+    {
+        var drivers = await askAiService.GetMlPickableDriversAsync(Extensions.AskAiClient.PredictionType.MainRace);
+        return Ok(drivers);
+    }
+
+    [Authorize]
+    [HttpGet("drivers/qualifying")]
+    public async Task<IActionResult> GetMlPickableDriversForQualifying()
+    {
+        var drivers = await askAiService.GetMlPickableDriversAsync(Extensions.AskAiClient.PredictionType.Qualifying);
+        return Ok(drivers);
+    }
+
+    [Authorize]
+    [HttpGet("constructors/main-race")]
+    public async Task<IActionResult> GetMlPickableConstructorsForMainRace()
+    {
+        var constructors =
+            await askAiService.GetMlPickableConstructorsAsync(Extensions.AskAiClient.PredictionType.MainRace);
+        return Ok(constructors);
+    }
+
+    [Authorize]
+    [HttpGet("constructors/qualifying")]
+    public async Task<IActionResult> GetMlPickableConstructorsForQualifying()
+    {
+        var constructors =
+            await askAiService.GetMlPickableConstructorsAsync(Extensions.AskAiClient.PredictionType.Qualifying);
+        return Ok(constructors);
+    }
+
+    [Authorize]
+    [HttpGet("circuits/main-race")]
+    public async Task<IActionResult> GetMlPickableCircuitsForMainRace()
+    {
+        var circuits = await askAiService.GetMlPickableCircuitsAsync(Extensions.AskAiClient.PredictionType.MainRace);
+        return Ok(circuits);
+    }
+
+    [Authorize]
+    [HttpGet("circuits/qualifying")]
+    public async Task<IActionResult> GetMlPickableCircuitsForQualifying()
+    {
+        var circuits = await askAiService.GetMlPickableCircuitsAsync(Extensions.AskAiClient.PredictionType.Qualifying);
+        return Ok(circuits);
+    }
 }

@@ -1,4 +1,6 @@
-﻿namespace F1Fantasy.Modules.AskAiModule.Services.Interfaces;
+﻿using F1Fantasy.Modules.AskAiModule.Extensions;
+
+namespace F1Fantasy.Modules.AskAiModule.Services.Interfaces;
 
 public interface IAskAIService
 {
@@ -17,4 +19,11 @@ public interface IAskAIService
     Task <int> MakeQualifyingPredictionAsync(int userId, Dtos.Create.QualifyingPredictionCreateDto qualifyingPredictionCreateDto);
 
     Task <int> MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(int userId, int predictionId, Dtos.Create.MainRacePredictionCreateAsAdditionDto mainRacePredictionCreateAsAdditionDto);
+    
+    Task<List<Dtos.Get.PickableDriverGetDto>> GetMlPickableDriversAsync(AskAiClient.PredictionType predictionType);
+    
+    Task<List<Dtos.Get.PickableCircuitGetDto>> GetMlPickableCircuitsAsync(AskAiClient.PredictionType predictionType);
+    
+    Task<List<Dtos.Get.PickableConstructorGetDto>> GetMlPickableConstructorsAsync(AskAiClient.PredictionType predictionType);
+
 }

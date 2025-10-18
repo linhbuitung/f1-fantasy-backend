@@ -324,6 +324,50 @@ public class AskAiService(
         }
     }
 
+    public async Task<List<Dtos.Get.PickableDriverGetDto>> GetMlPickableDriversAsync(AskAiClient.PredictionType predictionType)
+    {
+        var drivers = await askAiClient.GetPickableDriversAsync(predictionType);
+        if (drivers == null)
+        {
+            throw new Exception("Failed to get pickable drivers from AI service");
+        }
+
+        var localDrivers = await staticDataRepository.GetAllDriversAsync();
+        
+        // Take only drivers that exist in both lists via driverRef / Code
+        var pickableDrivers = localDrivers.Where(d => drivers.Any(ad => ad.DriverRef == d.Code)).ToList();
+        return pickableDrivers.Select(AskAiDtoMapper.MapDriverToMlPickableDriverGetDto).ToList();
+    }
+
+    public async Task<List<Dtos.Get.PickableCircuitGetDto>> GetMlPickableCircuitsAsync(
+        AskAiClient.PredictionType predictionType)
+    {
+        var circuits = await askAiClient.GetPickableCircuitsAsync(predictionType);
+        if (circuits == null)
+        {
+            throw new Exception("Failed to get pickable circuits from AI service");
+        }
+        var localCircuits = await staticDataRepository.GetAllCircuitsAsync();
+        
+        // Take only circuits that exist in both lists via circuitRef / Code
+        var pickableCircuits = localCircuits.Where(c => circuits.Any(ac => ac.CircuitRef == c.Code)).ToList();
+        return pickableCircuits.Select(AskAiDtoMapper.MapCircuitToMlPickableCircuitGetDto).ToList();
+    }
+
+    public async Task<List<Dtos.Get.PickableConstructorGetDto>> GetMlPickableConstructorsAsync(
+        AskAiClient.PredictionType predictionType)
+    {
+        var constructors = await askAiClient.GetPickableConstructorsAsync(predictionType);
+        if (constructors == null)
+        {
+            throw new Exception("Failed to get pickable constructors from AI service");
+        }
+        var localConstructors = await staticDataRepository.GetAllConstructorsAsync();
+        // Take only constructors that exist in both lists via constructorRef / Code
+        var pickableConstructors = localConstructors.Where(c => constructors.Any(ac => ac.ConstructorRef == c.Code)).ToList();
+        return pickableConstructors.Select(AskAiDtoMapper.MapConstructorToMlPickableConstructorGetDto).ToList();
+    }
+
     #region  validate input existence for local database
 
     private async Task<(

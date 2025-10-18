@@ -34,6 +34,8 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
 
         Task<Circuit?> GetCircuitByCodeAsync(string code);
 
+        Task<List<Circuit>> GetAllCircuitsAsync();
+
         Task<Country> AddCountryAsync(Country country);
 
         Task<Country?> GetCountryByIdAsync(string id);
