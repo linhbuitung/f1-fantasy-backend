@@ -333,6 +333,8 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException("Fantasy lineup not found");
         }
+
+        PreValidateFantasyLineupDeadline(fantasyLineup);
                 
         var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
         if (currentRace == null)
@@ -370,6 +372,9 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException("Fantasy lineup not found");
         }
+        
+        PreValidateFantasyLineupDeadline(fantasyLineup);
+        
         var allPowerups = await coreGameplayRepository.GetAllPowerupsAsync();
         if (allPowerups.All(p => p.Id != powerupId))
         {
