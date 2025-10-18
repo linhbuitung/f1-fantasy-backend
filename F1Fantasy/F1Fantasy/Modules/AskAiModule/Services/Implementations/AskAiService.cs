@@ -83,12 +83,14 @@ public class AskAiService(
             driverCodeToId, 
             constructorIdToCode, 
             constructorCodeToId, 
-            circuitCode) = await ValidateInputExistence(mainRacePredictionCreateAsNewDto);      
+            circuitCode) = await ValidateInputExistenceForLocalDatabase(mainRacePredictionCreateAsNewDto);      
         ValidateUniqueDriverConstructorPair(mainRacePredictionCreateAsNewDto.Entries);
         ValidatePredictionCountCap(mainRacePredictionCreateAsNewDto.Entries.Count);
         
         var apiInputDto = AskAiDtoMapper.MapMainRaceCreateAsNewDtoToApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
         var apiStatusInputDto = AskAiDtoMapper.MapMainRaceCreateAsNewDtoToStatusApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
+
+        await ValidateInputExistenceForMlModel(apiInputDto);
         
         var predictionResults = await askAiClient.CallMainRacePrediction(apiInputDto);
         if (predictionResults == null || predictionResults.Predictions.Count != mainRacePredictionCreateAsNewDto.Entries.Count)
@@ -169,11 +171,13 @@ public class AskAiService(
             driverCodeToId, 
             constructorIdToCode, 
             constructorCodeToId, 
-            circuitCode) = await ValidateInputExistence(qualifyingPredictionCreateDto);      
+            circuitCode) = await ValidateInputExistenceForLocalDatabase(qualifyingPredictionCreateDto);      
         ValidateUniqueDriverConstructorPair(qualifyingPredictionCreateDto.Entries);
         ValidatePredictionCountCap(qualifyingPredictionCreateDto.Entries.Count);
         
         var apiInputDto = AskAiDtoMapper.MapQualifyingCreateDtoToApiInputDto(qualifyingPredictionCreateDto, driverIdToCode, constructorIdToCode, circuitCode);
+        
+        await ValidateInputExistenceForMlModel(apiInputDto);
         
         var predictionResults = await askAiClient.CallQualifyingPrediction(apiInputDto);
         if (predictionResults == null || predictionResults.Predictions.Count != qualifyingPredictionCreateDto.Entries.Count)
@@ -319,19 +323,20 @@ public class AskAiService(
             throw;
         }
     }
-    
+
+    #region  validate input existence for local database
+
     private async Task<(
-        Dictionary<int, string> driverIdToCode,
-        Dictionary<string, int> driverCodeToId,
-        Dictionary<int, string> constructorIdToCode,
-        Dictionary<string, int> constructorCodeToId,
-        string circuitCode
-        )> ValidateInputExistence(Dtos.Create.MainRacePredictionCreateAsNewDto mainRacePredictionCreateAsNewDto)
+    Dictionary<int, string> driverIdToCode,
+    Dictionary<string, int> driverCodeToId,
+    Dictionary<int, string> constructorIdToCode,
+    Dictionary<string, int> constructorCodeToId,
+    string circuitCode)> ValidateInputExistenceForLocalDatabaseCore(int circuitId, IEnumerable<int> drivers, IEnumerable<int> constructors)
     {
-        var circuit = await staticDataRepository.GetCircuitByIdAsync(mainRacePredictionCreateAsNewDto.CircuitId);
+        var circuit = await staticDataRepository.GetCircuitByIdAsync(circuitId);
         if (circuit == null)
         {
-            throw new NotFoundException($"Circuit with id {mainRacePredictionCreateAsNewDto.CircuitId} not found");
+            throw new NotFoundException($"Circuit with id {circuitId} not found");
         }
 
         var driverIdToCode = new Dictionary<int, string>();
@@ -339,10 +344,10 @@ public class AskAiService(
         var constructorIdToCode = new Dictionary<int, string>();
         var constructorCodeToId = new Dictionary<string, int>();
 
-        List<int> drivers = mainRacePredictionCreateAsNewDto.Entries.Select(e => e.DriverId).ToList();
-        List<int> constructors = mainRacePredictionCreateAsNewDto.Entries.Select(e => e.ConstructorId).ToList();
+        var driverList = drivers.Distinct().ToList();
+        var constructorList = constructors.Distinct().ToList();
 
-        foreach (var driverId in drivers)
+        foreach (var driverId in driverList)
         {
             var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
             if (driver == null)
@@ -352,99 +357,7 @@ public class AskAiService(
             driverIdToCode[driverId] = driver.Code;
             driverCodeToId[driver.Code] = driverId;
         }
-        foreach (var constructorId in constructors)
-        {
-            var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
-            if (constructor == null)
-            {
-                throw new NotFoundException($"Constructor with id {constructorId} not found");
-            }
-            constructorIdToCode[constructorId] = constructor.Code;
-            constructorCodeToId[constructor.Code] = constructorId;
-        }
-
-        return (driverIdToCode, driverCodeToId, constructorIdToCode, constructorCodeToId, circuit.Code);
-    }
-    
-    private async Task<(
-        Dictionary<int, string> driverIdToCode,
-        Dictionary<string, int> driverCodeToId,
-        Dictionary<int, string> constructorIdToCode,
-        Dictionary<string, int> constructorCodeToId,
-        string circuitCode
-        )> ValidateInputExistence(Dtos.Create.QualifyingPredictionCreateDto qualifyingPredictionCreateDto)
-    {
-        var circuit = await staticDataRepository.GetCircuitByIdAsync(qualifyingPredictionCreateDto.CircuitId);
-        if (circuit == null)
-        {
-            throw new NotFoundException($"Circuit with id {qualifyingPredictionCreateDto.CircuitId} not found");
-        }
-
-        var driverIdToCode = new Dictionary<int, string>();
-        var driverCodeToId = new Dictionary<string, int>();
-        var constructorIdToCode = new Dictionary<int, string>();
-        var constructorCodeToId = new Dictionary<string, int>();
-
-        List<int> drivers = qualifyingPredictionCreateDto.Entries.Select(e => e.DriverId).ToList();
-        List<int> constructors = qualifyingPredictionCreateDto.Entries.Select(e => e.ConstructorId).ToList();
-
-        foreach (var driverId in drivers)
-        {
-            var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
-            if (driver == null)
-            {
-                throw new NotFoundException($"Driver with id {driverId} not found");
-            }
-            driverIdToCode[driverId] = driver.Code;
-            driverCodeToId[driver.Code] = driverId;
-        }
-        foreach (var constructorId in constructors)
-        {
-            var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
-            if (constructor == null)
-            {
-                throw new NotFoundException($"Constructor with id {constructorId} not found");
-            }
-            constructorIdToCode[constructorId] = constructor.Code;
-            constructorCodeToId[constructor.Code] = constructorId;
-        }
-
-        return (driverIdToCode, driverCodeToId, constructorIdToCode, constructorCodeToId, circuit.Code);
-    }
-    
-    private async Task<(
-        Dictionary<int, string> driverIdToCode,
-        Dictionary<string, int> driverCodeToId,
-        Dictionary<int, string> constructorIdToCode,
-        Dictionary<string, int> constructorCodeToId,
-        string circuitCode
-        )> ValidateInputExistence(Dtos.Create.StatusPredictionCreateDto statusPredictionCreateDto)
-    {
-        var circuit = await staticDataRepository.GetCircuitByIdAsync(statusPredictionCreateDto.CircuitId);
-        if (circuit == null)
-        {
-            throw new NotFoundException($"Circuit with id {statusPredictionCreateDto.CircuitId} not found");
-        }
-
-        var driverIdToCode = new Dictionary<int, string>();
-        var driverCodeToId = new Dictionary<string, int>();
-        var constructorIdToCode = new Dictionary<int, string>();
-        var constructorCodeToId = new Dictionary<string, int>();
-
-        List<int> drivers = statusPredictionCreateDto.Entries.Select(e => e.DriverId).ToList();
-        List<int> constructors = statusPredictionCreateDto.Entries.Select(e => e.ConstructorId).ToList();
-
-        foreach (var driverId in drivers)
-        {
-            var driver = await staticDataRepository.GetDriverByIdAsync(driverId);
-            if (driver == null)
-            {
-                throw new NotFoundException($"Driver with id {driverId} not found");
-            }
-            driverIdToCode[driverId] = driver.Code;
-            driverCodeToId[driver.Code] = driverId;
-        }
-        foreach (var constructorId in constructors)
+        foreach (var constructorId in constructorList)
         {
             var constructor = await staticDataRepository.GetConstructorByIdAsync(constructorId);
             if (constructor == null)
@@ -458,6 +371,103 @@ public class AskAiService(
         return (driverIdToCode, driverCodeToId, constructorIdToCode, constructorCodeToId, circuit.Code);
     }
 
+    // thin wrappers to preserve existing signatures and minimize call-site changes
+    private Task<(
+        Dictionary<int, string> driverIdToCode,
+        Dictionary<string, int> driverCodeToId,
+        Dictionary<int, string> constructorIdToCode,
+        Dictionary<string, int> constructorCodeToId,
+        string circuitCode
+        )> ValidateInputExistenceForLocalDatabase(Dtos.Create.MainRacePredictionCreateAsNewDto mainRacePredictionCreateAsNewDto)
+    {
+        var drivers = mainRacePredictionCreateAsNewDto.Entries.Select(e => e.DriverId);
+        var constructors = mainRacePredictionCreateAsNewDto.Entries.Select(e => e.ConstructorId);
+        return ValidateInputExistenceForLocalDatabaseCore(mainRacePredictionCreateAsNewDto.CircuitId, drivers, constructors);
+    }
+
+    private Task<(
+        Dictionary<int, string> driverIdToCode,
+        Dictionary<string, int> driverCodeToId,
+        Dictionary<int, string> constructorIdToCode,
+        Dictionary<string, int> constructorCodeToId,
+        string circuitCode
+        )> ValidateInputExistenceForLocalDatabase(Dtos.Create.QualifyingPredictionCreateDto qualifyingPredictionCreateDto)
+    {
+        var drivers = qualifyingPredictionCreateDto.Entries.Select(e => e.DriverId);
+        var constructors = qualifyingPredictionCreateDto.Entries.Select(e => e.ConstructorId);
+        return ValidateInputExistenceForLocalDatabaseCore(qualifyingPredictionCreateDto.CircuitId, drivers, constructors);
+    }
+
+    private Task<(
+        Dictionary<int, string> driverIdToCode,
+        Dictionary<string, int> driverCodeToId,
+        Dictionary<int, string> constructorIdToCode,
+        Dictionary<string, int> constructorCodeToId,
+        string circuitCode
+        )> ValidateInputExistenceForLocalDatabase(Dtos.Create.StatusPredictionCreateDto statusPredictionCreateDto)
+    {
+        var drivers = statusPredictionCreateDto.Entries.Select(e => e.DriverId);
+        var constructors = statusPredictionCreateDto.Entries.Select(e => e.ConstructorId);
+        return ValidateInputExistenceForLocalDatabaseCore(statusPredictionCreateDto.CircuitId, drivers, constructors);
+    }
+
+    #endregion
+
+    #region validate input existence for ml model
+
+    private async Task ValidateInputExistenceForMlModelCore(string circuitRef, IEnumerable<string> driverRefs, IEnumerable<string> constructorRefs, AskAiClient.PredictionType predictionType)
+    {
+        var availableCircuits = await askAiClient.GetPickableCircuitsAsync(predictionType);
+        if (availableCircuits == null || availableCircuits.All(c => c.CircuitRef != circuitRef))
+        {
+            throw new NotFoundException($"Circuit with code {circuitRef} not found in ML model");
+        }
+        
+        var availableDrivers = await askAiClient.GetPickableDriversAsync(predictionType);
+        // Every driverRef must exist in availableDrivers
+        foreach (var driverCode in driverRefs)
+        {
+            if (availableDrivers == null || availableDrivers.All(d => d.DriverRef != driverCode))
+            {
+                throw new NotFoundException($"Driver with code {driverCode} not found in ML model");
+            }
+        }
+        
+        var availableConstructors = await askAiClient.GetPickableConstructorsAsync(predictionType);
+        // Every constructorRef must exist in availableConstructors
+        foreach (var constructorCode in constructorRefs)
+        {
+            if (availableConstructors == null || availableConstructors.All(c => c.ConstructorRef != constructorCode))
+            {
+                throw new NotFoundException($"Constructor with code {constructorCode} not found in ML model");
+            }
+        }
+    }
+
+    private Task ValidateInputExistenceForMlModel(List<Dtos.Api.MainRacePredictInputDto> inputDtos)
+    {
+        var driverRefs = inputDtos.Select(e => e.DriverCode);
+        var constructorRefs = inputDtos.Select(e => e.ConstructorCode);
+        var circuitRef = inputDtos.First().CircuitCode;
+        return ValidateInputExistenceForMlModelCore(circuitRef, driverRefs, constructorRefs , AskAiClient.PredictionType.MainRace);
+    }
+    
+    private Task ValidateInputExistenceForMlModel(List<Dtos.Api.QualifyingPredictInputDto> inputDtos)
+    {
+        var driverRefs =   inputDtos.Select(e => e.DriverCode);
+        var constructorRefs =  inputDtos.Select(e => e.ConstructorCode);
+        var circuitRef =  inputDtos.First().CircuitCode;
+        return ValidateInputExistenceForMlModelCore(circuitRef, driverRefs, constructorRefs, AskAiClient.PredictionType.Qualifying);
+    }
+    
+    private Task ValidateInputExistenceForMlModel(List<Dtos.Api.StatusPredictInputDto> inputDtos)
+    {
+        var driverRefs =   inputDtos.Select(e => e.DriverCode);
+        var constructorRefs =  inputDtos.Select(e => e.ConstructorCode);
+        var circuitRef =  inputDtos.First().CircuitCode;
+        return ValidateInputExistenceForMlModelCore(circuitRef, driverRefs, constructorRefs, AskAiClient.PredictionType.Status);
+    }
+    #endregion
     private void ValidateUniqueDriverConstructorPair(List<DriverPredictionInputCreateDto> entries)
     {
         var uniquePairs = new HashSet<string>();
