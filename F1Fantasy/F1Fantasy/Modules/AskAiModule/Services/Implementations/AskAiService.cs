@@ -377,6 +377,16 @@ public class AskAiService(
     Dictionary<string, int> constructorCodeToId,
     string circuitCode)> ValidateInputExistenceForLocalDatabaseCore(int circuitId, IEnumerable<int> drivers, IEnumerable<int> constructors)
     {
+        if(drivers == null || !drivers.Any())
+        {
+            throw new InvalidOperationException("No drivers provided");
+        }
+
+        if (constructors == null || !constructors.Any())
+        {
+            throw new InvalidOperationException("No constructors provided");
+        }
+
         var circuit = await staticDataRepository.GetCircuitByIdAsync(circuitId);
         if (circuit == null)
         {

@@ -55,7 +55,8 @@ public class AskAiController(
             return Forbid();
         }
         
-        var prediction = await askAiService.MakeMainRacePredictionAsNewPredictionAsync(userId, mainRacePrediction);
+        var predictionId = await askAiService.MakeMainRacePredictionAsNewPredictionAsync(userId, mainRacePrediction);
+        var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
         return Ok(prediction);
     }
     
@@ -69,14 +70,16 @@ public class AskAiController(
             return Forbid();
         }
         
-        var prediction = await askAiService.MakeQualifyingPredictionAsync(userId, qualifyingPredictionCreateDto);
+        var predictionId = await askAiService.MakeQualifyingPredictionAsync(userId, qualifyingPredictionCreateDto);
+        var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
+
         return Ok(prediction);
     }
     
     
     [Authorize]
     [HttpPost("user/{userId:int}/prediction/{predictionId:int}/main-race")]
-    public async Task<IActionResult> MakeNewQualifyingPrediction(int userId, int predictionId, MainRacePredictionCreateAsAdditionDto mainRacePredictionCreateAsAdditionDto)
+    public async Task<IActionResult> MakeMainRacePredictionFromAlreadyMadeQualifyingPrediction(int userId, int predictionId, MainRacePredictionCreateAsAdditionDto mainRacePredictionCreateAsAdditionDto)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
@@ -84,7 +87,9 @@ public class AskAiController(
             return Forbid();
         }
         
-        var prediction = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
+        var updatedPredictionId = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
+        var prediction = await askAiService.GetPredictionDetailByIdAsync(updatedPredictionId);
+
         return Ok(prediction);
     }
     

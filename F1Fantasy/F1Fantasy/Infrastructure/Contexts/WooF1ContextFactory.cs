@@ -14,7 +14,8 @@ public class WooF1ContextFactory : IDesignTimeDbContextFactory<WooF1Context>
     {
         var optionsBuilder = new DbContextOptionsBuilder<WooF1Context>();
         optionsBuilder
-            .UseNpgsql(GetConnectionString())
+            .UseNpgsql(GetConnectionString(),  
+                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             .ReplaceService<IHistoryRepository, WooF1HistoryRepository>()
             .UseSnakeCaseNamingConvention();
 
