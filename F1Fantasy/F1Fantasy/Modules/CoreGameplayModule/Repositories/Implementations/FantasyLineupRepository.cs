@@ -91,8 +91,8 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         {
             throw new InvalidOperationException($"You can only select up to {maxConstructors} constructors.");
         }
-        RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds);
-        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, captainDriverId, maxDrivers, maxConstructors);
+        await RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds);
+        await AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, captainDriverId, maxDrivers, maxConstructors);
         await UpdateAllFutureFantasyLineupAsync(trackedFantasyLineup);
         await context.SaveChangesAsync();
         return trackedFantasyLineup;
@@ -115,8 +115,8 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         {
             throw new InvalidOperationException($"You can only select up to {maxConstructors} constructors.");
         }
-        RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds, powerupIds);
-        AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, captainDriverId, maxDrivers, maxConstructors);
+        await RemoveUnselectedLineupItems(trackedFantasyLineup, driverIds, constructorIds, powerupIds);
+        await AddNewItemsAndCalculateTransfers(trackedFantasyLineup, driverIds, constructorIds, powerupIds, captainDriverId, maxDrivers, maxConstructors);
         await UpdateAllFutureFantasyLineupAsync(trackedFantasyLineup);
         await context.SaveChangesAsync();
         return trackedFantasyLineup;
@@ -145,7 +145,8 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             context.PowerupFantasyLineups.RemoveRange(
                 context.PowerupFantasyLineups.Where(pfl => pfl.FantasyLineupId == futureLineup.Id)
             );
-            
+            await context.SaveChangesAsync();
+
             // Add drivers, constructors from the trackedFantasyLineup
             foreach (var driver in trackedFantasyLineup.FantasyLineupDrivers)
             {
@@ -170,7 +171,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
         await context.SaveChangesAsync();
     }
 
-    private void RemoveUnselectedLineupItems(
+    private async Task RemoveUnselectedLineupItems(
         FantasyLineup trackedFantasyLineup,
         List<int> driverIds,
         List<int> constructorIds)
@@ -183,8 +184,10 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             context.FantasyLineupConstructors
                 .Where(flc => flc.FantasyLineupId == trackedFantasyLineup.Id && !constructorIds.Contains(flc.ConstructorId))
         );
+        await context.SaveChangesAsync();
     }
-    private void RemoveUnselectedLineupItems(
+    
+    private async Task RemoveUnselectedLineupItems(
         FantasyLineup trackedFantasyLineup,
         List<int> driverIds,
         List<int> constructorIds,
@@ -202,9 +205,10 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             context.PowerupFantasyLineups
                 .Where(pfl => pfl.FantasyLineupId == trackedFantasyLineup.Id && !powerupIds.Contains(pfl.PowerupId))
         );
+        await context.SaveChangesAsync();
     }
 
-    private void AddNewItemsAndCalculateTransfers(
+    private async Task AddNewItemsAndCalculateTransfers(
         FantasyLineup trackedFantasyLineup,
         List<int> newDriverIds,
         List<int> newConstructorIds,
@@ -280,8 +284,10 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             }
         }
         #endregion
+        
+        await context.SaveChangesAsync();
     }
-    private void AddNewItemsAndCalculateTransfers(
+    private async Task AddNewItemsAndCalculateTransfers(
         FantasyLineup trackedFantasyLineup,
         List<int> newDriverIds,
         List<int> newConstructorIds,
@@ -377,6 +383,8 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             }
         }
         #endregion
+        
+        await context.SaveChangesAsync();
     }
 
     public async Task ResetFantasyLineupsBySeasonAsync(Season season)
