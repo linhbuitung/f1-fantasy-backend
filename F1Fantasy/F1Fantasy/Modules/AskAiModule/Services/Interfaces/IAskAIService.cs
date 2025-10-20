@@ -26,4 +26,5 @@ public interface IAskAIService
     
     Task<List<Dtos.Get.PickableConstructorGetDto>> GetMlPickableConstructorsAsync(AskAiClient.PredictionType predictionType);
 
+    void PrevalidateDateForPredictionAsync(DateTime predictionQualifyingDate,DateTime? predictionMainRaceDate);
 }

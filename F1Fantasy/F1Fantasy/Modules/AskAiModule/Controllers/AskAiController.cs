@@ -37,6 +37,11 @@ public class AskAiController(
             return Forbid();
         }
         
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
         if (prediction.UserId != userId)
         {
@@ -54,7 +59,14 @@ public class AskAiController(
         {
             return Forbid();
         }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         
+        askAiService.PrevalidateDateForPredictionAsync(mainRacePrediction.QualifyingDate, mainRacePrediction.RaceDate);
+
         var predictionId = await askAiService.MakeMainRacePredictionAsNewPredictionAsync(userId, mainRacePrediction);
         var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
         return Ok(prediction);
@@ -69,6 +81,12 @@ public class AskAiController(
         {
             return Forbid();
         }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        askAiService.PrevalidateDateForPredictionAsync(qualifyingPredictionCreateDto.QualifyingDate, null);
         
         var predictionId = await askAiService.MakeQualifyingPredictionAsync(userId, qualifyingPredictionCreateDto);
         var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
@@ -86,7 +104,15 @@ public class AskAiController(
         {
             return Forbid();
         }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         
+        var predictionToUpdate = await askAiService.GetPredictionDetailByIdAsync(predictionId);
+
+        askAiService.PrevalidateDateForPredictionAsync(predictionToUpdate.QualifyingDate, mainRacePredictionCreateAsAdditionDto.RaceDate);
+
         var updatedPredictionId = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
         var prediction = await askAiService.GetPredictionDetailByIdAsync(updatedPredictionId);
 
