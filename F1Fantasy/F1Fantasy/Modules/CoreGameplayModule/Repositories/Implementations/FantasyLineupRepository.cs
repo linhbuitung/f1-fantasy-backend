@@ -153,7 +153,7 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
                 {
                     FantasyLineupId = futureLineup.Id,
                     DriverId = driver.DriverId,
-                    IsCaptain = false
+                    IsCaptain = driver.IsCaptain
                 });
             }
 

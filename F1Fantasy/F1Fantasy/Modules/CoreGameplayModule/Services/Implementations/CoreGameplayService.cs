@@ -98,8 +98,6 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             Console.WriteLine($"Error updating fantasy lineup: {ex.Message}");
             throw;
         }
-        
-        return CoreGameplayDtoMapper.MapFantasyLineupToGetDto(trackedFantasyLineup);
     }
     public async Task<Dtos.Get.FantasyLineupDto> UpdateFantasyLineupWithPowerupsAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
