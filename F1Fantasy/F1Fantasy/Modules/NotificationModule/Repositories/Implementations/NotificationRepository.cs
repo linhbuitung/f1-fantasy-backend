@@ -46,7 +46,7 @@ public class NotificationRepository(WooF1Context context) : INotificationReposit
 
     public async Task<Notification?> GetNotificationAsTrackingAsync(int notificationId)
     {
-        return await context.Notifications.AsTracking().FirstOrDefaultAsync(n => n.Id == notificationId);
+        return await context.Notifications.AsTracking().AsSingleQuery().FirstOrDefaultAsync(n => n.Id == notificationId);
 
     }
 }

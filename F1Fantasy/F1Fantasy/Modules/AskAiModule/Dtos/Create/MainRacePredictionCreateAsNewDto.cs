@@ -7,7 +7,7 @@ namespace F1Fantasy.Modules.AskAiModule.Dtos.Create;
 
 public class MainRacePredictionCreateAsNewDto
 {
-    [Required]
+    [Required, Range(1, int.MaxValue)]
     public int Laps { get; set; }
 
     [Required]

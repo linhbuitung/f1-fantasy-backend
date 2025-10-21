@@ -38,11 +38,12 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         {
             logger.LogError(ex, "Exception");
             context.Response.StatusCode = 500;
+            
             context.Response.ContentType = "application/json";
             var errorResponse = new
             {
                 error = "An error occurred.",
-                message = ex.Message,
+                message = "An internal server error occurred. Please try again later.",
             };
             await context.Response.WriteAsJsonAsync(errorResponse);
         }

@@ -18,6 +18,7 @@ public class PredictionGetDto
     [Required]
     public bool Rain { get; set; }
 
+    public int? Laps { get; set; }
 
     [Required]
     public int UserId { get; set; }

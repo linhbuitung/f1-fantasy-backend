@@ -98,8 +98,6 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
             Console.WriteLine($"Error updating fantasy lineup: {ex.Message}");
             throw;
         }
-        
-        return CoreGameplayDtoMapper.MapFantasyLineupToGetDto(trackedFantasyLineup);
     }
     public async Task<Dtos.Get.FantasyLineupDto> UpdateFantasyLineupWithPowerupsAsync(Dtos.Update.FantasyLineupDto fantasyLineupDto)
     {
@@ -333,6 +331,8 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException("Fantasy lineup not found");
         }
+
+        PreValidateFantasyLineupDeadline(fantasyLineup);
                 
         var currentRace = await coreGameplayRepository.GetCurrentRaceAsync();
         if (currentRace == null)
@@ -370,6 +370,9 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
         {
             throw new NotFoundException("Fantasy lineup not found");
         }
+        
+        PreValidateFantasyLineupDeadline(fantasyLineup);
+        
         var allPowerups = await coreGameplayRepository.GetAllPowerupsAsync();
         if (allPowerups.All(p => p.Id != powerupId))
         {

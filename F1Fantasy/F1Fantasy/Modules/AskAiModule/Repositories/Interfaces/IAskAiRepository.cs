@@ -7,6 +7,7 @@ public interface IAskAiRepository
     Task<List<Prediction>> GetAllPredictionsByUserIdAsync(int userId);
     
     Task<Prediction?> GetPredictionDetailByIdAsync(int predictionId);
+    Task<Prediction?> GetPredictionDetailByIdAsTrackingAsync(int predictionId);
     
     Task<Prediction>  AddPredictionAsync(Prediction prediction);
     

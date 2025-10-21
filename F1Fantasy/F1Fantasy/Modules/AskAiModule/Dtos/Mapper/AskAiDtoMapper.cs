@@ -15,6 +15,7 @@ public class AskAiDtoMapper
             DatePredicted = prediction.DatePredicted,
             RaceDate = prediction.RaceDate,
             QualifyingDate = prediction.QualifyingDate,
+            Laps = prediction.Laps,
             Rain = prediction.Rain,
             UserId = prediction.UserId,
             // if there is any driver prediction entity linked with a grid position not null, then set true
@@ -66,6 +67,7 @@ public class AskAiDtoMapper
             Id = prediction.Id,
             DatePredicted = prediction.DatePredicted,
             RaceDate = prediction.RaceDate,
+            Laps = prediction.Laps,
             QualifyingDate = prediction.QualifyingDate,
             Rain = prediction.Rain,
             UserId = prediction.UserId,
@@ -125,6 +127,7 @@ public class AskAiDtoMapper
             DatePredicted = DateOnly.FromDateTime(DateTime.UtcNow),
             RaceDate = createAsNewDto.RaceDate,
             QualifyingDate = createAsNewDto.QualifyingDate,
+            Laps = createAsNewDto.Laps,
             Rain = createAsNewDto.Rain,
             CircuitId = createAsNewDto.CircuitId,
             UserId = userId
@@ -252,5 +255,37 @@ public class AskAiDtoMapper
             Rain = createAsNewDto.Rain ? 1 : 0,
             RaceDate = DateOnly.FromDateTime(createAsNewDto.RaceDate),
         }).ToList();
+    }
+    
+    public static PickableDriverGetDto MapDriverToMlPickableDriverGetDto(Core.Common.Driver driver)
+    {
+        return new Get.PickableDriverGetDto
+        {
+            Id = driver.Id,
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            DateOfBirth = driver.DateOfBirth,
+            Code = driver.Code,
+        };
+    }
+    
+    public static Get.PickableConstructorGetDto MapConstructorToMlPickableConstructorGetDto(Core.Common.Constructor constructor)
+    {
+        return new Get.PickableConstructorGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            Code = constructor.Code,
+        };
+    }
+    
+    public static Get.PickableCircuitGetDto MapCircuitToMlPickableCircuitGetDto(Core.Common.Circuit circuit)
+    {
+        return new Get.PickableCircuitGetDto
+        {
+            Id = circuit.Id,
+            CircuitName = circuit.CircuitName,
+            Code = circuit.Code,
+        };
     }
 }

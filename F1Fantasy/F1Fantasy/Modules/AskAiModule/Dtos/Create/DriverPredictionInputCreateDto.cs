@@ -5,7 +5,6 @@ namespace F1Fantasy.Modules.AskAiModule.Dtos.Create;
 
 public class DriverPredictionInputCreateDto
 {
-    [Required]
     public int? QualificationPosition { get; set; }
     
     [Required]

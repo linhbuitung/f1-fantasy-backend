@@ -24,6 +24,7 @@ namespace F1Fantasy.Core.Common
         [Required]
         public bool Rain { get; set; }
 
+        public int? Laps { get; set; }
         //[Required, MaxLength(10)]
         //public string PredictionType { get; set; }
 

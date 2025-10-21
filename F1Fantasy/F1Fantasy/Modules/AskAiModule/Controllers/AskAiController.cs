@@ -23,7 +23,7 @@ public class AskAiController(
             return Forbid();
         }
         
-        var prediction = await askAiService.GetPagedPredictionsByUserIdAsync(userId, pageNum, pageSize);
+        var prediction = await askAiService.GetPagedPredictionsByUserIdOrderByDatePredictedAsync(userId, pageNum, pageSize);
         return Ok(prediction);
     }
     
@@ -35,6 +35,11 @@ public class AskAiController(
         if (!authResult.Succeeded)
         {
             return Forbid();
+        }
+        
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
         
         var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
@@ -54,8 +59,16 @@ public class AskAiController(
         {
             return Forbid();
         }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         
-        var prediction = await askAiService.MakeMainRacePredictionAsNewPredictionAsync(userId, mainRacePrediction);
+        askAiService.PrevalidateDateForPredictionAsync(mainRacePrediction.QualifyingDate, mainRacePrediction.RaceDate);
+
+        var predictionId = await askAiService.MakeMainRacePredictionAsNewPredictionAsync(userId, mainRacePrediction);
+        var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
         return Ok(prediction);
     }
     
@@ -68,23 +81,91 @@ public class AskAiController(
         {
             return Forbid();
         }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         
-        var prediction = await askAiService.MakeQualifyingPredictionAsync(userId, qualifyingPredictionCreateDto);
+        askAiService.PrevalidateDateForPredictionAsync(qualifyingPredictionCreateDto.QualifyingDate, null);
+        
+        var predictionId = await askAiService.MakeQualifyingPredictionAsync(userId, qualifyingPredictionCreateDto);
+        var prediction = await askAiService.GetPredictionDetailByIdAsync(predictionId);
+
         return Ok(prediction);
     }
     
     
     [Authorize]
     [HttpPost("user/{userId:int}/prediction/{predictionId:int}/main-race")]
-    public async Task<IActionResult> MakeNewQualifyingPrediction(int userId, int predictionId, MainRacePredictionCreateAsAdditionDto mainRacePredictionCreateAsAdditionDto)
+    public async Task<IActionResult> MakeMainRacePredictionFromAlreadyMadeQualifyingPrediction(int userId, int predictionId, MainRacePredictionCreateAsAdditionDto mainRacePredictionCreateAsAdditionDto)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
         if (!authResult.Succeeded)
         {
             return Forbid();
         }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         
-        var prediction = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
+        var predictionToUpdate = await askAiService.GetPredictionDetailByIdAsync(predictionId);
+
+        askAiService.PrevalidateDateForPredictionAsync(predictionToUpdate.QualifyingDate, mainRacePredictionCreateAsAdditionDto.RaceDate);
+
+        var updatedPredictionId = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
+        var prediction = await askAiService.GetPredictionDetailByIdAsync(updatedPredictionId);
+
         return Ok(prediction);
+    }
+    
+    [Authorize]
+    [HttpGet("drivers/main-race")]
+    public async Task<IActionResult> GetMlPickableDriversForMainRace()
+    {
+        var drivers = await askAiService.GetMlPickableDriversAsync(Extensions.AskAiClient.PredictionType.MainRace);
+        return Ok(drivers);
+    }
+
+    [Authorize]
+    [HttpGet("drivers/qualifying")]
+    public async Task<IActionResult> GetMlPickableDriversForQualifying()
+    {
+        var drivers = await askAiService.GetMlPickableDriversAsync(Extensions.AskAiClient.PredictionType.Qualifying);
+        return Ok(drivers);
+    }
+
+    [Authorize]
+    [HttpGet("constructors/main-race")]
+    public async Task<IActionResult> GetMlPickableConstructorsForMainRace()
+    {
+        var constructors =
+            await askAiService.GetMlPickableConstructorsAsync(Extensions.AskAiClient.PredictionType.MainRace);
+        return Ok(constructors);
+    }
+
+    [Authorize]
+    [HttpGet("constructors/qualifying")]
+    public async Task<IActionResult> GetMlPickableConstructorsForQualifying()
+    {
+        var constructors =
+            await askAiService.GetMlPickableConstructorsAsync(Extensions.AskAiClient.PredictionType.Qualifying);
+        return Ok(constructors);
+    }
+
+    [Authorize]
+    [HttpGet("circuits/main-race")]
+    public async Task<IActionResult> GetMlPickableCircuitsForMainRace()
+    {
+        var circuits = await askAiService.GetMlPickableCircuitsAsync(Extensions.AskAiClient.PredictionType.MainRace);
+        return Ok(circuits);
+    }
+
+    [Authorize]
+    [HttpGet("circuits/qualifying")]
+    public async Task<IActionResult> GetMlPickableCircuitsForQualifying()
+    {
+        var circuits = await askAiService.GetMlPickableCircuitsAsync(Extensions.AskAiClient.PredictionType.Qualifying);
+        return Ok(circuits);
     }
 }

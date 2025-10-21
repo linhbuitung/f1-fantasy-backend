@@ -47,7 +47,7 @@ public class NotificationController(
         {
             return Forbid();
         }
-        var notification = notificationService.MarkNotificationAsReadAsync(userId, notificationId);
+        var notification = await notificationService.MarkNotificationAsReadAsync(userId, notificationId);
         return Ok(notification);
     }
 

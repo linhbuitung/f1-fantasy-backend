@@ -89,6 +89,11 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
             return await context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
+        public async Task<List<Circuit>> GetAllCircuitsAsync()
+        {
+            return await context.Circuits.AsNoTracking().ToListAsync();
+        }
+        
         public async Task<Circuit?> GetCircuitByCodeAsync(string code)
         {
             return await context.Circuits.AsNoTracking().FirstOrDefaultAsync(c => c.Code.Equals(code));
