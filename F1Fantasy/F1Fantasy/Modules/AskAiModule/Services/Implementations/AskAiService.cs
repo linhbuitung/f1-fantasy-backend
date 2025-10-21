@@ -43,10 +43,11 @@ public class AskAiService(
         }
     }
     
-    public async Task<List<Dtos.Get.PredictionGetDto>> GetPagedPredictionsByUserIdAsync(int userId, int pageNumber, int pageSize)
+    public async Task<List<Dtos.Get.PredictionGetDto>> GetPagedPredictionsByUserIdOrderByDatePredictedAsync(int userId, int pageNumber, int pageSize)
     {
         var allPredictions = await askAiRepository.GetAllPredictionsByUserIdAsync(userId);
         var pagedPredictions = allPredictions
+            .OrderByDescending(p => p.DatePredicted)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToList();
@@ -86,6 +87,7 @@ public class AskAiService(
             circuitCode) = await ValidateInputExistenceForLocalDatabase(mainRacePredictionCreateAsNewDto);      
         ValidateUniqueDriverConstructorPair(mainRacePredictionCreateAsNewDto.Entries);
         ValidatePredictionCountCap(mainRacePredictionCreateAsNewDto.Entries.Count);
+        ValidateQualificationPositionExistenceForMlModel(mainRacePredictionCreateAsNewDto.Entries);
         
         var apiInputDto = AskAiDtoMapper.MapMainRaceCreateAsNewDtoToApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
         var apiStatusInputDto = AskAiDtoMapper.MapMainRaceCreateAsNewDtoToStatusApiInputDto(mainRacePredictionCreateAsNewDto, driverIdToCode, constructorIdToCode, circuitCode);
@@ -236,7 +238,7 @@ public class AskAiService(
             throw new InvalidOperationException("Not enough AI credits");
         }
 
-        var existingPrediction = await askAiRepository.GetPredictionDetailByIdAsync(predictionId);
+        var existingPrediction = await askAiRepository.GetPredictionDetailByIdAsTrackingAsync(predictionId);
         if (existingPrediction == null)
         {
             throw new NotFoundException("Existing prediction not found");
@@ -308,6 +310,11 @@ public class AskAiService(
             {
                 throw new Exception("Failed to deduct AI credit");
             }
+            
+            // Update existing prediction
+            existingPrediction.RaceDate = mainRacePredictionCreateAsAdditionDto.RaceDate;
+            existingPrediction.Laps = mainRacePredictionCreateAsAdditionDto.Laps;
+            existingPrediction.Rain = mainRacePredictionCreateAsAdditionDto.Rain;
             
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -504,6 +511,17 @@ public class AskAiService(
         var constructorRefs = inputDtos.Select(e => e.ConstructorCode);
         var circuitRef = inputDtos.First().CircuitCode;
         return ValidateInputExistenceForMlModelCore(circuitRef, driverRefs, constructorRefs , AskAiClient.PredictionType.MainRace);
+    }
+    
+    private void ValidateQualificationPositionExistenceForMlModel(List<DriverPredictionInputCreateDto> inputDtos)
+    {
+        foreach (var inputDto in inputDtos)
+        {
+            if (inputDto.QualificationPosition == null)
+            {
+                throw new InvalidOperationException($"Qualification position is required in ML model input");
+            }
+        }
     }
     
     private Task ValidateInputExistenceForMlModel(List<Dtos.Api.QualifyingPredictInputDto> inputDtos)

@@ -7,7 +7,7 @@ public interface IAskAIService
     Task AddAskAiCreditAsync(int userId);
     Task AddAskAiCreditAsync(string userId);
     
-    Task<List<Dtos.Get.PredictionGetDto>> GetPagedPredictionsByUserIdAsync(int userId, int pageNumber, int pageSize);
+    Task<List<Dtos.Get.PredictionGetDto>> GetPagedPredictionsByUserIdOrderByDatePredictedAsync(int userId, int pageNumber, int pageSize);
     
     Task <Dtos.Get.PredictionGetDto> GetPredictionDetailByIdAsync(int predictionId);
     

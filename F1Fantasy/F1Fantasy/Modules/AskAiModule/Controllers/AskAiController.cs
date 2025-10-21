@@ -23,7 +23,7 @@ public class AskAiController(
             return Forbid();
         }
         
-        var prediction = await askAiService.GetPagedPredictionsByUserIdAsync(userId, pageNum, pageSize);
+        var prediction = await askAiService.GetPagedPredictionsByUserIdOrderByDatePredictedAsync(userId, pageNum, pageSize);
         return Ok(prediction);
     }
     

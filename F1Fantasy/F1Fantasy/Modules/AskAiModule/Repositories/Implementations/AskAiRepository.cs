@@ -27,6 +27,18 @@ public class AskAiRepository( WooF1Context context) : IAskAiRepository
             .Include(p => p.Circuit)
             .FirstOrDefaultAsync(p => p.Id == predictionId);
     }
+    
+    public async Task<Prediction?> GetPredictionDetailByIdAsTrackingAsync(int predictionId)
+    {
+        return await context.Predictions
+            .AsTracking()
+            .Include(p => p.DriverPredictions)
+            .ThenInclude(dp => dp.Driver)
+            .Include(p => p.DriverPredictions)
+            .ThenInclude(dp => dp.Constructor)
+            .Include(p => p.Circuit)
+            .FirstOrDefaultAsync(p => p.Id == predictionId);
+    }
 
     public async Task<Prediction> AddPredictionAsync(Prediction prediction)
     {
