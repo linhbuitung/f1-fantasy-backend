@@ -184,7 +184,6 @@ public class FantasyLineupRepository(WooF1Context context, IConfiguration config
             context.FantasyLineupConstructors
                 .Where(flc => flc.FantasyLineupId == trackedFantasyLineup.Id && !constructorIds.Contains(flc.ConstructorId))
         );
-        await context.SaveChangesAsync();
     }
     
     private async Task RemoveUnselectedLineupItems(
