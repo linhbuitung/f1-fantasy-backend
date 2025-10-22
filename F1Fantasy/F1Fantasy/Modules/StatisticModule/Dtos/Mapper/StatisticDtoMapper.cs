@@ -48,13 +48,39 @@ public class StatisticDtoMapper
         };
     }
     
-    public static Get.DriverWIthFantasyPointScored MapToDriverWIthFantasyPointScoredDto(Driver driver, int fantasyPointScored)
+    public static Get.DriverWithTotalFantasyPointScoredGetDto MapToDriverWithTotalFantasyPointScoredDto(Driver driver, int totalFantasyPointScored)
     {
-        return new Get.DriverWIthFantasyPointScored
+        return new Get.DriverWithTotalFantasyPointScoredGetDto
         {
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
-            FantasyPointScored = fantasyPointScored,
+            TotalFantasyPointScored = totalFantasyPointScored,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithAveragePointScoredGetDto MapToDriverWithAverageFantasyPointScoredDto(Driver driver, double averageFantasyPointScored)
+    {
+        return new Get.DriverWithAveragePointScoredGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            AverageFantasyPointScored = Math.Round(averageFantasyPointScored, 2),
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithSelectionPercentageGetDto MapToDriverWithSelectionPercentageDto(Driver driver, double selectionPercentage)
+    {
+        return new Get.DriverWithSelectionPercentageGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            SelectionPercentage = Math.Round(selectionPercentage, 2),
             Code = driver.Code,
             Price = driver.Price,
             ImgUrl = driver.ImgUrl

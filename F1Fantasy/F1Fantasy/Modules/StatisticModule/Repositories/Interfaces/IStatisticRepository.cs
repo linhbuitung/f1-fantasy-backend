@@ -27,4 +27,14 @@ public interface IStatisticRepository
     Task<List<RaceEntry>> GetAllRaceEntriesByRaceIdAsync(int raceId);
     
     Task<List<Driver>> GetAllDriversIncludeRaceEntriesBySeasonIdAsync(int seasonId);
+    
+    // Get total number of fantasy lineup created in a season from the first race to the current race
+    Task<int> GetTotalNumberOfFantasyLineupForASeasonUntilCurrentDateAsync(int seasonId);
+    
+    Task<int> GetTotalNumberOfFantasyLineupForARaceAsync(int raceId);
+
+    Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInASeasonUntilCurrentDateAsync(int seasonId, int driverId);
+    
+    Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInARaceAsync(int raceId, int driverId);
+
 }

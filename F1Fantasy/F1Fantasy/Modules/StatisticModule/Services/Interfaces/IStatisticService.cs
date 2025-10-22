@@ -10,6 +10,4 @@ public interface IStatisticService
         int seasonId);
 
     Task<Dtos.Get.TeamOfTheRaceDto> GetTeamOfTheRaceByRaceIdAsync(RaceDto raceDto);
-    
-    Task<List<Dtos.Get.DriverWIthFantasyPointScored>> GetTopDriversInSeasonByFantasyPointsAsync(int seasonId);
 }

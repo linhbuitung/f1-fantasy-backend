@@ -144,4 +144,34 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .AsNoTracking()
             .ToListAsync();
     }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupForASeasonUntilCurrentDateAsync(int seasonId)
+    {
+        return await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId && 
+                         fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow))
+            .CountAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupForARaceAsync(int raceId)
+    {
+        return await context.FantasyLineups.Where(fl => fl.RaceId == raceId).CountAsync();
+    }
+    
+    public async Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInASeasonUntilCurrentDateAsync(int seasonId, int driverId)
+    {
+        return await context.FantasyLineupDrivers
+            .Where(fld => fld.FantasyLineup.Race.SeasonId == seasonId && 
+                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
+                          fld.DriverId == driverId)
+            .CountAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInARaceAsync(int raceId, int driverId)
+    {
+        return await context.FantasyLineupDrivers
+            .Where(fld => fld.FantasyLineup.RaceId == raceId &&
+                          fld.DriverId == driverId)
+            .CountAsync();
+    }
 }
