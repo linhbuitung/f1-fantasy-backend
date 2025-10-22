@@ -1,4 +1,5 @@
 ﻿using F1Fantasy.Exceptions;
+using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Dtos.Get;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
@@ -8,7 +9,7 @@ using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.StatisticModule.Services.Implementations;
 
-public class StatisticService(IStatisticRepository statisticRepository, ICoreGameplayService coreGameplayService) : IStatisticService
+public class StatisticService(IStatisticRepository statisticRepository, ICoreGameplayService coreGameplayService, IAdminRepository adminRepository) : IStatisticService
 {
     public async Task<Dtos.Get.GeneralSeasonStatisticDto> GetGeneralStatisticBySeasonId(int seasonId)
     {
@@ -112,5 +113,27 @@ public class StatisticService(IStatisticRepository statisticRepository, ICoreGam
         .ToList();
         
         return StatisticDtoMapper.MapToTeamOfTheRaceDto(raceDto.Id, raceDto.RaceName, raceDto.Round, driverDtos, constructorDtos);
+    }
+
+    public async Task<List<Dtos.Get.DriverWIthFantasyPointScored>> GetTopDriversInSeasonByFantasyPointsAsync(int seasonId)
+    {
+        var drivers = await statisticRepository.GetAllDriversIncludeRaceEntriesBySeasonIdAsync(seasonId);
+        var driverPointsList = new List<Dtos.Get.DriverWIthFantasyPointScored>();
+
+        foreach (var driver in drivers)
+        {
+            // Calculate total fantasy points for the driver in the season and create DTO
+            
+            // Repository already includes RaceEntries for the season so we can sum directly
+            var totalPoints = driver.RaceEntries
+                .Sum(re => re.PointsGained);
+
+            var driverDto = StatisticDtoMapper.MapToDriverWIthFantasyPointScoredDto(driver, totalPoints);
+            driverPointsList.Add(driverDto);
+        }
+        
+        return driverPointsList
+            .OrderByDescending(dp => dp.FantasyPointScored)
+            .ToList();
     }
 }

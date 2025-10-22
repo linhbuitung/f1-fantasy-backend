@@ -47,4 +47,17 @@ public class StatisticDtoMapper
             Constructors = constructorEntries
         };
     }
+    
+    public static Get.DriverWIthFantasyPointScored MapToDriverWIthFantasyPointScoredDto(Driver driver, int fantasyPointScored)
+    {
+        return new Get.DriverWIthFantasyPointScored
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            FantasyPointScored = fantasyPointScored,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
 }

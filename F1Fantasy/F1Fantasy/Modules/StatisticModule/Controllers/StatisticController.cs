@@ -1,6 +1,7 @@
 ﻿using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace F1Fantasy.Modules.StatisticModule.Controllers;
@@ -19,6 +20,7 @@ public class StatisticController(IStatisticService statisticService, IAdminServi
         return Ok(statisticDto);
     }
     
+    [Authorize]
     [HttpGet("general/current-season/user/{userId}")]
     public async Task<IActionResult> GetGeneralStatisticForCurrentActiveSeasonByUserId(int userId)
     {

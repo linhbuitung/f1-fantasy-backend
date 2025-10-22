@@ -134,4 +134,14 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .AsNoTracking()
             .ToListAsync();
     }
+
+    public async Task<List<Driver>> GetAllDriversIncludeRaceEntriesBySeasonIdAsync(int seasonId)
+    {
+     
+        return await context.Drivers
+            .Where(d => d.RaceEntries.Any(re => re.Race.SeasonId == seasonId))
+            .Include(d => d.RaceEntries.Where(re => re.Race.SeasonId == seasonId))
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

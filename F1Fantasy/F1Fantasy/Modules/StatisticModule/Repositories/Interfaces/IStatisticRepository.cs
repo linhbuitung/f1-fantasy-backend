@@ -25,5 +25,6 @@ public interface IStatisticRepository
     Task<List<RaceEntry>> GetTopConstructorRaceEntriesInARaceByRaceIdAsync(int raceId, int topN);
     
     Task<List<RaceEntry>> GetAllRaceEntriesByRaceIdAsync(int raceId);
-
+    
+    Task<List<Driver>> GetAllDriversIncludeRaceEntriesBySeasonIdAsync(int seasonId);
 }
