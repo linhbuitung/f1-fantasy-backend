@@ -48,7 +48,7 @@ public class StatisticDtoMapper
         };
     }
     
-    public static Get.DriverWithTotalFantasyPointScoredGetDto MapToDriverWithTotalFantasyPointScoredDto(Driver driver, int totalFantasyPointScored)
+    public static Get.DriverWithTotalFantasyPointScoredGetDto MapToDriverWithTotalFantasyPointScoredGetDto(Driver driver, int totalFantasyPointScored)
     {
         return new Get.DriverWithTotalFantasyPointScoredGetDto
         {
@@ -61,13 +61,78 @@ public class StatisticDtoMapper
         };
     }
     
-    public static Get.DriverWithAveragePointScoredGetDto MapToDriverWithAverageFantasyPointScoredDto(Driver driver, double averageFantasyPointScored)
+    public static Get.DriverWithAveragePointScoredGetDto MapToDriverWithAverageFantasyPointScoredGetDto(Driver driver, double averageFantasyPointScored)
     {
         return new Get.DriverWithAveragePointScoredGetDto
         {
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             AverageFantasyPointScored = Math.Round(averageFantasyPointScored, 2),
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithRaceWinsGetDto MapToDriverWithRaceWinsGetDto(Driver driver, int totalRacesWin)
+    {
+        return new Get.DriverWithRaceWinsGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            TotalRacesWin = totalRacesWin,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithPodiumsGetDto MapToDriverWithPodiumsGetDto(Driver driver,int totalPodiums)
+    {
+        return new Get.DriverWithPodiumsGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            TotalPodiums = totalPodiums,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithTop10FinishesGetDto MapToDriverWithTop10FinishesGetDto(Driver driver,int totalTop10Finishes)
+    {
+        return new Get.DriverWithTop10FinishesGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            TotalTop10Finishes = totalTop10Finishes,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithFastestLapsGetDto MapToDriverWithFastestLapsGetDto(Driver driver,int totalFastestLaps)
+    {
+        return new Get.DriverWithFastestLapsGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            TotalFastestLaps = totalFastestLaps,
+            Code = driver.Code,
+            Price = driver.Price,
+            ImgUrl = driver.ImgUrl
+        };
+    }
+    
+    public static Get.DriverWithDnfsGetDto MapToDriverWithDnfsGetDto(Driver driver,int totalDnfs)
+    {
+        return new Get.DriverWithDnfsGetDto
+        {
+            GivenName = driver.GivenName,
+            FamilyName = driver.FamilyName,
+            TotalDnfs = totalDnfs,
             Code = driver.Code,
             Price = driver.Price,
             ImgUrl = driver.ImgUrl

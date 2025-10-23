@@ -43,26 +43,46 @@ public class DriverStatisticController(IDriverStatisticService driverStatisticSe
     [HttpGet("race-wins")]
     public async Task<IActionResult> GetDriversWithRaceWinsInCurrentSeason()
     {
+        var activeSeason = await adminService.GetActiveSeasonAsync();
         
+        var dtos = await driverStatisticService.GetTopDriversInSeasonByTotalRacesWinsAsync(activeSeason.Id);
+
+        return Ok(dtos);
     }
     [HttpGet("podiums")]
     public async Task<IActionResult> GetDriversWithPodiumsInCurrentSeason()
     {
+        var activeSeason = await adminService.GetActiveSeasonAsync();
         
+        var dtos = await driverStatisticService.GetTopDriversInSeasonByTotalPodiumsAsync(activeSeason.Id);
+
+        return Ok(dtos);
     }
     [HttpGet("top-10-finishes")]
     public async Task<IActionResult> GetDriversWithTop10FinishesnInCurrentSeason()
     {
+        var activeSeason = await adminService.GetActiveSeasonAsync();
         
+        var dtos = await driverStatisticService.GetTopDriversInSeasonByTotalTop10FinishesAsync(activeSeason.Id);
+
+        return Ok(dtos);
     }
     [HttpGet("fastest-laps")]
     public async Task<IActionResult> GetDriversWithFastestLapsInCurrentSeason()
     {
+        var activeSeason = await adminService.GetActiveSeasonAsync();
         
+        var dtos = await driverStatisticService.GetTopDriversInSeasonByTotalFastestLapsAsync(activeSeason.Id);
+
+        return Ok(dtos);
     }
     [HttpGet("dnfs")]
     public async Task<IActionResult> GetDriversWithDnfsInCurrentSeason()
     {
+        var activeSeason = await adminService.GetActiveSeasonAsync();
         
+        var dtos = await driverStatisticService.GetTopDriversInSeasonByTotalDnfsAsync(activeSeason.Id);
+
+        return Ok(dtos);
     }
 }
