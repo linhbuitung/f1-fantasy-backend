@@ -255,7 +255,7 @@ public static class ServiceExtensions
         
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IStatisticRepository, StatisticRepository>();
-        services.AddScoped<IPlayerStatisticService, PlayerStatisticService>();
+        services.AddScoped<IUserStatisticService, UserStatisticService>();
         services.AddScoped<IDriverStatisticService, DriverStatisticService>();
         services.AddScoped<IConstructorStatisticService, ConstructorStatisticService>();
 

@@ -47,11 +47,14 @@ public class StatisticDtoMapper
             Constructors = constructorEntries
         };
     }
-    
+
+    #region  driver statistics dto mappers
+
     public static Get.DriverWithTotalFantasyPointScoredGetDto MapToDriverWithTotalFantasyPointScoredGetDto(Driver driver, int totalFantasyPointScored)
     {
         return new Get.DriverWithTotalFantasyPointScoredGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             TotalFantasyPointScored = totalFantasyPointScored,
@@ -65,6 +68,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithAveragePointScoredGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             AverageFantasyPointScored = Math.Round(averageFantasyPointScored, 2),
@@ -78,6 +82,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithRaceWinsGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             TotalRacesWin = totalRacesWin,
@@ -91,6 +96,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithPodiumsGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             TotalPodiums = totalPodiums,
@@ -104,6 +110,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithTop10FinishesGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             TotalTop10Finishes = totalTop10Finishes,
@@ -117,6 +124,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithFastestLapsGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             TotalFastestLaps = totalFastestLaps,
@@ -130,6 +138,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithDnfsGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             TotalDnfs = totalDnfs,
@@ -143,6 +152,7 @@ public class StatisticDtoMapper
     {
         return new Get.DriverWithSelectionPercentageGetDto
         {
+            Id = driver.Id,
             GivenName = driver.GivenName,
             FamilyName = driver.FamilyName,
             SelectionPercentage = Math.Round(selectionPercentage, 2),
@@ -151,4 +161,102 @@ public class StatisticDtoMapper
             ImgUrl = driver.ImgUrl
         };
     }
+
+    #endregion
+
+    #region  constructor statistics dto mappers
+    public static Get.ConstructorWithTotalFantasyPointScoredGetDto MapToConstructorWithTotalFantasyPointScoredGetDto(Constructor constructor, int totalFantasyPointScored)
+    {
+        return new Get.ConstructorWithTotalFantasyPointScoredGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            TotalFantasyPointScored = totalFantasyPointScored,
+            Code = constructor.Code,
+            Price = constructor.Price,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    public static Get.ConstructorWithAveragePointScoredGetDto MapToConstructorWithAverageFantasyPointScoredGetDto(Constructor constructor, double averageFantasyPointScored)
+    {
+        return new Get.ConstructorWithAveragePointScoredGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            AverageFantasyPointScored = Math.Round(averageFantasyPointScored, 2),
+            Code = constructor.Code,
+            Price = constructor.Price,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    public static Get.ConstructorWithSelectionPercentageGetDto MapToConstructorWithSelectionPercentageGetDto(Constructor constructor, double selectionPercentage)
+    {
+        return new Get.ConstructorWithSelectionPercentageGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            SelectionPercentage = Math.Round(selectionPercentage, 2),
+            Code = constructor.Code,
+            Price = constructor.Price,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    public static Get.ConstructorWithPodiumsGetDto MapToConstructorWithPodiumsGetDto(Constructor constructor,int totalPodiums)
+    {
+        return new Get.ConstructorWithPodiumsGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            TotalPodiums = totalPodiums,
+            Code = constructor.Code,
+            Price = constructor.Price,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    public static Get.ConstructorWithTop10FinishesGetDto MapToConstructorWithTop10FinishesGetDto(Constructor constructor,int totalTop10Finishes)
+    {
+        return new Get.ConstructorWithTop10FinishesGetDto
+        {
+            Id = constructor.Id,
+            Name = constructor.Name,
+            TotalTop10Finishes = totalTop10Finishes,
+            Code = constructor.Code,
+            Price = constructor.Price,
+            ImgUrl = constructor.ImgUrl
+        };
+    }
+    
+    #endregion
+    
+    #region  user statistics dto mappers
+    
+    public static Get.UserWithTotalFantasyPointScoredGetDto MapToUserWithTotalFantasyPointScoredGetDto(ApplicationUser user, int totalFantasyPointScored)
+    {
+        return new Get.UserWithTotalFantasyPointScoredGetDto
+        {
+            Id = user.Id,
+            DisplayName = user.DisplayName,
+            Email = user.Email,
+            JoinDate = user.JoinDate,
+            TotalFantasyPointScored = totalFantasyPointScored
+        };
+    }
+    
+    public static Get.UserWithAveragePointScoredGetDto MapToUserWithAveragePointScoredGetDto(ApplicationUser user, double averageFantasyPointScored)
+    {
+        return new Get.UserWithAveragePointScoredGetDto
+        {
+            Id = user.Id,
+            DisplayName = user.DisplayName,
+            Email = user.Email,
+            JoinDate = user.JoinDate,
+            AverageFantasyPointScored = Math.Round(averageFantasyPointScored, 2)
+        };
+    }
+    
+    #endregion
 }
