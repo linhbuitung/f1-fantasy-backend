@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using F1Fantasy.Core.Common;
 using F1Fantasy.Infrastructure.Contexts;
+using F1Fantasy.Modules.StatisticModule.Dtos.Repository;
 using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -133,5 +134,106 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .Include(re => re.Constructor)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<List<Driver>> GetAllDriversIncludeRaceEntriesBySeasonIdAsync(int seasonId)
+    {
+     
+        return await context.Drivers
+            .Where(d => d.RaceEntries.Any(re => re.Race.SeasonId == seasonId))
+            .Include(d => d.RaceEntries.Where(re => re.Race.SeasonId == seasonId))
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<Constructor>> GetAllConstructorsIncludeRaceEntriesBySeasonIdAsync(int seasonId)
+    {
+        return await context.Constructors
+            .Where(d => d.RaceEntries.Any(re => re.Race.SeasonId == seasonId))
+            .Include(d => d.RaceEntries.Where(re => re.Race.SeasonId == seasonId))
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupForASeasonUntilCurrentDateAsync(int seasonId)
+    {
+        return await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId && 
+                         fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow))
+            .CountAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupForARaceAsync(int raceId)
+    {
+        return await context.FantasyLineups.Where(fl => fl.RaceId == raceId).CountAsync();
+    }
+    
+    public async Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInASeasonUntilCurrentDateAsync(int seasonId, int driverId)
+    {
+        return await context.FantasyLineupDrivers
+            .Where(fld => fld.FantasyLineup.Race.SeasonId == seasonId && 
+                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
+                          fld.DriverId == driverId)
+            .CountAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInARaceAsync(int raceId, int driverId)
+    {
+        return await context.FantasyLineupDrivers
+            .Where(fld => fld.FantasyLineup.RaceId == raceId &&
+                          fld.DriverId == driverId)
+            .CountAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupSelectionForAConstructorInASeasonUntilCurrentDateAsync(
+        int seasonId, int constructorId)
+    {
+        return await context.FantasyLineupConstructors
+            .Where(fld => fld.FantasyLineup.Race.SeasonId == seasonId && 
+                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
+                          fld.ConstructorId == constructorId)
+            .CountAsync();
+    }
+
+    public async Task<int> GetTotalNumberOfFantasyLineupSelectionForAConstructorInARaceAsync(int raceId,
+        int constructorId)
+    {
+        return await context.FantasyLineupConstructors
+            .Where(fld => fld.FantasyLineup.RaceId == raceId &&
+                          fld.ConstructorId == constructorId)
+            .CountAsync();
+    }
+    
+    public async Task<List<UserIdWithPoints>> GetTotalPointsForTopUsersBySeasonAsync(int seasonId, int topN)
+    {
+        var totals = await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId)
+            .GroupBy(fl => fl.UserId)
+            .Select(g => new { UserId = g.Key, Total = g.Sum(fl => fl.TotalAmount) })
+            .AsNoTracking()
+            .OrderByDescending(t => t.Total)
+            .Take(topN)
+            .ToListAsync();
+
+        return totals
+            .Select(t => new UserIdWithPoints { UserId = t.UserId, TotalPoints = t.Total })
+            .ToList();
+    }
+    
+    // Average until before current date
+    public async Task<List<UserIdWithPoints>> GetAveragePointsForTopUsersBySeasonAsync(int seasonId, int topN)
+    {
+        var totals = await context.FantasyLineups
+            .Where(fl => fl.Race.SeasonId == seasonId && fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow)) 
+            .GroupBy(fl => fl.UserId)
+            .Select(g => new { UserId = g.Key, Average = g.Average(fl => fl.TotalAmount) })
+            .AsNoTracking()
+            .OrderByDescending(t => t.Average)
+            .Take(topN)
+            .ToListAsync();
+
+        return totals
+            .Select(t => new UserIdWithPoints { UserId = t.UserId, AveragePoints = t.Average })
+            .ToList();
     }
 }

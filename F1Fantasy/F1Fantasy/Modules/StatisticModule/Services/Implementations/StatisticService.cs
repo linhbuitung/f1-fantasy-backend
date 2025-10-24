@@ -1,6 +1,8 @@
 ﻿using F1Fantasy.Exceptions;
+using F1Fantasy.Modules.AdminModule.Repositories.Interfaces;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Dtos.Get;
+using F1Fantasy.Modules.CoreGameplayModule.Repositories.Interfaces;
 using F1Fantasy.Modules.CoreGameplayModule.Services.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Dtos.Mapper;
 using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
@@ -8,7 +10,7 @@ using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
 
 namespace F1Fantasy.Modules.StatisticModule.Services.Implementations;
 
-public class StatisticService(IStatisticRepository statisticRepository, ICoreGameplayService coreGameplayService) : IStatisticService
+public class StatisticService(IStatisticRepository statisticRepository) : IStatisticService
 {
     public async Task<Dtos.Get.GeneralSeasonStatisticDto> GetGeneralStatisticBySeasonId(int seasonId)
     {
