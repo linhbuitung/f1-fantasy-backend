@@ -61,7 +61,7 @@ public class LeagueDtoMapper
         };
     }
     
-    public static Get.UserInLeagueDto MapUserWithTotalPointToUserInLeagueDto(ApplicationUser user, int currentSeasonId)
+    public static Get.UserInLeagueDto MapUserWithTotalPointToUserInLeagueDto(ApplicationUser user, int totalPoints)
     {
         return new Get.UserInLeagueDto
         {
@@ -69,7 +69,7 @@ public class LeagueDtoMapper
             DisplayName = user.DisplayName ?? string.Empty,
             Email = user.Email ?? string.Empty,
             CountryName = user.Country?.ShortName ?? string.Empty,
-            TotalPoints = user.FantasyLineups.Where(ul => ul.Race.SeasonId == currentSeasonId).Sum(fl => fl.PointsGained)
+            TotalPoints = totalPoints
         };
     }
     
