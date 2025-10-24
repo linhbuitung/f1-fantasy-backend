@@ -37,6 +37,8 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
     {
         return await context.Leagues
             .Include(l => l.User)
+            .ThenInclude(o => o.Country)
+            .Include(l => l.UserLeagues)
             .FirstOrDefaultAsync(l => l.Id == leagueId);
     }
     
@@ -150,5 +152,4 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
 
         return (leagues, totalCount);
     }
-    
 }

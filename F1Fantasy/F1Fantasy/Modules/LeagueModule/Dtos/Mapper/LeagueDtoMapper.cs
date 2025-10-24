@@ -60,6 +60,19 @@ public class LeagueDtoMapper
             TotalPoints = userLeague.User.FantasyLineups.Where(ul => ul.Race.SeasonId == currentSeasonId).Sum(fl => fl.PointsGained)
         };
     }
+    
+    public static Get.UserInLeagueDto MapUserWithTotalPointToUserInLeagueDto(ApplicationUser user, int totalPoints)
+    {
+        return new Get.UserInLeagueDto
+        {
+            Id = user.Id,
+            DisplayName = user.DisplayName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            CountryName = user.Country?.ShortName ?? string.Empty,
+            TotalPoints = totalPoints
+        };
+    }
+    
     public static Get.LeagueDto MapSearchedLeagueToDto(League league)
     {
         return new Get.LeagueDto
