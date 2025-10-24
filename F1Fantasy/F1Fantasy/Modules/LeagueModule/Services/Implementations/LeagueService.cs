@@ -6,6 +6,8 @@ using F1Fantasy.Modules.LeagueModule.Dtos.Get;
 using F1Fantasy.Modules.LeagueModule.Dtos.Mapper;
 using F1Fantasy.Modules.LeagueModule.Repositories.Interfaces;
 using F1Fantasy.Modules.LeagueModule.Services.Interfaces;
+using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
+using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
 using F1Fantasy.Shared.Dtos;
 
@@ -16,6 +18,7 @@ public class LeagueService(
     ILeagueRepository leagueRepository,
     IUserService userService,
     IAdminService adminService,
+    IStatisticRepository statisticRepository,
     WooF1Context context)
     : ILeagueService
 {
@@ -69,6 +72,9 @@ public class LeagueService(
         }
         var usersInLeague = await leagueRepository.GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(leagueId, isAccepted:true, currentSeasonId: currentActiveSeason.Id);
         var userInLeagueDtos = usersInLeague.Select(ul => LeagueDtoMapper.MapUserLeagueToUserInLeagueDto(ul, currentActiveSeason.Id)).ToList();
+        
+        var ownerTotalPoints = await statisticRepository.GetTotalPointOfAnUserBySeasonIdAsync(league.OwnerId, currentActiveSeason.Id);
+        userInLeagueDtos.Add(LeagueDtoMapper.MapUserWithTotalPointToUserInLeagueDto(league.User, ownerTotalPoints));
         
         var leagueDto = LeagueDtoMapper.MapLeagueToDtoWithPlayers(league, userInLeagueDtos, pageNum, pageSize);
         return leagueDto;
