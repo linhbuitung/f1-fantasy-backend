@@ -135,7 +135,7 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
             .AsNoTracking()
             .ToListAsync();
     }
-    public async Task<(List<League> Leagues, int TotalCount)> SearchLeaguesViaFullTextSearchAsync(string query, int skip, int take)
+    public async Task<(List<League> Leagues, int TotalCount)> SearchLeaguesAsync(string query, int skip, int take)
     {
         var leaguesQuery = context.Leagues
             .Where(l =>

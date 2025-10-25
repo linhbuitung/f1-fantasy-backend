@@ -28,5 +28,5 @@ public interface ILeagueRepository
     
     Task<List<UserLeague>> GetAllUserLeaguesByLeagueIdAndAcceptStatusAsync(int leagueId, bool isAccepted, int? currentSeasonId);
     
-    Task<(List<League> Leagues, int TotalCount)> SearchLeaguesViaFullTextSearchAsync(string query, int skip, int take);
+    Task<(List<League> Leagues, int TotalCount)> SearchLeaguesAsync(string query, int skip, int take);
 }

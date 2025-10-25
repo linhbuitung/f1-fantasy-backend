@@ -281,7 +281,7 @@ public class LeagueService(
     public async Task<PagedResult<Dtos.Get.LeagueDto>> SearchLeaguesAsync(string query, int pageNum, int pageSize)
     {
         int skip = (pageNum - 1) * pageSize;
-        var (leagues, totalCount) = await leagueRepository.SearchLeaguesViaFullTextSearchAsync(query, skip, pageSize);
+        var (leagues, totalCount) = await leagueRepository.SearchLeaguesAsync(query, skip, pageSize);
 
         var items = leagues.Select(LeagueDtoMapper.MapSearchedLeagueToDto).ToList();
 

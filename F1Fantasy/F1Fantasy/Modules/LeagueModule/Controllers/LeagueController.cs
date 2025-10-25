@@ -167,7 +167,7 @@ public class LeagueController(
         return Ok();
     }
     
-    [HttpGet("/league/full-text-search")]
+    [HttpGet("/league/search")]
     public async Task<IActionResult> SearchLeagues(
         [FromQuery] string query,
         [FromQuery] int pageNum = 1,

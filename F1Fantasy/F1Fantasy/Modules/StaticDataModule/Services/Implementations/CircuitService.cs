@@ -5,10 +5,11 @@ using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
 using F1Fantasy.Modules.StaticDataModule.Dtos;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
+using F1Fantasy.Shared.Dtos;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 {
-    public class CircuitService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    public class CircuitService(IStaticDataRepository staticDataRepository, IStaticDataSearchRepository searchRepository, WooF1Context context)
         : ICircuitService
     {
         public async Task<CircuitDto> AddCircuitAsync(CircuitDto circuitDto)
@@ -78,6 +79,22 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
                 throw new NotFoundException($"Circuit with code {code} not found");
             }
             return StaticDataDtoMapper.MapCircuitToDto(circuit);
+        }
+
+        public async Task<PagedResult<CircuitDto>> SearchCircuitsAsync(string query, int pageNum, int pageSize)
+        {
+            int skip = (pageNum - 1) * pageSize;
+            var (circuits, totalCount) = await searchRepository.SearchCircuitsAsync(query, skip, pageSize);
+
+            var items = circuits.Select(StaticDataDtoMapper.MapCircuitToDto).ToList();
+
+            return new PagedResult<CircuitDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNum = pageNum,
+                PageSize = pageSize
+            };
         }
     }
 }

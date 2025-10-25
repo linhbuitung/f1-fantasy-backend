@@ -134,7 +134,7 @@ public class AdminController(
     
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
     [HttpPatch("powerup/{powerupId:int}")]
-    public async Task<IActionResult> UpdateCircuitInfoAsync(int powerupId,
+    public async Task<IActionResult> UpdatePowerupInfoAsync(int powerupId,
         [FromBody] Dtos.Update.PowerupDto dto)
     {
         if (!ModelState.IsValid || powerupId != dto.Id)
