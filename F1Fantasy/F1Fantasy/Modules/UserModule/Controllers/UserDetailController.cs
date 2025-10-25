@@ -36,13 +36,6 @@ public class UserDetailController(IUserService userService, IAuthorizationServic
         var updatedUser = await userService.UpdateUserAsync(userUpdateDto);
         return Ok(updatedUser);
     }
-
-    [HttpGet("search")]
-    public async Task<IActionResult> FindUserByDisplayName(string name)
-    {
-        var users = await userService.FindUserByDisplayNameAsync(name);
-        return Ok(users);
-    }
     
     [Authorize]
     [HttpGet("me")]
@@ -56,5 +49,18 @@ public class UserDetailController(IUserService userService, IAuthorizationServic
 
         var user = await userService.GetUserByIdAsync(userId);
         return Ok(user);
+    }
+    
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchUsers(
+        [FromQuery] string query,
+        [FromQuery] int pageNum = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return BadRequest("Query is required.");
+
+        var result = await userService.SearchUsersAsync(query, pageNum, pageSize);
+        return Ok(result);
     }
 }

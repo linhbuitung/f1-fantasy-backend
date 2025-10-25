@@ -5,10 +5,11 @@ using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
 using F1Fantasy.Modules.StaticDataModule.Dtos;
 using F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StaticDataModule.Services.Interfaces;
+using F1Fantasy.Shared.Dtos;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 {
-    public class ConstructorService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    public class ConstructorService(IStaticDataRepository staticDataRepository, IStaticDataSearchRepository searchRepository, WooF1Context context)
         : IConstructorService
     {
         public async Task<ConstructorDto> AddConstructorAsync(ConstructorDto constructorDto)
@@ -101,5 +102,20 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             return constructorDto;
         }
         
+        public async Task<PagedResult<ConstructorDto>> SearchConstructorsAsync(string query, int pageNum, int pageSize)
+        {
+            int skip = (pageNum - 1) * pageSize;
+            var (constructors, totalCount) = await searchRepository.SearchConstructorsAsync(query, skip, pageSize);
+
+            var items = constructors.Select(StaticDataDtoMapper.MapConstructorToDto).ToList();
+
+            return new PagedResult<ConstructorDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNum = pageNum,
+                PageSize = pageSize
+            };
+        }
     }
 }

@@ -6,6 +6,7 @@ using F1Fantasy.Modules.UserModule.Dtos;
 using F1Fantasy.Modules.UserModule.Dtos.Mapper;
 using F1Fantasy.Modules.UserModule.Repositories.Interfaces;
 using F1Fantasy.Modules.UserModule.Services.Interfaces;
+using F1Fantasy.Shared.Dtos;
 
 namespace F1Fantasy.Modules.UserModule.Services.Implementations;
 
@@ -63,5 +64,20 @@ public class UserService(IUserRepository userRepository, WooF1Context context) :
         return ApplicationUserDtoMapper.MapListUsersToDto(users);
     }
 
+    public async Task<PagedResult<Dtos.Get.ApplicationUserDto>> SearchUsersAsync(string query, int pageNum,
+        int pageSize)
+    {
+        int skip = (pageNum - 1) * pageSize;
+        var (drivers, totalCount) = await userRepository.SearchUsersAsync(query, skip, pageSize);
 
+        var items = drivers.Select(ApplicationUserDtoMapper.MapUserToGetDto).ToList();
+
+        return new PagedResult<Dtos.Get.ApplicationUserDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNum = pageNum,
+            PageSize = pageSize
+        };
+    }
 }

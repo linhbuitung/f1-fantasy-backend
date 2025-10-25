@@ -28,5 +28,11 @@ public interface ILeagueService
     
     Task<PagedResult<Dtos.Get.LeagueDto>> SearchLeaguesAsync(string query, int pageNum, int pageSize);
     
+    Task<PagedResult<Dtos.Get.LeagueDto>> GetLeaguesAsync(int pageNum, int pageSize);
+
+    Task<PagedResult<Dtos.Get.LeagueDto>> SearchPublicLeaguesAsync(string query, int pageNum, int pageSize);
+
+    Task<PagedResult<Dtos.Get.LeagueDto>> GetPublicLeaguesAsync(int pageNum, int pageSize);
+
     Task<Dtos.Get.LeagueDto> UpdateLeagueAsync(Dtos.Update.LeagueDto leagueUpdateDto);
 }

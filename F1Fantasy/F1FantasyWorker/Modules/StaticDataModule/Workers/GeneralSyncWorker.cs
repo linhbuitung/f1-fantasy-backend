@@ -426,13 +426,16 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             // Send notification to all users about the calculated race
             if (calculatedRace != null)
             {
+                var workerApiKey = Environment.GetEnvironmentVariable("WORKER_API_KEY");
+                
                 logger.LogInformation("Start sending notifications");
                 using var httpClient = new HttpClient();
                 var uriString = configuration.GetValue<string>("CoreGameplaySettings:BackendBaseUrl");
                 logger.LogInformation(uriString);
                 httpClient.BaseAddress = new Uri(uriString!);
+                
                 var request = new HttpRequestMessage(HttpMethod.Post, $"notification/worker/race-calculated/{calculatedRace.Id}");
-                request.Headers.Add("Worker-Api-Key", Environment.GetEnvironmentVariable("WORKER_API_KEY"));
+                request.Headers.Add("Worker-Api-Key", workerApiKey);
 
                 var response = await httpClient.SendAsync(request);
                 if (response.IsSuccessStatusCode)
@@ -442,6 +445,19 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 else
                 {
                     logger.LogWarning("Notification request failed: {StatusCode}", response.StatusCode);
+                }
+                
+                request = new HttpRequestMessage(HttpMethod.Post, $"admin/pickable-items/active");
+                request.Headers.Add("Worker-Api-Key", workerApiKey);
+
+                response = await httpClient.SendAsync(request);
+                if (response.IsSuccessStatusCode)
+                {
+                    logger.LogInformation("Update pickable items request sent successfully.");
+                }
+                else
+                {
+                    logger.LogWarning("Update pickable items request failed: {StatusCode}", response.StatusCode);
                 }
             }
         }

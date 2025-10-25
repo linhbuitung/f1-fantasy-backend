@@ -35,6 +35,28 @@ public class AdminLeagueController(
         return Ok(league);
     }
     
+    [HttpPut("league/{leagueId:int}")]
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
+    public async Task<IActionResult> UpdateLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.LeagueDto leagueDto)
+    {
+        if (leagueId != leagueDto.Id)
+        {
+            return Forbid();
+        }
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        var foundLeague = await leagueService.GetLeagueByIdAsync(leagueId, 1, 1);
+        if (foundLeague.Owner?.Id != userId && foundLeague.Type == LeagueType.Private)
+        {
+            return Forbid();
+        }
+        
+        var league = await leagueService.UpdateLeagueAsync(leagueDto);
+        return Ok(league);
+    }
+    
     [HttpDelete("league/{leagueId:int}")]
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
     public async Task<IActionResult> DeleteLeagueById(int leagueId)
@@ -42,4 +64,6 @@ public class AdminLeagueController(
         await leagueService.DeleteLeagueByIdAsync(leagueId);
         return Ok();
     }
+    
+
 }
