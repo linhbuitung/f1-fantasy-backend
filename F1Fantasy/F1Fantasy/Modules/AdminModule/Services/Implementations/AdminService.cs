@@ -174,6 +174,43 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         }
     }
 
+    public async Task ResetPickableItemsAsync()
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var pickableItem = await adminRepository.GetPickableItemAsync();
+            if (pickableItem == null)
+            {
+                throw new NotFoundException("Pickable item not found.");
+            }
+            
+            // Delete all driver connections in the pickable item that are not in the dto
+            var driversToRemove = pickableItem.Drivers.ToList();
+            foreach (var driver in driversToRemove)
+            {
+                pickableItem.Drivers.Remove(driver);
+            }
+
+            // Delete all constructor connections in the pickable item that are not in the dto
+            var constructorsToRemove = pickableItem.Constructors.ToList();
+            foreach (var constructor in constructorsToRemove)
+            {
+                pickableItem.Constructors.Remove(constructor);
+            }
+            
+          
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error resetting pickable item: {ex.Message}");
+            throw;
+        }
+    }
+
     public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemFromAllDriversInASeasonYearAsync(int seasonYear)
     {
         var season = await staticDataRepository.GetSeasonByYearAsync(seasonYear);
@@ -211,7 +248,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         if (!(latestRace.RaceDate < currentDate && currentDate < latestRace.RaceDate.AddDays(2)))
         {
-            throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race with id {latestRace.Id}." );
+            throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race {latestRace.RaceName}." );
         }
     }
 

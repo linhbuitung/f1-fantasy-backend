@@ -68,4 +68,26 @@ public class UserRepository(WooF1Context context) : IUserRepository
         return await context.Users.ToListAsync();
     }
 
+    public async Task<(List<ApplicationUser> Users, int TotalCount)> SearchUsersAsync(string query, int skip, int take)
+    {
+        var userQuery = context.Users
+            .Where(d =>
+                EF.Functions.ILike(d.DisplayName, $"%{query}%") ||
+                EF.Functions.ILike(d.Email, $"%{query}%"));
+
+        var totalCount = await userQuery.CountAsync();
+        var users = await userQuery
+            .OrderBy(d => d.DisplayName)
+            .Skip(skip)
+            .Take(take)
+            .Include(u => u.Constructor)
+            .Include(u => u.Driver)
+            .Include(u => u.Country)
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return (users, totalCount);
+    }
 }

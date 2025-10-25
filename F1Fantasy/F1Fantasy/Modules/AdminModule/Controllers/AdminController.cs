@@ -45,6 +45,9 @@ public class AdminController(
         StaticDataModule.Dtos.SeasonDto seasonDto = await seasonService.GetSeasonByYearAsync(year);
         
         SeasonDto startSeason = await adminService.StartSeasonAsync(year);
+        await adminService.ResetPickableItemsAsync();
+        await adminService.UpdatePickableItemFromAllDriversInASeasonYearAsync(year);
+        
         return Ok(startSeason);
     }
     
@@ -52,7 +55,6 @@ public class AdminController(
     public async Task<IActionResult> GetActiveSeasonAsync()
     {
         SeasonDto? seasonDto = await adminService.GetActiveSeasonAsync();
-        
         return Ok(seasonDto);
     }
     
@@ -63,7 +65,8 @@ public class AdminController(
         SeasonDto seasonDto = await adminService.GetActiveSeasonAsync();
 
         await adminService.DeactivateActiveSeasonAsync();
-        
+        await adminService.ResetPickableItemsAsync();
+
         return Ok();
     }
 
@@ -88,6 +91,20 @@ public class AdminController(
     {
         _ = await adminService.GetPickableItemAsync();        
         var pickableItemDto = await adminService.UpdatePickableItemFromAllDriversInASeasonYearAsync(seasonYear);
+        return Ok(pickableItemDto);
+    }
+    
+    // This endpoint is intended to be called by a background worker
+    [HttpPut("pickable-items/active")] 
+    public async Task<IActionResult> UpdatePickableItemsForCurrentSeasonAsync()
+    {
+        var apiKey = Request.Headers["Worker-Api-Key"].FirstOrDefault();
+        var expectedApiKey = Environment.GetEnvironmentVariable("WORKER_API_KEY");
+        if (apiKey is null ||expectedApiKey is null || apiKey != expectedApiKey) return BadRequest();
+        
+        _ = await adminService.GetPickableItemAsync();        
+        var currentSeason = await  adminService.GetActiveSeasonAsync();
+        var pickableItemDto = await adminService.UpdatePickableItemFromAllDriversInASeasonYearAsync(currentSeason.Year);
         return Ok(pickableItemDto);
     }
     

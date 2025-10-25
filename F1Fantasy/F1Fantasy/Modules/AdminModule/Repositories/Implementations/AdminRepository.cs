@@ -13,7 +13,7 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
 {
     public async Task<Season> UpdateSeasonStatusAsync(int year, bool isActive)
     {
-        Season season = await context.Seasons.AsTracking().FirstOrDefaultAsync(s => s.Year == year);
+        var season = await context.Seasons.AsTracking().FirstOrDefaultAsync(s => s.Year == year);
         if (season == null)
         {
             throw new InvalidOperationException($"Season with year {year} does not exist.");
