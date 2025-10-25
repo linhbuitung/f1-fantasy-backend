@@ -223,8 +223,10 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Driver with ID {dto.Id} not found.");
         }
+        // Get file extension
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
         
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/drivers/" + existingDriver.Code);
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/drivers/" + existingDriver.Code + fileExtension);
         var updatedDriver = AdminDtoMapper.MapUpdateDtoToDriver(dto, imgUrl);
         var resultDriver = await adminRepository.UpdateDriverInfoAsync(updatedDriver);
         
@@ -238,8 +240,8 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Constructor with ID {dto.Id} not found.");
         }
-        
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/constructors/" + existingConstructor.Code);
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/constructors/" + existingConstructor.Code + fileExtension);
         var updatedConstructor = AdminDtoMapper.MapUpdateDtoToConstructor(dto, imgUrl);
         var resultConstructor = await adminRepository.UpdateConstructorInfoAsync(updatedConstructor);
         
@@ -253,7 +255,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Circuit with ID {dto.Id} not found.");
         }
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/circuits/" + existingCircuit.Code);
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
+
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/circuits/" + existingCircuit.Code + fileExtension);
 
         var updatedCircuit = AdminDtoMapper.MapUpdateDtoToCircuit(dto, imgUrl);
         var resultCircuit = await adminRepository.UpdateCircuitInfoAsync(updatedCircuit);
@@ -269,7 +273,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             throw new NotFoundException($"Powerup with ID {dto.Id} not found.");
         }
         
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, $"imgs/powerups/{existingPowerup.Id}");
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
+
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, $"imgs/powerups/{existingPowerup.Id}" + fileExtension);
 
         var updatedPowerup = AdminDtoMapper.MapUpdateDtoToPowerup(dto,imgUrl);
         var resultPowerup = await adminRepository.UpdatePowerupInfoAsync(updatedPowerup);

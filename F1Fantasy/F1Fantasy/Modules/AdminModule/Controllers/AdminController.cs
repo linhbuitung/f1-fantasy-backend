@@ -93,7 +93,8 @@ public class AdminController(
     
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
     [HttpPatch("driver/{driverId:int}")] 
-    public async Task<IActionResult> UpdateDriverInfoAsync(int driverId, [FromBody] Dtos.Update.DriverDto dto)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateDriverInfoAsync(int driverId, [FromForm] Dtos.Update.DriverDto dto)
     {
         if(!ModelState.IsValid || driverId != dto.Id)
         {
@@ -106,8 +107,9 @@ public class AdminController(
 
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
     [HttpPatch("constructor/{constructorId:int}")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateConstructorInfoAsync(int constructorId,
-        [FromBody] Dtos.Update.ConstructorDto dto)
+        [FromForm] Dtos.Update.ConstructorDto dto)
     {
         if (!ModelState.IsValid || constructorId != dto.Id)
         {
@@ -120,8 +122,9 @@ public class AdminController(
     
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
     [HttpPatch("circuit/{circuitId:int}")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdateCircuitInfoAsync(int circuitId,
-        [FromBody] Dtos.Update.CircuitDto dto)
+        [FromForm] Dtos.Update.CircuitDto dto)
     {
         if (!ModelState.IsValid || circuitId != dto.Id)
         {
@@ -134,8 +137,9 @@ public class AdminController(
     
     [Authorize(Roles = AppRoles.Admin + "," + AppRoles.SuperAdmin)]
     [HttpPatch("powerup/{powerupId:int}")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> UpdatePowerupInfoAsync(int powerupId,
-        [FromBody] Dtos.Update.PowerupDto dto)
+        [FromForm] Dtos.Update.PowerupDto dto)
     {
         if (!ModelState.IsValid || powerupId != dto.Id)
         {

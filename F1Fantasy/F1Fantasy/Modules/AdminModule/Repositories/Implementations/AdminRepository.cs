@@ -85,7 +85,7 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
         // Update only the properties we want to allow
         if (existingDriver != null)
         {
-            existingDriver.Price = driver.Price;
+            existingDriver.Price = driver.Price == 0 ? existingDriver.Price : driver.Price;
             existingDriver.ImgUrl = driver.ImgUrl;
             
             await context.SaveChangesAsync();
@@ -111,7 +111,7 @@ public class AdminRepository(WooF1Context context) : IAdminRepository
         // Update only the properties we want to allow
         if (existingConstructor != null)
         {
-            existingConstructor.Price = constructor.Price;
+            existingConstructor.Price = constructor.Price == 0 ? existingConstructor.Price : constructor.Price;
             existingConstructor.ImgUrl = constructor.ImgUrl;
             
             await context.SaveChangesAsync();

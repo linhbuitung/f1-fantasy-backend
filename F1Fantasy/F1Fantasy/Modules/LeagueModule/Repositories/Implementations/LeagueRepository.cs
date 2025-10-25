@@ -135,13 +135,27 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
             .AsNoTracking()
             .ToListAsync();
     }
-    public async Task<(List<League> Leagues, int TotalCount)> SearchLeaguesAsync(string query, int skip, int take)
+    public async Task<(List<League> Leagues, int TotalCount)> SearchLeaguesAsync(string query, int skip, int take, LeagueType? leagueType)
     {
-        var leaguesQuery = context.Leagues
-            .Where(l =>
-                EF.Functions.ILike(l.Name, $"%{query}%") ||
-                EF.Functions.ILike(l.Description, $"%{query}%"))
-            .Include(l => l.User);
+        System.Linq.IQueryable<League> leaguesQuery;
+        if (leagueType == null)
+        {
+            leaguesQuery = context.Leagues
+                .Where(l =>
+                    EF.Functions.ILike(l.Name, $"%{query}%") ||
+                     EF.Functions.ILike(l.Description, $"%{query}%"))
+                .Include(l => l.User);
+        }
+        else
+        {
+            leaguesQuery = context.Leagues
+                .Where(l =>
+                    (EF.Functions.ILike(l.Name, $"%{query}%") ||
+                     EF.Functions.ILike(l.Description, $"%{query}%")) &&
+                    l.Type == leagueType)
+                .Include(l => l.User);
+        }
+
 
         var totalCount = await leaguesQuery.CountAsync();
         var leagues = await leaguesQuery
@@ -151,5 +165,37 @@ public class LeagueRepository(WooF1Context context) : ILeagueRepository
             .ToListAsync();
 
         return (leagues, totalCount);
+    }
+    
+    public async Task<(List<League> Leagues, int TotalCount)> GetLeaguesAsync(int skip, int take, LeagueType? leagueType)
+    {
+        List<League> leagues;
+        var totalCount = 0;
+        if (leagueType == null)
+        {
+            leagues = await context.Leagues
+                .Include(l => l.User)
+                .OrderBy(l => l.Name)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+            totalCount = await context.Leagues
+                .CountAsync();
+        }
+        else 
+        {
+            leagues  = await context.Leagues
+                .Where(l => l.Type == leagueType)
+                .Include(l => l.User)
+                .OrderBy(l => l.Name)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+            totalCount  = await context.Leagues
+                .Where(l => l.Type == leagueType)
+                .CountAsync();
+        }
+
+        return ( leagues, totalCount);
     }
 }

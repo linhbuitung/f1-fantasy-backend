@@ -86,7 +86,7 @@ public class LeagueController(
     public async Task<IActionResult> HandleJoinLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.UserLeagueDto userLeagueDto)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
-        if (!authResult.Succeeded)
+        if (!authResult.Succeeded || leagueId != userLeagueDto.LeagueId)
         {
             return Forbid();
         }
@@ -110,7 +110,7 @@ public class LeagueController(
     public async Task<IActionResult> UpdateLeagueById(int userId, int leagueId, [FromBody] Dtos.Update.LeagueDto leagueDto)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
-        if (!authResult.Succeeded || leagueId != leagueDto.Id)
+        if (!authResult.Succeeded || leagueId != leagueDto.Id || userId != leagueDto.OwnerId)
         {
             return Forbid();
         }
@@ -128,7 +128,8 @@ public class LeagueController(
     public async Task<IActionResult> DeleteLeagueById(int userId, int leagueId)
     {
         var authResult = await authorizationService.AuthorizeAsync(User, userId, AuthPolicies.CanOperateOnOwnResource);
-        if (!authResult.Succeeded)
+        var leagueDto = await leagueService.GetLeagueByIdAsync(leagueId, 1, 1);
+        if (!authResult.Succeeded || leagueDto.Owner!.Id != userId)
         { 
             return Forbid();
         }
@@ -169,12 +170,15 @@ public class LeagueController(
     
     [HttpGet("/league/search")]
     public async Task<IActionResult> SearchLeagues(
-        [FromQuery] string query,
+        [FromQuery] string? query,
         [FromQuery] int pageNum = 1,
         [FromQuery] int pageSize = 10)
     {
         if (string.IsNullOrWhiteSpace(query))
-            return BadRequest("Query is required.");
+        {
+            var resultNoQuery = await leagueService.GetLeaguesAsync(pageNum, pageSize);
+            return Ok(resultNoQuery);
+        }
 
         var result = await leagueService.SearchLeaguesAsync(query, pageNum, pageSize);
         return Ok(result);
@@ -204,5 +208,21 @@ public class LeagueController(
         }
         var userLeague = await leagueService.GetUserLeagueByIdAsync(leagueId, userId);
         return Ok(userLeague);
+    }
+    
+    [HttpGet("/league/public/search")]
+    public async Task<IActionResult> SearchPublicLeagues(
+        [FromQuery] string? query,
+        [FromQuery] int pageNum = 1,
+        [FromQuery] int pageSize = 10)
+    {
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            var resultNoQuery = await leagueService.GetPublicLeaguesAsync(pageNum, pageSize);
+            return Ok(resultNoQuery);
+        }
+        var result = await leagueService.SearchPublicLeaguesAsync(query, pageNum, pageSize);
+        return Ok(result);
     }
 }
