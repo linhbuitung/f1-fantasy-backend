@@ -41,6 +41,11 @@ public class NotificationService(
             {
                 throw new NotFoundException($"User with ID {notificationDto.UserId} not found.");
             }
+            if(!user.AcceptNotification)
+            {
+                return;
+            }
+            
             var notification = NotificationDtoMapper.MapCreateDtoToNotification(notificationDto);
             var newNotification = await notificationRepository.AddNotificationAsync(notification);
             
@@ -69,6 +74,10 @@ public class NotificationService(
         var users = await userRepository.GetAllUsersAsync();
         foreach (var user in users)
         {
+            if (!user.AcceptNotification)
+            {
+                continue;
+            }
             var notificationDto = new Dtos.Create.NotificationDto
             {
                 UserId = user.Id,
