@@ -7,10 +7,12 @@ using F1Fantasy.Modules.StaticDataModule.Dtos.Mapper;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
 using F1Fantasy.Exceptions;
+using F1Fantasy.Modules.LeagueModule.Dtos.Mapper;
+using F1Fantasy.Shared.Dtos;
 
 namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
 {
-    public class DriverService(IStaticDataRepository staticDataRepository, WooF1Context context)
+    public class DriverService(IStaticDataRepository staticDataRepository, IStaticDataSearchRepository searchRepository, WooF1Context context)
         : IDriverService
     {
         public async Task<DriverDto> AddDriverAsync(DriverDto driverDto)
@@ -103,6 +105,22 @@ namespace F1Fantasy.Modules.StaticDataModule.Services.Implementations
             
 
             return driverDto;
+        }
+        
+        public async Task<PagedResult<DriverDto>> SearchDriversAsync(string query, int pageNum, int pageSize)
+        {
+            int skip = (pageNum - 1) * pageSize;
+            var (drivers, totalCount) = await searchRepository.SearchDriversAsync(query, skip, pageSize);
+
+            var items = drivers.Select(StaticDataDtoMapper.MapDriverToDto).ToList();
+
+            return new PagedResult<DriverDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNum = pageNum,
+                PageSize = pageSize
+            };
         }
     }
 }

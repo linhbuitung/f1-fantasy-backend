@@ -2,6 +2,7 @@
 using F1Fantasy.Exceptions;
 using F1Fantasy.Infrastructure.Contexts;
 using F1Fantasy.Modules.AdminModule.Services.Interfaces;
+using F1Fantasy.Modules.AuthModule.Extensions;
 using F1Fantasy.Modules.LeagueModule.Dtos.Get;
 using F1Fantasy.Modules.LeagueModule.Dtos.Mapper;
 using F1Fantasy.Modules.LeagueModule.Repositories.Interfaces;
@@ -248,7 +249,8 @@ public class LeagueService(
     private async Task<List<League>> VerifyOwnedLeagueLimitAsync(int ownerId)
     {
         var ownedLeagues = await leagueRepository.GetAllLeaguesByOwnerIdAsync(ownerId);
-        if (ownedLeagues.Count >= _maxLeaguePerOwner)
+        var owner = await userService.GetUserByIdAsync(ownerId);
+        if (ownedLeagues.Count >= _maxLeaguePerOwner && !(owner.Roles.Contains(AppRoles.Admin) || owner.Roles.Contains(AppRoles.SuperAdmin)))
         {
             throw new InvalidOperationException($"Owner with id {ownerId} has reached the maximum number of leagues ({_maxLeaguePerOwner}).");
         }
@@ -281,7 +283,37 @@ public class LeagueService(
     public async Task<PagedResult<Dtos.Get.LeagueDto>> SearchLeaguesAsync(string query, int pageNum, int pageSize)
     {
         int skip = (pageNum - 1) * pageSize;
-        var (leagues, totalCount) = await leagueRepository.SearchLeaguesViaFullTextSearchAsync(query, skip, pageSize);
+        var (leagues, totalCount) = await leagueRepository.SearchLeaguesAsync(query, skip, pageSize, leagueType: null);
+
+        var items = leagues.Select(LeagueDtoMapper.MapSearchedLeagueToDto).ToList();
+
+        return new PagedResult<Dtos.Get.LeagueDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNum = pageNum,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<PagedResult<Dtos.Get.LeagueDto>> GetLeaguesAsync(int pageNum, int pageSize)
+    {
+        int skip = (pageNum - 1) * pageSize;
+        var (leagues, totalCount) = await leagueRepository.GetLeaguesAsync( skip, pageSize, leagueType: null);
+        var items = leagues.Select(LeagueDtoMapper.MapSearchedLeagueToDto).ToList();
+        return new PagedResult<Dtos.Get.LeagueDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNum = pageNum,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<PagedResult<Dtos.Get.LeagueDto>> SearchPublicLeaguesAsync(string query, int pageNum, int pageSize)
+    {
+        int skip = (pageNum - 1) * pageSize;
+        var (leagues, totalCount) = await leagueRepository.SearchLeaguesAsync(query, skip, pageSize, leagueType: LeagueType.Public);
 
         var items = leagues.Select(LeagueDtoMapper.MapSearchedLeagueToDto).ToList();
 
@@ -294,6 +326,19 @@ public class LeagueService(
         };
     }
     
+    public async Task<PagedResult<Dtos.Get.LeagueDto>> GetPublicLeaguesAsync(int pageNum, int pageSize)
+    {
+        int skip = (pageNum - 1) * pageSize;
+        var (leagues, totalCount) = await leagueRepository.GetLeaguesAsync( skip, pageSize, LeagueType.Public);
+        var items = leagues.Select(LeagueDtoMapper.MapSearchedLeagueToDto).ToList();
+        return new PagedResult<Dtos.Get.LeagueDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNum = pageNum,
+            PageSize = pageSize
+        };
+    }
     public async Task<Dtos.Get.LeagueDto> UpdateLeagueAsync(Dtos.Update.LeagueDto leagueUpdateDto)
     {
         await using var transaction = await context.Database.BeginTransactionAsync();

@@ -174,6 +174,43 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         }
     }
 
+    public async Task ResetPickableItemsAsync()
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            var pickableItem = await adminRepository.GetPickableItemAsync();
+            if (pickableItem == null)
+            {
+                throw new NotFoundException("Pickable item not found.");
+            }
+            
+            // Delete all driver connections in the pickable item that are not in the dto
+            var driversToRemove = pickableItem.Drivers.ToList();
+            foreach (var driver in driversToRemove)
+            {
+                pickableItem.Drivers.Remove(driver);
+            }
+
+            // Delete all constructor connections in the pickable item that are not in the dto
+            var constructorsToRemove = pickableItem.Constructors.ToList();
+            foreach (var constructor in constructorsToRemove)
+            {
+                pickableItem.Constructors.Remove(constructor);
+            }
+            
+          
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error resetting pickable item: {ex.Message}");
+            throw;
+        }
+    }
+
     public async Task<Dtos.Get.PickableItemDto> UpdatePickableItemFromAllDriversInASeasonYearAsync(int seasonYear)
     {
         var season = await staticDataRepository.GetSeasonByYearAsync(seasonYear);
@@ -211,7 +248,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         if (!(latestRace.RaceDate < currentDate && currentDate < latestRace.RaceDate.AddDays(2)))
         {
-            throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race with id {latestRace.Id}." );
+            throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race {latestRace.RaceName}." );
         }
     }
 
@@ -223,8 +260,10 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Driver with ID {dto.Id} not found.");
         }
+        // Get file extension
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
         
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/drivers/" + existingDriver.Code);
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/drivers/" + existingDriver.Code + fileExtension);
         var updatedDriver = AdminDtoMapper.MapUpdateDtoToDriver(dto, imgUrl);
         var resultDriver = await adminRepository.UpdateDriverInfoAsync(updatedDriver);
         
@@ -238,8 +277,8 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Constructor with ID {dto.Id} not found.");
         }
-        
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/constructors/" + existingConstructor.Code);
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/constructors/" + existingConstructor.Code + fileExtension);
         var updatedConstructor = AdminDtoMapper.MapUpdateDtoToConstructor(dto, imgUrl);
         var resultConstructor = await adminRepository.UpdateConstructorInfoAsync(updatedConstructor);
         
@@ -253,7 +292,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         {
             throw new NotFoundException($"Circuit with ID {dto.Id} not found.");
         }
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/circuits/" + existingCircuit.Code);
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
+
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, "imgs/circuits/" + existingCircuit.Code + fileExtension);
 
         var updatedCircuit = AdminDtoMapper.MapUpdateDtoToCircuit(dto, imgUrl);
         var resultCircuit = await adminRepository.UpdateCircuitInfoAsync(updatedCircuit);
@@ -269,7 +310,9 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
             throw new NotFoundException($"Powerup with ID {dto.Id} not found.");
         }
         
-        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, $"imgs/powerups/{existingPowerup.Id}");
+        var fileExtension = System.IO.Path.GetExtension(dto.Img.FileName).ToLower();
+
+        var imgUrl = await cloudStorage.UploadFileAsync(dto.Img, $"imgs/powerups/{existingPowerup.Id}" + fileExtension);
 
         var updatedPowerup = AdminDtoMapper.MapUpdateDtoToPowerup(dto,imgUrl);
         var resultPowerup = await adminRepository.UpdatePowerupInfoAsync(updatedPowerup);

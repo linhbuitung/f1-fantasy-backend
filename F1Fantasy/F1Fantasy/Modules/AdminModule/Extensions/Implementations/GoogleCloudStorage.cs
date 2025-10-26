@@ -30,30 +30,44 @@ public class GoogleCloudStorage : ICloudStorage
 
     public async Task<string> UploadFileAsync(IFormFile imageFile, string fileNameForStorage)
     {
-        // Check if the file exists
-        try
-        {
-            var existingObject = await storageClient.GetObjectAsync(bucketName, fileNameForStorage);
-            if (existingObject != null)
-            {
-                await storageClient.DeleteObjectAsync(bucketName, fileNameForStorage);
-            }
-        }
-        catch (Google.GoogleApiException ex) when (ex.Error.Code == 404)
-        {
-            // File does not exist, nothing to delete
-        }
-        
         using (var memoryStream = new MemoryStream())
         {
             await imageFile.CopyToAsync(memoryStream);
-            var dataObject = await storageClient.UploadObjectAsync(bucketName, fileNameForStorage, null, memoryStream);
-            return dataObject.MediaLink;
+            
+            memoryStream.Position = 0;
+
+            var contentType = string.IsNullOrWhiteSpace(imageFile.ContentType)
+                ? GetContentTypeFromFileName(fileNameForStorage)
+                : imageFile.ContentType;
+            
+            // Create object with Cache-Control set so caches respect your desired TTL
+            var obj = new Google.Apis.Storage.v1.Data.Object
+            {
+                Bucket = bucketName,
+                Name = fileNameForStorage,
+                ContentType = contentType,
+                CacheControl = "no-cache, max-age=0, must-revalidate"
+            };
+            
+            var uploaded = await storageClient.UploadObjectAsync(obj, memoryStream);
+            var versionedUrl = $"https://storage.googleapis.com/{bucketName}/{Uri.EscapeDataString(fileNameForStorage)}?generation={uploaded.Generation}";
+            return versionedUrl;
         }
     }
 
     public async Task DeleteFileAsync(string fileNameForStorage)
     {
         await storageClient.DeleteObjectAsync(bucketName, fileNameForStorage);
+    }
+    
+    private string GetContentTypeFromFileName(string fileName)
+    {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            _ => "application/octet-stream"
+        };
     }
 }
