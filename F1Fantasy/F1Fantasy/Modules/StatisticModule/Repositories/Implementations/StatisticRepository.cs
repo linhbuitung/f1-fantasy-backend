@@ -159,13 +159,16 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
     {
         return await context.FantasyLineups
             .Where(fl => fl.Race.SeasonId == seasonId && 
-                         fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow))
+                         fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
+                         fl.Race.DeadlineDate > fl.User.JoinDate)
             .CountAsync();
     }
 
     public async Task<int> GetTotalNumberOfFantasyLineupForARaceAsync(int raceId)
     {
-        return await context.FantasyLineups.Where(fl => fl.RaceId == raceId).CountAsync();
+        return await context.FantasyLineups
+            .Where(fl => fl.RaceId == raceId &&
+                    fl.Race.DeadlineDate > fl.User.JoinDate).CountAsync();
     }
     
     public async Task<int> GetTotalNumberOfFantasyLineupSelectionForADriverInASeasonUntilCurrentDateAsync(int seasonId, int driverId)
