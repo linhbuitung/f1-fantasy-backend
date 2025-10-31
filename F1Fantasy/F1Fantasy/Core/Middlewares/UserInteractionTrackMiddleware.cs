@@ -46,7 +46,8 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
     {
         var hub = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<F1Fantasy.Modules.NotificationModule.NotificationHub>>();
         var notificationService = context.RequestServices.GetRequiredService<F1Fantasy.Modules.NotificationModule.Services.Interfaces.INotificationService>();
-        
+        var consecutiveActiveDaysPerCreditAdded = configuration.GetValue<int?>("CoreGameplaySettings:AskAiSettings:ConsecutiveActiveDaysPerCreditAdded") ?? 7;
+
         var lastActive = user.LastActiveAt;
         var now = DateTime.UtcNow;
 
@@ -66,8 +67,17 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
             user.ConsecutiveActiveDays = 1;
         }
 
-        var consecutiveActiveDaysPerCreditAdded = configuration.GetValue<int?>("CoreGameplaySettings:AskAiSettings:ConsecutiveActiveDaysPerCreditAdded") ?? 7;
-        if (user.ConsecutiveActiveDays >= consecutiveActiveDaysPerCreditAdded)
+        if (user.ConsecutiveActiveDays < consecutiveActiveDaysPerCreditAdded)
+        {
+            await notificationService.AddAndSendNotificationAsync(
+                new NotificationDto
+                {
+                    UserId = user.Id,
+                    Header = "AI Progress",
+                    Content = $"You've logged in for ${user.ConsecutiveActiveDays}, ${consecutiveActiveDaysPerCreditAdded - user.ConsecutiveActiveDays} more days to earn an extra AI credit!",
+                });
+        }
+        else
         {
             await askAIService.AddAskAiCreditAsync(userId: user.Id);
             user.ConsecutiveActiveDays = 0;
