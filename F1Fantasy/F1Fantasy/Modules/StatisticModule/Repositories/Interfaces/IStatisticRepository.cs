@@ -47,4 +47,6 @@ public interface IStatisticRepository
     Task<List<UserIdWithPoints>> GetTotalPointsForTopUsersBySeasonAsync(int seasonId, int topN);
 
     Task<List<UserIdWithPoints>> GetAveragePointsForTopUsersBySeasonAsync(int seasonId, int topN);
+    
+    Task<Race?> GetRaceIncludeRaceEntriesByIdAsync(int raceId);
 }

@@ -10,7 +10,9 @@ public class StaticDataController(
     IConstructorService constructorService, 
     ICountryService countryService,
     IPowerupService powerupService,
-    ICircuitService circuitService) : ControllerBase
+    ICircuitService circuitService,
+    ISeasonService seasonService,
+    IRaceService raceService) : ControllerBase
 {
     [HttpGet("drivers")]
     public async Task<IActionResult> GetAllDrivers()
@@ -79,5 +81,17 @@ public class StaticDataController(
 
         var result = await circuitService.SearchCircuitsAsync(query, pageNum, pageSize);
         return Ok(result);
+    }
+
+    [HttpGet("races/year/{year:int}")]
+    public async Task<IActionResult> GetRacesByYear(int year)
+    {
+        var season = await seasonService.GetSeasonByYearAsync(year);
+        if (season.Id == null)
+        {
+            return NotFound($"Season for year {year} not found.");
+        }
+        var races = await raceService.GetRacesBySeasonIdAsync((int)season.Id);
+        return Ok(races);
     }
 }

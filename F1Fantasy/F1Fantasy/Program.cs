@@ -261,7 +261,7 @@ public static class ServiceExtensions
         services.AddScoped<IUserStatisticService, UserStatisticService>();
         services.AddScoped<IDriverStatisticService, DriverStatisticService>();
         services.AddScoped<IConstructorStatisticService, ConstructorStatisticService>();
-
+        services.AddScoped<IRaceStatisticService, RaceStatisticService>();
         
         services.AddTransient<IEmailSender<ApplicationUser>, EmailService>();
         services.AddSingleton<ICloudStorage, GoogleCloudStorage>();

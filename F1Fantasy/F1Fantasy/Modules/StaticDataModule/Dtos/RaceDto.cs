@@ -2,38 +2,30 @@
 
 namespace F1Fantasy.Modules.StaticDataModule.Dtos;
 
-public class RaceDto(
-    int? id,
-    DateOnly raceDate,
-    int round,
-    DateOnly deadlineDate,
-    bool calculated,
-    int? seasonId,
-    int? circuitId,
-    string? circuitCode)
+public class RaceDto
 {
   
-    public int? Id { get; set; } = id ?? null;
+    public int? Id { get; set; }
     
     [Required]
-    public string RaceName { get; set; }
+    public required string RaceName { get; set; }
 
     [Required]
-    public int Round { get; set; } = round;
+    public int Round { get; set; }
 
     [Required]
-    public DateOnly RaceDate { get; set; } = raceDate;
+    public DateOnly RaceDate { get; set; }
 
     [Required]
-    public DateOnly DeadlineDate { get; set; } = deadlineDate;
+    public DateOnly DeadlineDate { get; set; }
 
     [Required]
-    public bool Calculated { get; set; } = calculated;
+    public bool Calculated { get; set; }
 
 
-    public int? SeasonId { get; set; } = seasonId;
+    public int? SeasonId { get; set; }
 
-    public int? CircuitId { get; set; } = circuitId;
+    public int? CircuitId { get; set; }
 
-    public string? CircuitCode { get; set; } = circuitCode;
+    public string? CircuitCode { get; set; }
 }

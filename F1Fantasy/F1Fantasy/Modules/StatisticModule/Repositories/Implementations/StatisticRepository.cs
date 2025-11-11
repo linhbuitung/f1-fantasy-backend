@@ -239,4 +239,17 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
             .Select(t => new UserIdWithPoints { UserId = t.UserId, AveragePoints = t.Average })
             .ToList();
     }
+
+    public async Task<Race?> GetRaceIncludeRaceEntriesByIdAsync(int raceId)
+    {
+        return await context.Races
+            .AsNoTracking()
+            .Include(r => r.Circuit)
+            .ThenInclude(c => c.Country)
+            .Include(r => r.RaceEntries)
+            .ThenInclude(re => re.Driver)
+            .Include(r => r.RaceEntries)
+            .ThenInclude(re => re.Constructor)
+            .FirstOrDefaultAsync(r => r.Id == raceId);
+    }
 }
