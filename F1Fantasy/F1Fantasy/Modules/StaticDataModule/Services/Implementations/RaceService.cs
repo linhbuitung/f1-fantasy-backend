@@ -87,4 +87,17 @@ public class RaceService(IStaticDataRepository staticDataRepository, WooF1Contex
         }
         return StaticDataDtoMapper.MapRaceToDto(race);
     }
+
+    public async Task<List<RaceDto>> GetRacesBySeasonIdAsync(int seasonId)
+    {
+        var races = await staticDataRepository.GetAllRacesBySeasonIdAsync(seasonId);
+        
+        List<RaceDto> raceDtos = new List<RaceDto>();
+        foreach (var race in races)
+        {
+            raceDtos.Add(StaticDataDtoMapper.MapRaceToDto(race));
+        }
+        
+        return raceDtos;
+    }
 }

@@ -46,6 +46,10 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Interfaces
         Task<Race> AddRaceAsync(Race race);
 
         Task<Race?> GetRaceByIdAsync(int id);
+        
+        Task<List<Race>> GetAllRacesBySeasonIdAsync(int seasonId);
+
+        Task<List<Race>> GetAllRacesByYearAsync(int year);
 
         Task<Race?> GetRaceByRaceDateAsync(DateOnly date);
 

@@ -259,4 +259,65 @@ public class StatisticDtoMapper
     }
     
     #endregion
+
+    #region race statistics dto mappers
+    
+        public static Get.RaceStatisticDto MapToInitialRaceStatisticDto(Race race)
+        {
+            // Leave out constructor statistic to be calculated later
+            return new Get.RaceStatisticDto
+            {
+                Id = race.Id,
+                RaceName = race.RaceName,
+                Round = race.Round,
+                RaceDate = race.RaceDate,
+                DeadlineDate = race.DeadlineDate,
+                Calculated = race.Calculated,
+                Circuit = MapToCircuitInRaceStatisticDto(race.Circuit),
+                DriversStatistics = race.RaceEntries.Select(MapToDriverInRaceStatisticDto).ToList(),
+            };
+        }
+        
+        public static Get.CircuitInRaceStatisticDto MapToCircuitInRaceStatisticDto(Circuit circuit)
+        {
+            return new Get.CircuitInRaceStatisticDto
+            {
+                CircuitName = circuit.CircuitName,
+                Code = circuit.Code,
+                Country = circuit.Country.ShortName,
+                ImgUrl = circuit.ImgUrl,
+            };
+        }
+
+        public static Get.DriverInRaceStatisticDto MapToDriverInRaceStatisticDto(RaceEntry raceEntry)
+        {
+            return new Get.DriverInRaceStatisticDto
+            {
+                Id = raceEntry.Driver.Id,
+                GivenName = raceEntry.Driver.GivenName,
+                FamilyName = raceEntry.Driver.FamilyName,
+                ConstructorName = raceEntry.Constructor.Name,
+                ImgUrl = raceEntry.Driver.ImgUrl,
+                Position = raceEntry.Position,
+                Grid = raceEntry.Grid,
+                FastestLap = raceEntry.FastestLap,
+                PointsGained = raceEntry.PointsGained,
+                Finished = raceEntry.Finished,
+            } ;
+        }
+
+        public static Get.ConstructorInRaceStatisticDto MapToConstructorInRaceStatisticDto(Constructor constructor,
+            int pointsGained)
+        {
+            return new Get.ConstructorInRaceStatisticDto
+            {
+                Id = constructor.Id,
+                Name = constructor.Name,
+                ImgUrl = constructor.ImgUrl,
+                PointsGained = pointsGained
+            };
+        }
+
+
+        #endregion
 }

@@ -144,7 +144,28 @@ namespace F1Fantasy.Modules.StaticDataModule.Repositories.Implementations
 
         public async Task<Race?> GetRaceByRaceDateAsync(DateOnly date)
         {
-            return await context.Races.AsNoTracking().FirstOrDefaultAsync(n => n.RaceDate == date);
+            return await context.Races
+                .AsNoTracking()
+                .Include(r => r.Circuit)
+                .FirstOrDefaultAsync(n => n.RaceDate == date);
+        }
+
+        public async Task<List<Race>> GetAllRacesBySeasonIdAsync(int seasonId)
+        {
+            return await context.Races
+                .AsNoTracking()
+                .Where(r => r.Season.Id == seasonId)
+                .Include(r => r.Circuit)
+                .ToListAsync();
+        }
+
+        public async Task<List<Race>> GetAllRacesByYearAsync(int year)
+        {
+            return await context.Races
+                .AsNoTracking()
+                .Where(r => r.Season.Year == year)
+                .Include(r => r.Circuit)
+                .ToListAsync();
         }
 
         public async Task<Powerup> AddPowerupAsync(Powerup powerup)
