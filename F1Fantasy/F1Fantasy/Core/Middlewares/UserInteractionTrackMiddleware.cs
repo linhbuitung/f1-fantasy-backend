@@ -44,40 +44,34 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
 
     private async Task UpdateUserActivity(ApplicationUser user, IAskAIService askAIService, HttpContext context)
     {
-        var hub = context.RequestServices.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<F1Fantasy.Modules.NotificationModule.NotificationHub>>();
         var notificationService = context.RequestServices.GetRequiredService<F1Fantasy.Modules.NotificationModule.Services.Interfaces.INotificationService>();
         var consecutiveActiveDaysPerCreditAdded = configuration.GetSection("CoreGameplaySettings:AskAiSettings:ConsecutiveActiveDaysPerCreditAdded").Get<int>();
 
         var lastActive = user.LastActiveAt;
         var now = DateTime.UtcNow;
-
+        var consecutiveActiveDaysAdded = false;
+        
         if (lastActive.HasValue)
         {
             if (lastActive.Value.Date == now.AddDays(-1).Date)
             {
                 user.ConsecutiveActiveDays += 1;
+                consecutiveActiveDaysAdded = true;
             }
             else if (lastActive.Value.Date < now.AddDays(-1).Date)
             {
                 user.ConsecutiveActiveDays = 1;
+                consecutiveActiveDaysAdded = true;
             }
         }
         else
         {
             user.ConsecutiveActiveDays = 1;
+            consecutiveActiveDaysAdded = true;
         }
 
-        if (user.ConsecutiveActiveDays < consecutiveActiveDaysPerCreditAdded)
-        {
-            await notificationService.AddAndSendNotificationAsync(
-                new NotificationDto
-                {
-                    UserId = user.Id,
-                    Header = "AI Progress",
-                    Content = $"You've logged in for {user.ConsecutiveActiveDays}, {consecutiveActiveDaysPerCreditAdded - user.ConsecutiveActiveDays} more days to earn an extra AI credit!",
-                });
-        }
-        else
+        
+        if (user.ConsecutiveActiveDays >= consecutiveActiveDaysPerCreditAdded)
         {
             await askAIService.AddAskAiCreditAsync(userId: user.Id);
             user.ConsecutiveActiveDays = 0;
@@ -87,6 +81,16 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
                     UserId = user.Id,
                     Header = "AI Reward",
                     Content = "You've earned an extra AI credit for your activity! Keep it up!",
+                });
+        } 
+        else if (consecutiveActiveDaysAdded)
+        {
+            await notificationService.AddAndSendNotificationAsync(
+                new NotificationDto
+                {
+                    UserId = user.Id,
+                    Header = "AI Progress",
+                    Content = $"You've logged in for {user.ConsecutiveActiveDays}, {consecutiveActiveDaysPerCreditAdded - user.ConsecutiveActiveDays} more days to earn an extra AI credit!",
                 });
         }
         user.LastActiveAt = now;
