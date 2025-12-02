@@ -221,6 +221,8 @@ app.MapHub<NotificationHub>("/hub/notification");
 
 app.Run();
 
+public partial class Program { }
+
 public static class ServiceExtensions
 {
     public static void AddApplicationScoped(this IServiceCollection services)

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace F1Fantasy.Modules.CoreGameplayModule.Repositories.Implementations;
 
-public class FantasyLineupRepository(WooF1Context context, IConfiguration configuration) : IFantasyLineupRepository
+public class FantasyLineupRepository(WooF1Context context) : IFantasyLineupRepository
 {
     public async Task<FantasyLineup?> GetFantasyLineupByIdAsync(int fantasyLineupId)
     {

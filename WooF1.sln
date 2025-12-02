@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F1Fantasy", "F1Fantasy\F1Fa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F1FantasyWorker", "F1Fantasy\F1FantasyWorker\F1FantasyWorker.csproj", "{10DC9BA0-446D-4346-A1A3-9C580986C64A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "F1Fantasy\Tests\Tests.csproj", "{CFE70D2B-7829-4E10-8721-07302911FE5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,18 @@ Global
 		{10DC9BA0-446D-4346-A1A3-9C580986C64A}.Release|x64.Build.0 = Release|Any CPU
 		{10DC9BA0-446D-4346-A1A3-9C580986C64A}.Release|x86.ActiveCfg = Release|Any CPU
 		{10DC9BA0-446D-4346-A1A3-9C580986C64A}.Release|x86.Build.0 = Release|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Debug|x64.Build.0 = Debug|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Debug|x86.Build.0 = Debug|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Release|x64.ActiveCfg = Release|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Release|x64.Build.0 = Release|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Release|x86.ActiveCfg = Release|Any CPU
+		{CFE70D2B-7829-4E10-8721-07302911FE5D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7A931929-9068-4C4B-8803-F7B209673A51} = {CE10060A-A66F-C892-C6C9-0F680B3B298C}
 		{10DC9BA0-446D-4346-A1A3-9C580986C64A} = {CE10060A-A66F-C892-C6C9-0F680B3B298C}
+		{CFE70D2B-7829-4E10-8721-07302911FE5D} = {CE10060A-A66F-C892-C6C9-0F680B3B298C}
 	EndGlobalSection
 EndGlobal

@@ -52,17 +52,7 @@ public class PointCalculationHelper
             _ => 0
         };
     }
-
-    public static int GetDriversRacePoint(List<RaceEntry> raceEntries)
-    {
-        int totalPoints = 0;
-        foreach (var raceEntry in raceEntries)
-        {
-            if (raceEntry.Position != null)
-                totalPoints += GetDriverQualificationPoint(raceEntry.Position ?? -1);
-        }
-        return totalPoints;
-    }
+    
     /*
      
     Neither driver reaches top 10 
