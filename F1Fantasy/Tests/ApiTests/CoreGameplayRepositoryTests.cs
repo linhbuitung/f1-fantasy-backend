@@ -45,6 +45,7 @@ public class CoreGameplayRepositoryTests
         var race = new Race
         {
             Id = 1,
+            RaceName = "R",
             SeasonId = season.Id,
             CircuitId = circuit.Id,
             RaceDate = DateOnly.FromDateTime(DateTime.UtcNow)

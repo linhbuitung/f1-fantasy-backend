@@ -30,13 +30,14 @@ jobs:
       run: dotnet build F1Fantasy/F1Fantasy.sln --configuration Release --no-restore
       
     - name: Run tests
-      run: dotnet test F1Fantasy/Tests/Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+      run: dotnet test F1Fantasy/Tests/Tests.csproj --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
       
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
         files: '**/test-results.trx'
+        check_name: 'Test Results'
         
     - name: Upload test results
       uses: actions/upload-artifact@v4
