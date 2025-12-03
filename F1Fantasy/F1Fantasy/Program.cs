@@ -54,6 +54,7 @@ using F1Fantasy.Modules.StatisticModule.Repositories.Implementations;
 using F1Fantasy.Modules.StatisticModule.Repositories.Interfaces;
 using F1Fantasy.Modules.StatisticModule.Services.Implementations;
 using F1Fantasy.Modules.StatisticModule.Services.Interfaces;
+using Google.Api.Gax;
 using Newtonsoft.Json.Converters;
 
 var root = Directory.GetCurrentDirectory();
@@ -89,12 +90,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = ".F1Fantasy.Identity";
-});
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
     options.Cookie.SameSite = SameSiteMode.None;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    options.SlidingExpiration = true;
 });
 
 builder.Services.AddControllers()
