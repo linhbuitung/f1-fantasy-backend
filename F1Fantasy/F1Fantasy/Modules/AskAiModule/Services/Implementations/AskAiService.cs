@@ -649,9 +649,9 @@ public class AskAiService(
         return (driverIdToCode, driverCodeToId, constructorIdToCode, constructorCodeToId);
     }
 
-    public void PrevalidateDateForPredictionAsync(DateTime predictionQualifyingDate,DateTime? predictionMainRaceDate)
+    public void PrevalidateDateForPredictionAsync(DateTime? predictionQualifyingDate,DateTime? predictionMainRaceDate)
     {
-        if (predictionQualifyingDate < DateTime.UtcNow.Date)
+        if (predictionQualifyingDate != null && predictionQualifyingDate < DateTime.UtcNow.Date)
         {
             throw new InvalidOperationException("Prediction date cannot be in the past");
         }

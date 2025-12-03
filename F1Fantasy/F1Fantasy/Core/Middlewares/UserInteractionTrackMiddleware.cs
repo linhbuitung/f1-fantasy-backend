@@ -90,7 +90,7 @@ public class UserInteractionTrackMiddleware(RequestDelegate next, ILogger<UserIn
                 {
                     UserId = user.Id,
                     Header = "AI Progress",
-                    Content = $"You've logged in for {user.ConsecutiveActiveDays}, {consecutiveActiveDaysPerCreditAdded - user.ConsecutiveActiveDays} more days to earn an extra AI credit!",
+                    Content = $"You've logged in for {user.ConsecutiveActiveDays} day(s), do it for {consecutiveActiveDaysPerCreditAdded - user.ConsecutiveActiveDays} more days to earn an extra AI credit!",
                 });
         }
         user.LastActiveAt = now;

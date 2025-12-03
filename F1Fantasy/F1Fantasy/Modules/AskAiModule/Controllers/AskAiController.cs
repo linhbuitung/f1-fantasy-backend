@@ -111,7 +111,7 @@ public class AskAiController(
         
         var predictionToUpdate = await askAiService.GetPredictionDetailByIdAsync(predictionId);
 
-        askAiService.PrevalidateDateForPredictionAsync(predictionToUpdate.QualifyingDate, mainRacePredictionCreateAsAdditionDto.RaceDate);
+        askAiService.PrevalidateDateForPredictionAsync(null, mainRacePredictionCreateAsAdditionDto.RaceDate);
 
         var updatedPredictionId = await askAiService.MakeMainRacePredictionFromAlreadyMadeQualifyingPredictionAsync(userId, predictionId, mainRacePredictionCreateAsAdditionDto);
         var prediction = await askAiService.GetPredictionDetailByIdAsync(updatedPredictionId);
