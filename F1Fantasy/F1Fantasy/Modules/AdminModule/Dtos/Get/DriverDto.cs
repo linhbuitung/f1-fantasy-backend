@@ -13,13 +13,12 @@ public class DriverDto
     [Required, MaxLength(300)]
     public string FamilyName { get; set; }
 
-    [Required]
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
-    [Required, MaxLength(200)]
-    public string CountryId { get; set; }
+    [MaxLength(200)]
+    public string? CountryId { get; set; }
 
-    [Required, MaxLength(50)]
+    [MaxLength(50)]
     public string Code { get; set; }
     
     [Required, Range(1,100)]

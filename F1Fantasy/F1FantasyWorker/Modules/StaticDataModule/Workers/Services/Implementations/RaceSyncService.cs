@@ -68,14 +68,7 @@ public class RaceSyncService(
                 {
                     return [];
                 }
-                if (currentRacesCount == 0)
-                {
-                    offset += limit;
-                }
-                else
-                {
-                    offset = currentRacesCount;
-                }
+                offset += limit;
             }
             else
             {

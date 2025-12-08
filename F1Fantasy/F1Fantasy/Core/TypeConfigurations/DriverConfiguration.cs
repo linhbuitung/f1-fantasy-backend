@@ -8,6 +8,11 @@ namespace F1Fantasy.Core.TypeConfigurations
     {
         public void Configure(EntityTypeBuilder<Driver> entity)
         {
+            entity.Property(e => e.CountryId)
+                .HasColumnType("varchar(100)")
+                .IsRequired(false)          // allow NULL
+                .HasDefaultValue(null);  
+            
             entity.HasAlternateKey(d => d.Code);
 
             entity.HasMany(d => d.DriverPredictions)

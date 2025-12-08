@@ -73,11 +73,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
                     DriverDto fixedDriverDto = FixSpecialCountryCase(driverDto);
                     // Driver API returns nationality, so we need check for nationality.
-                    if (!exisitngCountries.Exists(c => c.Nationalities.Contains(fixedDriverDto.CountryId)))
+                    if (fixedDriverDto.CountryId != null && !exisitngCountries.Exists(c => c.Nationalities.Contains(fixedDriverDto.CountryId)))
                     {
                         throw new Exception($"Country with nationality {fixedDriverDto.CountryId} not found");
                     }
-                    fixedDriverDto.CountryId = exisitngCountries.First(c => c.Nationalities.Contains(fixedDriverDto.CountryId)).Id;
+                    if (fixedDriverDto.CountryId != null)
+                    {
+                        fixedDriverDto.CountryId = exisitngCountries.First(c => c.Nationalities.Contains(fixedDriverDto.CountryId)).Id;
+                    }
 
                     Driver driver = StaticDataDtoMapper.MapDtoToDriver(fixedDriverDto);
 
@@ -123,6 +126,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
 
         private DriverDto FixSpecialCountryCase(DriverDto driverDto)
         {
+            if(driverDto.CountryId == null)
+            {
+                return driverDto;
+            }
             if (driverDto.CountryId.Equals("East German"))
             {
                 driverDto.CountryId = "German";

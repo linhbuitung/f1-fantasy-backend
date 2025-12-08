@@ -70,16 +70,7 @@ public class ConstructorSyncService(
                 {
                     return [];
                 }
-
-                if (currentConstructorCount == 0)
-                {
-                    offset += limit;
-                }
-                else
-                {
-                    offset = currentConstructorCount;
-
-                }
+                offset += limit;
             }
             else
             {

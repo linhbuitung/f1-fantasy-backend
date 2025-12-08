@@ -299,6 +299,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasOne(d => d.Country).WithMany(p => p.Constructors)
                 .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_constructor_country_country_id");
 
             entity.HasOne(d => d.PickableItem).WithMany(p => p.Constructors)
@@ -356,6 +357,7 @@ public partial class WooF1Context : DbContext
 
             entity.HasOne(d => d.Country).WithMany(p => p.Drivers)
                 .HasForeignKey(d => d.CountryId)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_driver_country_country_id");
 
             entity.HasOne(d => d.PickableItem).WithMany(p => p.Drivers)
@@ -591,6 +593,7 @@ public partial class WooF1Context : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CircuitId).HasColumnName("circuit_id");
             entity.Property(e => e.DatePredicted).HasColumnName("date_predicted");
+            entity.Property(e => e.Laps).HasColumnName("laps");
             entity.Property(e => e.QualifyingDate)
                 .HasDefaultValueSql("'-infinity'::timestamp with time zone")
                 .HasColumnName("qualifying_date");

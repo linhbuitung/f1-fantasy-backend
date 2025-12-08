@@ -88,7 +88,17 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<DriverDto> newDriverDtos = new List<DriverDto>();
                 foreach (var tempDriver in newTempDrivers)
                 {
-                    newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName, tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, price: 1, null));
+                    newDriverDtos.Add(new DriverDto
+                    {
+                        Id = null,
+                        GivenName = tempDriver.GivenName,
+                        FamilyName = tempDriver.FamilyName,
+                        DateOfBirth = tempDriver.DateOfBirth,
+                        CountryId = tempDriver.Nationality,
+                        Code = tempDriver.DriverId,
+                        Price = 1,
+                        ImgUrl = null
+                    });
                 }
 
                 await driverService.AddListDriversAsync(newDriverDtos);
@@ -103,7 +113,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
                 List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
                 foreach (var tempConstructor in newTempConstructors)
                 {
-                    newConstructorDtos.Add(new ConstructorDto(id: null,tempConstructor.Name, tempConstructor.Nationality, tempConstructor.ConstructorId, price: 0, null));
+                    newConstructorDtos.Add(new ConstructorDto
+                    {
+                        Id = null,
+                        Name = tempConstructor.Name,
+                        CountryId = tempConstructor.Nationality,
+                        Code = tempConstructor.ConstructorId,
+                        Price = 1,
+                        ImgUrl = null
+                    });
                 }
 
                 await constructorService.AddListConstructorsAsync(newConstructorDtos);
@@ -301,8 +319,17 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             List<DriverDto> newDriverDtos = new List<DriverDto>();
             foreach (var tempDriver in newTempDrivers)
             {
-                newDriverDtos.Add(new DriverDto(id: null, tempDriver.GivenName, tempDriver.FamilyName,
-                    tempDriver.DateOfBirth, tempDriver.Nationality, tempDriver.DriverId, 0, null));
+                newDriverDtos.Add(new DriverDto
+                {
+                    Id = null,
+                    GivenName = tempDriver.GivenName,
+                    FamilyName = tempDriver.FamilyName,
+                    DateOfBirth = tempDriver.DateOfBirth,
+                    CountryId = tempDriver.Nationality,
+                    Code = tempDriver.DriverId,
+                    Price = 1,
+                    ImgUrl = null
+                });
             }
 
             await driverService.AddListDriversAsync(newDriverDtos);
@@ -317,8 +344,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers
             List<ConstructorDto> newConstructorDtos = new List<ConstructorDto>();
             foreach (var tempConstructor in newTempConstructors)
             {
-                newConstructorDtos.Add(new ConstructorDto(id: null, tempConstructor.Name, tempConstructor.Nationality,
-                    tempConstructor.ConstructorId, price: 0, null));
+                newConstructorDtos.Add(new ConstructorDto
+                {
+                    Id = null,
+                    Name = tempConstructor.Name,
+                    CountryId = tempConstructor.Nationality,
+                    Code = tempConstructor.ConstructorId,
+                    Price = 0,
+                    ImgUrl = null
+                });
             }
 
             await constructorService.AddListConstructorsAsync(newConstructorDtos);

@@ -19,6 +19,8 @@ public partial class Prediction
 
     public DateTime? RaceDate { get; set; }
 
+    public int? Laps { get; set; }
+
     public virtual Circuit Circuit { get; set; } = null!;
 
     public virtual ICollection<DriverPrediction> DriverPredictions { get; set; } = new List<DriverPrediction>();

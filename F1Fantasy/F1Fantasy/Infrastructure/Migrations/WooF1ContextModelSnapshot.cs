@@ -401,8 +401,8 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnName("code");
 
                     b.Property<string>("CountryId")
-                        .IsRequired()
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("country_id");
 
                     b.Property<string>("ImgUrl")
@@ -479,11 +479,11 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnName("code");
 
                     b.Property<string>("CountryId")
-                        .IsRequired()
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("country_id");
 
-                    b.Property<DateOnly>("DateOfBirth")
+                    b.Property<DateOnly?>("DateOfBirth")
                         .HasColumnType("date")
                         .HasColumnName("date_of_birth");
 
@@ -1141,8 +1141,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.HasOne("F1Fantasy.Core.Common.Country", "Country")
                         .WithMany("Constructors")
                         .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_constructor_country_country_id");
 
                     b.HasOne("F1Fantasy.Core.Common.PickableItem", "PickableItem")
@@ -1161,8 +1159,6 @@ namespace F1Fantasy.Infrastructure.Migrations
                     b.HasOne("F1Fantasy.Core.Common.Country", "Country")
                         .WithMany("Drivers")
                         .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_driver_country_country_id");
 
                     b.HasOne("F1Fantasy.Core.Common.PickableItem", "PickableItem")

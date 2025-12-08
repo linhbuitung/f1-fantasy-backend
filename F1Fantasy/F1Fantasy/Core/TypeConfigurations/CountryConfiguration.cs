@@ -17,13 +17,11 @@ namespace F1Fantasy.Core.TypeConfigurations
 
             entity.HasMany(e => e.Drivers)
                 .WithOne(e => e.Country)
-                .HasForeignKey(e => e.CountryId)
-                .IsRequired();
+                .HasForeignKey(e => e.CountryId);
 
             entity.HasMany(e => e.Constructors)
                 .WithOne(e => e.Country)
-                .HasForeignKey(e => e.CountryId)
-                .IsRequired();
+                .HasForeignKey(e => e.CountryId);
 
             entity.HasMany(e => e.Circuits)
                 .WithOne(e => e.Country)

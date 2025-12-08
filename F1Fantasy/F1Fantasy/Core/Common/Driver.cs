@@ -6,16 +6,6 @@ namespace F1Fantasy.Core.Common
     [Table("driver")]
     public class Driver
     {
-        public Driver(string givenName, string familyName, DateOnly dateOfBirth, string nationality, string code, string? imgUrl)
-        {
-            GivenName = givenName;
-            FamilyName = familyName;
-            DateOfBirth = dateOfBirth;
-
-            Code = code;
-            ImgUrl = imgUrl;
-        }
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -26,9 +16,8 @@ namespace F1Fantasy.Core.Common
         [Required, MaxLength(300)]
         public string FamilyName { get; set; }
 
-        [Required]
         [Column(TypeName = "date")]
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
         [Required, MaxLength(50)]
         public string Code { get; set; }
@@ -38,25 +27,14 @@ namespace F1Fantasy.Core.Common
 
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
-
-        //constructor
-        public Driver() { }
-
-        public Driver(string givenName, string familyName, DateOnly dateOfBirth, string code, string? imgUrl)
-        {
-            GivenName = givenName;
-            FamilyName = familyName;
-            DateOfBirth = dateOfBirth;
-            Code = code;
-            ImgUrl = imgUrl;
-        }
-
+        
         // Navigation properties
-        [Required]
-        public string CountryId { get; set; }
+        [MaxLength(100)]
+
+        public string? CountryId { get; set; }
 
         [ForeignKey(nameof(CountryId))]
-        public virtual Country Country { get; set; }
+        public virtual Country? Country { get; set; }
         
         public int? PickableItemId { get; set; }
         
