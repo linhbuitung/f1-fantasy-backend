@@ -8,7 +8,7 @@ public class PickableDriverGetDto
     
     public required string FamilyName { get; set; }
     
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
     
     public required string Code { get; set; }
 }

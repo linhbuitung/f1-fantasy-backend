@@ -11,7 +11,7 @@ public partial class Driver
 
     public string FamilyName { get; set; } = null!;
 
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
     public string Code { get; set; } = null!;
 
@@ -19,13 +19,13 @@ public partial class Driver
 
     public string? ImgUrl { get; set; }
 
-    public string CountryId { get; set; } = null!;
+    public string? CountryId { get; set; }
 
     public int? PickableItemId { get; set; }
 
     public virtual ICollection<AspNetUser> AspNetUsers { get; set; } = new List<AspNetUser>();
 
-    public virtual Country Country { get; set; } = null!;
+    public virtual Country? Country { get; set; }
 
     public virtual ICollection<DriverPrediction> DriverPredictions { get; set; } = new List<DriverPrediction>();
 

@@ -7,7 +7,17 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
     {
         public static DriverDto MapDriverToDto(Driver driver)
         {
-            return new DriverDto(driver.Id, driver.GivenName, driver.FamilyName, driver.DateOfBirth, driver.CountryId, driver.Code, driver.Price, driver.ImgUrl);
+            return new DriverDto
+            {
+                Id = driver.Id,
+                GivenName = driver.GivenName,
+                FamilyName = driver.FamilyName,
+                DateOfBirth = driver.DateOfBirth,
+                CountryId = driver.CountryId,
+                Price = driver.Price,
+                Code = driver.Code,
+                ImgUrl = driver.ImgUrl
+            };
         }
 
         public static Driver MapDtoToDriver(DriverDto driverDto)
@@ -27,7 +37,15 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos.Mapper
 
         public static ConstructorDto MapConstructorToDto(Constructor constructor)
         {
-            return new ConstructorDto(constructor.Id, constructor.Name, constructor.CountryId, constructor.Code, constructor.Price, constructor.ImgUrl);
+            return new ConstructorDto
+            {
+                Id = constructor.Id,
+                Name = constructor.Name,
+                CountryId = constructor.CountryId,
+                Code = constructor.Code,
+                ImgUrl = constructor.ImgUrl,
+                Price = constructor.Price
+            };
         }
 
         public static Constructor MapDtoToConstructor(ConstructorDto constructorDto)

@@ -13,11 +13,10 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
         [Required, MaxLength(300)]
         public string FamilyName { get; set; }
 
-        [Required]
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
-        [Required, MaxLength(200)]
-        public string CountryId { get; set; }
+        [MaxLength(200)]
+        public string? CountryId { get; set; }
 
         [Required, MaxLength(50)]
         public string Code { get; set; }
@@ -27,29 +26,5 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 
         [MaxLength(300)]
         public string? ImgUrl { get; set; }
-
-        public DriverDto(int id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, int price, string? imgUrl)
-        {
-            Id = id;
-            GivenName = givenName;
-            FamilyName = familyName;
-            DateOfBirth = dateOfBirth;
-            CountryId = countryId;
-            Code = code;
-            Price = price;
-            ImgUrl = imgUrl;
-        }
-
-        public DriverDto(int? id, string givenName, string familyName, DateOnly dateOfBirth, string countryId, string code, int price, string? imgUrl)
-        {
-            Id = id ?? null;
-            GivenName = givenName;
-            FamilyName = familyName;
-            DateOfBirth = dateOfBirth;
-            CountryId = countryId;
-            Code = code;
-            Price = price;
-            ImgUrl = imgUrl;
-        }
     }
 }

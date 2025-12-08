@@ -19,6 +19,5 @@ public class ConstructorInFantasyLineupDto
     [MaxLength(300)]
     public string? ImgUrl { get; set; }
     
-    [Required]
-    public string CountryId { get; set; }
+    public string? CountryId { get; set; }
 }

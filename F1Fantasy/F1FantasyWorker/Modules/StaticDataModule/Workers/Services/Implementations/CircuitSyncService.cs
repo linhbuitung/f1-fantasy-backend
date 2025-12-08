@@ -68,8 +68,7 @@ public class CircuitSyncService(
                 {
                     return [];
                 }
-
-                offset = currentCircuitsCount;
+                offset += limit;
             }
             else
             {

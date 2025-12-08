@@ -69,15 +69,8 @@ public class DriverSyncService(
                 if (apiResponse.MRData.Total == currentDriversCount)
                 {
                     return [];
-                }
-                if (currentDriversCount == 0)
-                {
-                    offset += limit;
-                }
-                else
-                {
-                    offset = currentDriversCount;
-                }
+                } 
+                offset += limit;
             }
             else
             {

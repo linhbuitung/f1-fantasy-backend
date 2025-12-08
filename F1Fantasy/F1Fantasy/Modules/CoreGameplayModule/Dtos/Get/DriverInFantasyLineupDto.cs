@@ -16,11 +16,10 @@ public class DriverInFantasyLineupDto
     [Required]
     public bool IsCaptain { get; set; }
     
-    [Required]
-    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
-    [Required, MaxLength(200)]
-    public string CountryId { get; set; }
+    [MaxLength(200)]
+    public string? CountryId { get; set; }
 
     [Required, MaxLength(50)]
     public string Code { get; set; }

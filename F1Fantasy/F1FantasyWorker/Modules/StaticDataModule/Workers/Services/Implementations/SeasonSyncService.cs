@@ -69,14 +69,8 @@ public class SeasonSyncService(
                 {
                     return [];
                 }
-                if (currentSeasonCount == 0)
-                {
-                    offset += limit;
-                }
-                else
-                {
-                    offset = currentSeasonCount;
-                }
+                offset += limit;
+
             }
             else
             {

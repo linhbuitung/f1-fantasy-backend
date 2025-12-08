@@ -71,11 +71,14 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
                     var fixedConstructorDto = FixSpecialCountryCase(constructorDto);
                     
                     // Constructor API returns nationality, so we need check for nationality.
-                    if (!existingCountries.Exists(c => c.Nationalities.Contains(fixedConstructorDto.CountryId)))
+                    if ( fixedConstructorDto.CountryId  != null && !existingCountries.Exists(c => c.Nationalities.Contains(fixedConstructorDto.CountryId)))
                     {
                         throw new Exception($"Country with nationality {fixedConstructorDto.CountryId} not found");
                     }
-                    fixedConstructorDto.CountryId = existingCountries.First(c => c.Nationalities.Contains(fixedConstructorDto.CountryId)).Id;
+                    if (fixedConstructorDto.CountryId != null)
+                    {
+                        fixedConstructorDto.CountryId = existingCountries.First(c => c.Nationalities.Contains(fixedConstructorDto.CountryId)).Id;
+                    }
                 
                     Constructor constructor = StaticDataDtoMapper.MapDtoToConstructor(fixedConstructorDto);
 
@@ -114,6 +117,11 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Services.Implementations
         
         private ConstructorDto FixSpecialCountryCase(ConstructorDto constructorDto)
         {
+            if (constructorDto.CountryId == null)
+            {
+                return constructorDto;
+            }
+
             if (constructorDto.CountryId.Equals("East German"))
             {
                 constructorDto.CountryId = "German";

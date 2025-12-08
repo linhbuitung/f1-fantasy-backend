@@ -23,11 +23,11 @@ namespace F1Fantasy.Core.Common
         public string? ImgUrl { get; set; }
         
         // Navigation properties
-        [Required]
-        public string CountryId { get; set; }
+        [MaxLength(100)]
+        public string? CountryId { get; set; }
 
         [ForeignKey(nameof(CountryId))]
-        public virtual Country Country { get; set; }
+        public virtual Country? Country { get; set; }
 
         public int? PickableItemId { get; set; }
         
