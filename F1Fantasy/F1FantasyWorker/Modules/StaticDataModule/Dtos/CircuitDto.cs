@@ -7,8 +7,8 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
         int? id,
         string circuitName,
         string code,
-        decimal latitude,
-        decimal longitude,
+        decimal? latitude,
+        decimal? longitude,
         string locality,
         string countryId,
         string? imgUrl)
@@ -19,9 +19,9 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Dtos
 
         public string Code { get; set; } = code;
 
-        public decimal Latitude { get; set; } = latitude;
+        public decimal? Latitude { get; set; } = latitude;
 
-        public decimal Longitude { get; set; } = longitude;
+        public decimal? Longitude { get; set; } = longitude;
 
         public string Locality { get; set; } = locality;
 

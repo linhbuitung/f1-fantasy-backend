@@ -10,8 +10,8 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
         string circuitId,
         string circuitName,
         string url,
-        decimal lat,
-        decimal lng,
+        decimal? lat,
+        decimal? lng,
         string locality,
         string country)
     {
@@ -28,13 +28,13 @@ namespace F1FantasyWorker.Modules.StaticDataModule.Workers.TempModels
             return result;
         }
 
-        public class LocationApiDto(decimal lat, decimal lng, string locality, string country)
+        public class LocationApiDto(decimal? lat, decimal? lng, string locality, string country)
         {
             [JsonProperty("lat")]
-            public decimal Lat { get; set; } = lat;
+            public decimal? Lat { get; set; } = lat;
 
             [JsonProperty("long")]
-            public decimal Long { get; set; } = lng;
+            public decimal? Long { get; set; } = lng;
 
             [JsonProperty("locality")]
             public string Locality { get; set; } = locality;
