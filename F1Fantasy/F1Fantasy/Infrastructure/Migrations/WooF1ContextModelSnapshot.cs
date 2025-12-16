@@ -359,7 +359,7 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("character varying(300)")
                         .HasColumnName("img_url");
 
-                    b.Property<decimal>("Latitude")
+                    b.Property<decimal?>("Latitude")
                         .HasColumnType("decimal(9,7)")
                         .HasColumnName("latitude");
 
@@ -369,7 +369,7 @@ namespace F1Fantasy.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("locality");
 
-                    b.Property<decimal>("Longitude")
+                    b.Property<decimal?>("Longitude")
                         .HasColumnType("decimal(10,7)")
                         .HasColumnName("longitude");
 

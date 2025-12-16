@@ -13,11 +13,9 @@ public class CircuitDto
     [Required, MaxLength(50)]
     public string Code { get; set; }
 
-    [Required]
-    public decimal Latitude { get; set; }
+    public decimal? Latitude { get; set; }
 
-    [Required]
-    public decimal Longitude { get; set; }
+    public decimal? Longitude { get; set; }
 
     [Required, MaxLength(200)]
     public string Locality { get; set; }

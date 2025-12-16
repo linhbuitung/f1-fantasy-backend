@@ -18,13 +18,11 @@ namespace F1Fantasy.Core.Common
         [Required, MaxLength(50)]
         public string Code { get; set; }
 
-        [Required]
         [Column(TypeName = "decimal(9,7)")]
-        public decimal Latitude { get; set; }
+        public decimal? Latitude { get; set; }
 
-        [Required]
         [Column(TypeName = "decimal(10,7)")]
-        public decimal Longitude { get; set; }
+        public decimal? Longitude { get; set; }
 
         [Required, MaxLength(200)]
         public string Locality { get; set; }
