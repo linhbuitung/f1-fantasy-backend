@@ -64,6 +64,12 @@ F1 Fantasy Backend is a modular monolith application that powers a fantasy sport
 
 ---
 
+## Features in development
+
+- Rate limiting for better security
+
+---
+
 ## Tech Stack
 
 ### Backend
