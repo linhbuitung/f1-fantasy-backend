@@ -14,6 +14,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+- [Features in development](#features-in-development)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
