@@ -295,10 +295,9 @@ dotnet ef database update PreviousMigrationName --project F1Fantasy
 
 This project is developed as part of a Bachelor's thesis for educational purposes.
 
-**Author**: Bui Tung Linh
-**Student ID**: S28786
-**University**: PJATK
-**Thesis**: Polish-Japanese Academy of Information Technology
+- **Author**: Bui Tung Linh
+- **University**: PJATK
+- **Thesis**: Polish-Japanese Academy of Information Technology
 
 ---
 
