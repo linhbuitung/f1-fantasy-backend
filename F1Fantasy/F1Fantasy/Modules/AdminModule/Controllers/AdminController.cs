@@ -100,7 +100,16 @@ public class AdminController(
     {
         var apiKey = Request.Headers["Worker-Api-Key"].FirstOrDefault();
         var expectedApiKey = Environment.GetEnvironmentVariable("WORKER_API_KEY");
-        if (apiKey is null ||expectedApiKey is null || apiKey != expectedApiKey) return BadRequest();
+        
+        if (string.IsNullOrEmpty(expectedApiKey))
+        {
+            return StatusCode(500, "Server configuration error");
+        }
+    
+        if (string.IsNullOrEmpty(apiKey) || !string.Equals(apiKey, expectedApiKey))
+        {
+            return Unauthorized("Invalid or missing API key");
+        }        
         
         _ = await adminService.GetPickableItemAsync();        
         var currentSeason = await  adminService.GetActiveSeasonAsync();
