@@ -246,6 +246,13 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         var latestRace = await coreGameplayService.GetLatestFinishedRaceAsync();
         
         var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        
+        // Pass if the current date is in a later year than the latest race
+        if (currentDate.Year > latestRace.RaceDate.Year)
+        {
+            return;
+        }
+        
         if (!(latestRace.RaceDate < currentDate && currentDate < latestRace.RaceDate.AddDays(2)))
         {
             throw new InvalidOperationException($"{objectNameForMessage} can only be modified in {latestRace.RaceDate.AddDays(1)}, after latest race {latestRace.RaceName}." );
