@@ -82,7 +82,7 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
     public async Task<Race?> GetLatestFinishedRaceAsync()
     {
         return await context.Races
-            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)))
             .Include(r => r.Circuit)
             .Include(r => r.Season)
             .AsNoTracking()
@@ -93,7 +93,7 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
     public async Task<Race?> GetLatestFinishedRaceResultAsync()
     {
         return await context.Races
-            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)))
             .Include(r => r.Circuit)
             .Include(r => r.Season)
             .Include(r => r.RaceEntries)
@@ -108,7 +108,7 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
     public async Task<Race?> GetLatestRaceAsync()
     {
         return await context.Races
-            .Where(r => r.RaceDate <= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Where(r => r.RaceDate <= DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)))
             .Include(r => r.Circuit)
             .Include(r => r.Season)
             .OrderByDescending(r => r.RaceDate)
@@ -118,7 +118,7 @@ public class CoreGameplayRepository(WooF1Context context) : ICoreGameplayReposit
     public async Task<Race?> GetCurrentRaceAsync()
     {
         return await context.Races
-            .Where(r => r.RaceDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+            .Where(r => r.RaceDate >= DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)))
             .Include(r => r.Circuit)
             .Include(r => r.Season)
             .OrderBy(r => r.RaceDate)

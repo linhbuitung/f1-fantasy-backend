@@ -69,7 +69,7 @@ public class FantasyLineupRepository(WooF1Context context) : IFantasyLineupRepos
             .AsSplitQuery()
             .Where(fl => fl.UserId == userId 
                          && fl.Race.SeasonId == activeSeason.Id 
-                         && fl.Race.RaceDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+                         && fl.Race.RaceDate >= DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)))
             .OrderBy(fl => fl.Race.RaceDate)
             .FirstOrDefaultAsync();
         
