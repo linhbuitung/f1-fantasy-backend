@@ -245,7 +245,7 @@ public class AdminService(IAdminRepository adminRepository, IStaticDataRepositor
         }
         var latestRace = await coreGameplayService.GetLatestFinishedRaceAsync();
         
-        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var currentDate = DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc));
         
         // Pass if the current date is in a later year than the latest race
         if (currentDate.Year > latestRace.RaceDate.Year)
