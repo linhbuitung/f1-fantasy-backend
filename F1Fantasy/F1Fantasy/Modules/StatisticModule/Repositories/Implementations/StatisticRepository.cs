@@ -159,7 +159,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
     {
         return await context.FantasyLineups
             .Where(fl => fl.Race.SeasonId == seasonId && 
-                         fl.Race.RaceDate < DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)) &&
+                         fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
                          fl.Race.DeadlineDate > fl.User.JoinDate)
             .CountAsync();
     }
@@ -175,7 +175,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
     {
         return await context.FantasyLineupDrivers
             .Where(fld => fld.FantasyLineup.Race.SeasonId == seasonId && 
-                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)) &&
+                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
                           fld.DriverId == driverId)
             .CountAsync();
     }
@@ -193,7 +193,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
     {
         return await context.FantasyLineupConstructors
             .Where(fld => fld.FantasyLineup.Race.SeasonId == seasonId && 
-                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)) &&
+                          fld.FantasyLineup.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow) &&
                           fld.ConstructorId == constructorId)
             .CountAsync();
     }
@@ -227,7 +227,7 @@ public class StatisticRepository(WooF1Context context) : IStatisticRepository
     public async Task<List<UserIdWithPoints>> GetAveragePointsForTopUsersBySeasonAsync(int seasonId, int topN)
     {
         var totals = await context.FantasyLineups
-            .Where(fl => fl.Race.SeasonId == seasonId && fl.Race.RaceDate < DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc))) 
+            .Where(fl => fl.Race.SeasonId == seasonId && fl.Race.RaceDate < DateOnly.FromDateTime(DateTime.UtcNow)) 
             .GroupBy(fl => fl.UserId)
             .Select(g => new { UserId = g.Key, Average = g.Average(fl => fl.TotalAmount) })
             .AsNoTracking()

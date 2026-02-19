@@ -228,7 +228,7 @@ public class CoreGameplayService(IStaticDataRepository staticDataRepository, IFa
 
     private void PreValidateFantasyLineupDeadline(FantasyLineup fantasyLineup)
     {
-        if (fantasyLineup.Race.DeadlineDate < DateOnly.FromDateTime(new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc)))
+        if (fantasyLineup.Race.DeadlineDate < DateOnly.FromDateTime(DateTime.UtcNow))
         {
             throw new Exception("The deadline for this fantasy lineup has passed");
         }
