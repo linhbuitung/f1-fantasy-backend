@@ -8,6 +8,12 @@
 
 **Live Demo**: [https://woof1.racing](https://woof1.racing)
 
+## 📖 Repositories
+
+Including this one, there are 2 more repositories in the project that you will need to run everything in one go:
+- **[Angular Frontend](https://github.com/linhbuitung/f1-fantasy-frontend)**
+- **[FastApi ML Prediction](https://github.com/linhbuitung/f1-fantasy-ml-api)**
+  
 ## 📖 Documentation
 
 For complete documentation, setup instructions, and technical details, please see:
