@@ -6,7 +6,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?logo=postgresql)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-Academic-blue)](LICENSE)
 
-**Live Demo**: [https://woof1.racing](https://woof1.racing)
+**Live Demo**: [https://woof1.racing](https://woof1.racing) - Inactive
 
 ## 📖 Repositories
 
